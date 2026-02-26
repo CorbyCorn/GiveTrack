@@ -75,30 +75,59 @@ function getOrgColor(name) {
 
 const ORG_IMAGES = {
   "Save the Children": "https://plus.unsplash.com/premium_photo-1770394034525-2aa9baaabd5b?w=800&h=500&fit=crop&q=80",
-  "Doctors Without Borders": "https://images.unsplash.com/photo-1524600458977-62f028117758?w=800&h=500&fit=crop&q=80",
-  "Médecins Sans Frontières": "https://images.unsplash.com/photo-1524600458977-62f028117758?w=800&h=500&fit=crop&q=80",
-  "Médecins sans Frontières": "https://images.unsplash.com/photo-1524600458977-62f028117758?w=800&h=500&fit=crop&q=80",
-  "GiveWell": "https://plus.unsplash.com/premium_photo-1712225701666-7c97f05ae631?w=800&h=500&fit=crop&q=80",
-  "Sea Shepherd": "https://seashepherd.org/wp-content/uploads/2024/09/SeaShepherd_Ocean_Warriors_BobBarker_GE_1060782-1.jpg",
-  "Evidence Action": "https://plus.unsplash.com/premium_photo-1712225701666-7c97f05ae631?w=800&h=500&fit=crop&q=80",
+  "Doctors Without Borders": "https://www.doctorswithoutborders.org/sites/default/files/styles/crop_top_level_hero_mobile_375_221/public/image_base_media/2018/06/MSF141690.jpg",
+  "Médecins Sans Frontières": "https://www.doctorswithoutborders.org/sites/default/files/styles/crop_top_level_hero_mobile_375_221/public/image_base_media/2018/06/MSF141690.jpg",
+  "Médecins sans Frontières": "https://www.doctorswithoutborders.org/sites/default/files/styles/crop_top_level_hero_mobile_375_221/public/image_base_media/2018/06/MSF141690.jpg",
+  "GiveWell": "https://assets.evidenceaction.org/web/images/_1280xAUTO_crop_center-center_none/ea-doctor.jpg",
+  "Sea Shepherd": "https://seashepherd.org/wp-content/uploads/2026/01/240506-SISO-CF-FadCrewPullingLine-JamesPullsLine-IMG_2366.jpg",
+  "Evidence Action": "https://assets.evidenceaction.org/web/images/_1280xAUTO_crop_center-center_none/ea-kids.jpg",
   "Open Door Legal": "https://opendoorlegal.org/wp-content/uploads/2019/08/claudia-for-web.jpg",
-  "Wholesome Wave": "https://images.unsplash.com/photo-1759003103614-11427d946af0?w=800&h=500&fit=crop&q=80",
-  "Room to Read": "https://plus.unsplash.com/premium_photo-1750530064429-48178da78d18?w=800&h=500&fit=crop&q=80",
+  "Wholesome Wave": "https://images.squarespace-cdn.com/content/v1/5febb5b1df316630764c4dec/1b65a895-6b11-4898-b025-f7e397195b1c/ww-little-girl-eating-watermelon.png",
+  "Room to Read": "https://plus.unsplash.com/premium_photo-1664106242909-41922802ba52?w=800&h=500&fit=crop&q=80",
   "Asylum Access": "https://asylumaccess.org/wp-content/uploads/2025/05/AAE201609-Skoll-GabrielDiamond1-1ahaje.jpg",
-  "School on Wheels": "https://plus.unsplash.com/premium_photo-1770394034525-2aa9baaabd5b?w=800&h=500&fit=crop&q=80",
-  "Malaria Consortium": "https://images.unsplash.com/photo-1524600458977-62f028117758?w=800&h=500&fit=crop&q=80",
-  "The Washing Machine Project": "https://images.unsplash.com/photo-1727473704320-71a9ac47cfdd?w=800&h=500&fit=crop&q=80",
+  "School on Wheels": "https://schoolonwheels.org/wp-content/uploads/2026/02/jordan-and-anne.jpg",
+  "Malaria Consortium": "https://assets.evidenceaction.org/web/images/_1280xAUTO_crop_center-center_none/ea-doctor.jpg",
+  "The Washing Machine Project": "https://images.squarespace-cdn.com/content/v1/61aa260eae89d2514d87e72a/97bd3be0-03a9-4a2f-b1b8-00bcdb61d495/uganda24-hand-wash-young-lady_DPI300.jpg",
   "Action Against Hunger": "https://www.actionagainsthunger.org/app/themes/actionagainsthunger/assets/images/aah-og.jpg",
-  "Clean Ocean Action": "https://plus.unsplash.com/premium_photo-1682308119295-af0915794abd?w=800&h=500&fit=crop&q=80",
-  "Middle East Children's Alliance": "https://plus.unsplash.com/premium_photo-1770394034525-2aa9baaabd5b?w=800&h=500&fit=crop&q=80",
-  "Oceana": "https://plus.unsplash.com/premium_photo-1682308119295-af0915794abd?w=800&h=500&fit=crop&q=80",
-  "WWF": "https://images.unsplash.com/photo-1745526180300-443ef46e6a73?w=800&h=500&fit=crop&q=80",
+  "Clean Ocean Action": "https://plus.unsplash.com/premium_photo-1661889099855-b44dc39e88c9?w=800&h=500&fit=crop&q=80",
+  "Middle East Children's Alliance": "https://www.mecaforpeace.org/wp-content/uploads/2024/12/DSC04045-scaled.jpg",
+  "Oceana": "https://plus.unsplash.com/premium_photo-1661889099855-b44dc39e88c9?w=800&h=500&fit=crop&q=80",
+  "WWF": "https://plus.unsplash.com/premium_photo-1710846907411-41eb2e4d354c?w=800&h=500&fit=crop&q=80",
   "En Ptahy Vidchui": "https://plus.unsplash.com/premium_photo-1663126366512-62a1e0494bad?w=800&h=500&fit=crop&q=80",
-  "Give To IV": "https://plus.unsplash.com/premium_photo-1681492057012-4155ebced687?w=800&h=500&fit=crop&q=80",
-  "NCCHC Foundation": "https://images.unsplash.com/photo-1516841273335-e39b37888115?w=800&h=500&fit=crop&q=80",
-  "Radiance SF": "https://images.unsplash.com/photo-1600288480699-0b0d8a456dd8?w=800&h=500&fit=crop&q=80",
-  "Reality SF": "https://images.unsplash.com/photo-1600288480699-0b0d8a456dd8?w=800&h=500&fit=crop&q=80",
-  "SFHS": "https://images.unsplash.com/photo-1516841273335-e39b37888115?w=800&h=500&fit=crop&q=80",
+  "Give To IV": "https://give.intervarsity.org/themes/custom/donate/images/meta_img/metatag.jpg",
+  "NCCHC Foundation": "https://images.unsplash.com/photo-1617565980755-d57f254b0ba7?w=800&h=500&fit=crop&q=80",
+  "Radiance SF": "https://images.squarespace-cdn.com/content/v1/683e4d39bcde3364772e61ad/b0420a5e-6c73-461e-b4f2-457cc659ccc4/SHK_1720+%281%29.jpg",
+  "Reality SF": "https://realitysf.com/wp-content/uploads/2024/08/20240504-Food_Pantry_-08-1024x683.jpg",
+  "SFHS": "https://saintfrancishigh.static.amais.com/Hero_Banner_Student_Community-49-Page-Image_157.webp?version=638823013438500000",
+};
+
+// Face-centered object-position for each org image (analyzed per photo)
+const ORG_IMAGE_POS = {
+  "Save the Children": "60% 20%",         // two girls drawing, faces right upper
+  "Doctors Without Borders": "30% 30%",   // mother & doctor, faces left upper
+  "Médecins Sans Frontières": "30% 30%",
+  "Médecins sans Frontières": "30% 30%",
+  "GiveWell": "40% 30%",                  // healthcare worker examining patient
+  "Sea Shepherd": "35% 35%",              // crew member on ship with flag
+  "Evidence Action": "center 40%",        // row of children's faces centered
+  "Open Door Legal": "center 25%",        // woman portrait, face upper center
+  "Wholesome Wave": "center 20%",         // little girl eating watermelon
+  "Room to Read": "center 30%",           // smiling boy reading a book
+  "Asylum Access": "center 30%",          // two women smiling together
+  "School on Wheels": "center 25%",       // volunteer tutoring child
+  "Malaria Consortium": "40% 30%",        // healthcare worker
+  "The Washing Machine Project": "center 20%", // young woman hand-washing
+  "Action Against Hunger": "60% 30%",     // mother in orange with baby
+  "Clean Ocean Action": "30% 40%",        // two scuba divers underwater
+  "Middle East Children's Alliance": "center 35%", // MECA workers with children
+  "Oceana": "30% 40%",                    // scuba divers
+  "WWF": "center 30%",                    // two rangers in safari vehicle
+  "En Ptahy Vidchui": "center 30%",       // three men with Ukraine aid box
+  "Give To IV": "center 25%",             // five young people arms around each other
+  "NCCHC Foundation": "center 20%",       // medical professional smiling
+  "Radiance SF": "center 30%",            // women on stage at gathering
+  "Reality SF": "center 30%",             // volunteers at food pantry
+  "SFHS": "center 30%",                   // SFHS students smiling together
 };
 const HERO_IMAGE = "https://plus.unsplash.com/premium_photo-1683134050449-080429c850a4?w=1200&h=600&fit=crop&q=80";
 
@@ -881,7 +910,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                       {/* Photo banner */}
                       <div style={{ height: 140, position: "relative", overflow: "hidden", background: `linear-gradient(135deg, ${color}22, ${color}44)` }}>
                         {img && !imgErrors[name] && (
-                          <img src={img} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                          <img src={img} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", objectPosition: ORG_IMAGE_POS[name] || "center center" }}
                             onError={() => setImgErrors(prev => ({ ...prev, [name]: true }))} />
                         )}
                         <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)` }} />
