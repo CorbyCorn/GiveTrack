@@ -678,11 +678,11 @@ function GlobeTab({ donations }) {
             arcStartLng={d => d.startLng}
             arcEndLat={d => d.endLat}
             arcEndLng={d => d.endLng}
-            arcColor={d => [`${d.color}cc`, `${d.color}55`]}
-            arcStroke={0.5}
-            arcDashLength={0.6}
-            arcDashGap={0.3}
-            arcDashAnimateTime={2000}
+            arcColor={d => [`rgba(255,255,255,0.9)`, `${d.color}dd`]}
+            arcStroke={0.35}
+            arcDashLength={0.5}
+            arcDashGap={0.15}
+            arcDashAnimateTime={1500}
             arcAltitudeAutoScale={0.4}
             arcLabel={d => {
               const orgLines = Object.entries(d.orgs).sort((a, b) => b[1] - a[1]).map(([org, amt]) =>
