@@ -678,8 +678,8 @@ function GlobeTab({ donations }) {
             arcStartLng={d => d.startLng}
             arcEndLat={d => d.endLat}
             arcEndLng={d => d.endLng}
-            arcColor={d => [`rgba(255,255,255,0.9)`, `${d.color}dd`]}
-            arcStroke={0.35}
+            arcColor={d => [`rgba(255,255,255,1)`, `${d.color}ff`]}
+            arcStroke={0.6}
             arcDashLength={0.5}
             arcDashGap={0.15}
             arcDashAnimateTime={1500}
@@ -699,11 +699,17 @@ function GlobeTab({ donations }) {
             ringColor={d => {
               const hex = d.color;
               const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-              return t => `rgba(${r},${g},${b},${1 - t})`;
+              return t => `rgba(${Math.min(255, r + 60)},${Math.min(255, g + 60)},${Math.min(255, b + 60)},${Math.pow(1 - t, 0.5)})`;
             }}
             ringMaxRadius={d => d.maxRadius}
-            ringPropagationSpeed={1.5}
-            ringRepeatPeriod={1400}
+            ringPropagationSpeed={1.2}
+            ringRepeatPeriod={1200}
+            pointsData={allDestinations}
+            pointLat={d => d.lat}
+            pointLng={d => d.lng}
+            pointAltitude={0.008}
+            pointRadius={0.35}
+            pointColor={d => d.color}
           />
         )}
       </div>
