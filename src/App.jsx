@@ -5,6 +5,7 @@ import * as topojson from "topojson-client";
 
 /*
  * GiveTrack — Employee Charitable Giving Dashboard
+ * Premium redesign: Photography-first, bento grid, warm palette, organic shapes
  */
 
 const GOOGLE_CLIENT_ID = "296721826980-i3sgo6dgklh7v8fppql7mumdnuv0lu33.apps.googleusercontent.com";
@@ -70,34 +71,50 @@ function getOrgColor(name) {
   return PALETTE[Math.abs(hash) % PALETTE.length];
 }
 
+// ─── ORG IMAGES ──────────────────────────────────────────────
+
+const ORG_IMAGES = {
+  "Save the Children": "https://plus.unsplash.com/premium_photo-1770394034525-2aa9baaabd5b?w=800&h=500&fit=crop&q=80",
+  "Doctors Without Borders": "https://images.unsplash.com/photo-1524600458977-62f028117758?w=800&h=500&fit=crop&q=80",
+  "Médecins Sans Frontières": "https://images.unsplash.com/photo-1524600458977-62f028117758?w=800&h=500&fit=crop&q=80",
+  "Médecins sans Frontières": "https://images.unsplash.com/photo-1524600458977-62f028117758?w=800&h=500&fit=crop&q=80",
+  "GiveWell": "https://plus.unsplash.com/premium_photo-1712225701666-7c97f05ae631?w=800&h=500&fit=crop&q=80",
+  "Sea Shepherd": "https://seashepherd.org/wp-content/uploads/2024/09/SeaShepherd_Ocean_Warriors_BobBarker_GE_1060782-1.jpg",
+  "Evidence Action": "https://plus.unsplash.com/premium_photo-1712225701666-7c97f05ae631?w=800&h=500&fit=crop&q=80",
+  "Open Door Legal": "https://opendoorlegal.org/wp-content/uploads/2019/08/claudia-for-web.jpg",
+  "Wholesome Wave": "https://images.unsplash.com/photo-1759003103614-11427d946af0?w=800&h=500&fit=crop&q=80",
+  "Room to Read": "https://plus.unsplash.com/premium_photo-1750530064429-48178da78d18?w=800&h=500&fit=crop&q=80",
+  "Asylum Access": "https://asylumaccess.org/wp-content/uploads/2025/05/AAE201609-Skoll-GabrielDiamond1-1ahaje.jpg",
+  "School on Wheels": "https://plus.unsplash.com/premium_photo-1770394034525-2aa9baaabd5b?w=800&h=500&fit=crop&q=80",
+  "Malaria Consortium": "https://images.unsplash.com/photo-1524600458977-62f028117758?w=800&h=500&fit=crop&q=80",
+  "The Washing Machine Project": "https://images.unsplash.com/photo-1727473704320-71a9ac47cfdd?w=800&h=500&fit=crop&q=80",
+  "Action Against Hunger": "https://www.actionagainsthunger.org/app/themes/actionagainsthunger/assets/images/aah-og.jpg",
+  "Clean Ocean Action": "https://plus.unsplash.com/premium_photo-1682308119295-af0915794abd?w=800&h=500&fit=crop&q=80",
+  "Middle East Children's Alliance": "https://plus.unsplash.com/premium_photo-1770394034525-2aa9baaabd5b?w=800&h=500&fit=crop&q=80",
+  "Oceana": "https://plus.unsplash.com/premium_photo-1682308119295-af0915794abd?w=800&h=500&fit=crop&q=80",
+  "WWF": "https://images.unsplash.com/photo-1745526180300-443ef46e6a73?w=800&h=500&fit=crop&q=80",
+  "En Ptahy Vidchui": "https://plus.unsplash.com/premium_photo-1663126366512-62a1e0494bad?w=800&h=500&fit=crop&q=80",
+  "Give To IV": "https://plus.unsplash.com/premium_photo-1681492057012-4155ebced687?w=800&h=500&fit=crop&q=80",
+  "NCCHC Foundation": "https://images.unsplash.com/photo-1516841273335-e39b37888115?w=800&h=500&fit=crop&q=80",
+  "Radiance SF": "https://images.unsplash.com/photo-1600288480699-0b0d8a456dd8?w=800&h=500&fit=crop&q=80",
+  "Reality SF": "https://images.unsplash.com/photo-1600288480699-0b0d8a456dd8?w=800&h=500&fit=crop&q=80",
+  "SFHS": "https://images.unsplash.com/photo-1516841273335-e39b37888115?w=800&h=500&fit=crop&q=80",
+};
+const HERO_IMAGE = "https://plus.unsplash.com/premium_photo-1683134050449-080429c850a4?w=1200&h=600&fit=crop&q=80";
+
 // ─── GLOBE DATA ──────────────────────────────────────────────
 
 const ORG_COUNTRY_MAP = {
-  "Save the Children": "COD",
-  "Doctors Without Borders": "COD",
-  "Médecins Sans Frontières": "COD",
-  "Médecins sans Frontières": "COD",
-  "GiveWell": "NGA",
-  "Sea Shepherd": "MEX",
-  "Evidence Action": "IND",
-  "Open Door Legal": "USA",
-  "Wholesome Wave": "USA",
-  "Room to Read": "NPL",
-  "Asylum Access": "KEN",
-  "School on Wheels": "USA",
-  "Malaria Consortium": "NGA",
-  "The Washing Machine Project": "IND",
-  "Action Against Hunger": "SYR",
-  "Clean Ocean Action": "USA",
-  "Middle East Children's Alliance": "PSE",
-  "Oceana": "USA",
-  "WWF": "CHN",
-  "En Ptahy Vidchui": "UKR",
-  "Give To IV": "USA",
-  "NCCHC Foundation": "USA",
-  "Radiance SF": "USA",
-  "Reality SF": "USA",
-  "SFHS": "USA",
+  "Save the Children": "COD", "Doctors Without Borders": "COD",
+  "Médecins Sans Frontières": "COD", "Médecins sans Frontières": "COD",
+  "GiveWell": "NGA", "Sea Shepherd": "MEX", "Evidence Action": "IND",
+  "Open Door Legal": "USA", "Wholesome Wave": "USA", "Room to Read": "NPL",
+  "Asylum Access": "KEN", "School on Wheels": "USA", "Malaria Consortium": "NGA",
+  "The Washing Machine Project": "IND", "Action Against Hunger": "SYR",
+  "Clean Ocean Action": "USA", "Middle East Children's Alliance": "PSE",
+  "Oceana": "USA", "WWF": "CHN", "En Ptahy Vidchui": "UKR",
+  "Give To IV": "USA", "NCCHC Foundation": "USA", "Radiance SF": "USA",
+  "Reality SF": "USA", "SFHS": "USA",
 };
 
 const ISO_NUM_TO_ALPHA3 = {
@@ -126,16 +143,11 @@ function aggregateDonationsByCountry(donations) {
 
 function warmColorInterpolate(t) {
   const stops = [
-    { r: 254, g: 235, b: 210 },
-    { r: 253, g: 186, b: 116 },
-    { r: 249, g: 115, b: 22 },
-    { r: 220, g: 60, b: 40 },
-    { r: 153, g: 27, b: 27 },
+    { r: 254, g: 235, b: 210 }, { r: 253, g: 186, b: 116 },
+    { r: 249, g: 115, b: 22 }, { r: 220, g: 60, b: 40 }, { r: 153, g: 27, b: 27 },
   ];
   const idx = Math.max(0, Math.min(1, t)) * (stops.length - 1);
-  const lo = Math.floor(idx);
-  const hi = Math.min(lo + 1, stops.length - 1);
-  const f = idx - lo;
+  const lo = Math.floor(idx), hi = Math.min(lo + 1, stops.length - 1), f = idx - lo;
   const r = Math.round(stops[lo].r + (stops[hi].r - stops[lo].r) * f);
   const g = Math.round(stops[lo].g + (stops[hi].g - stops[lo].g) * f);
   const b = Math.round(stops[lo].b + (stops[hi].b - stops[lo].b) * f);
@@ -145,30 +157,17 @@ function warmColorInterpolate(t) {
 // ─── ORG CATEGORIES ──────────────────────────────────────────
 
 const ORG_CATEGORIES = {
-  "Save the Children": "Children & Youth",
-  "Doctors Without Borders": "Healthcare",
-  "Médecins Sans Frontières": "Healthcare",
-  "Médecins sans Frontières": "Healthcare",
-  "GiveWell": "Effective Giving",
-  "Sea Shepherd": "Ocean Conservation",
-  "Evidence Action": "Global Health",
-  "Open Door Legal": "Legal Aid",
-  "Wholesome Wave": "Food Access",
-  "Room to Read": "Education",
-  "Asylum Access": "Human Rights",
-  "School on Wheels": "Education",
-  "Malaria Consortium": "Global Health",
-  "The Washing Machine Project": "Humanitarian",
-  "Action Against Hunger": "Food Security",
-  "Clean Ocean Action": "Ocean Conservation",
-  "Oceana": "Ocean Conservation",
-  "WWF": "Wildlife",
-  "En Ptahy Vidchui": "Humanitarian",
-  "Give To IV": "Community",
-  "NCCHC Foundation": "Healthcare",
-  "Radiance SF": "Community",
-  "Reality SF": "Community",
-  "SFHS": "Healthcare",
+  "Save the Children": "Children & Youth", "Doctors Without Borders": "Healthcare",
+  "Médecins Sans Frontières": "Healthcare", "Médecins sans Frontières": "Healthcare",
+  "GiveWell": "Effective Giving", "Sea Shepherd": "Ocean Conservation",
+  "Evidence Action": "Global Health", "Open Door Legal": "Legal Aid",
+  "Wholesome Wave": "Food Access", "Room to Read": "Education",
+  "Asylum Access": "Human Rights", "School on Wheels": "Education",
+  "Malaria Consortium": "Global Health", "The Washing Machine Project": "Humanitarian",
+  "Action Against Hunger": "Food Security", "Clean Ocean Action": "Ocean Conservation",
+  "Oceana": "Ocean Conservation", "WWF": "Wildlife", "En Ptahy Vidchui": "Humanitarian",
+  "Give To IV": "Community", "NCCHC Foundation": "Healthcare",
+  "Radiance SF": "Community", "Reality SF": "Community", "SFHS": "Healthcare",
   "Middle East Children's Alliance": "Children & Youth",
 };
 
@@ -316,39 +315,42 @@ function parseSpreadsheetData(rows, userEmail) {
 
 const FONTS_URL = "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap";
 const GLOBAL_CSS = `
-  @keyframes fadeSlideUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeSlideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
   @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
   @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
-  @keyframes gradientShift { 0% { background-position:0% 50%; } 50% { background-position:100% 50%; } 100% { background-position:0% 50%; } }
+  @keyframes float { 0%,100% { transform:translateY(0) scale(1); } 50% { transform:translateY(-20px) scale(1.05); } }
   @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.7; } }
+  @keyframes shimmer { 0% { background-position:-200% 0; } 100% { background-position:200% 0; } }
   * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f8f9fb; color:#111827; -webkit-font-smoothing:antialiased; }
+  body { font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#FBF8F3; color:#2D1F14; -webkit-font-smoothing:antialiased; }
   ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.15); border-radius:3px; }
-  ::selection { background:rgba(15,118,110,0.15); }
+  ::-webkit-scrollbar-thumb { background:rgba(120,80,40,0.15); border-radius:3px; }
+  ::selection { background:rgba(13,148,136,0.15); }
+  img { -webkit-user-drag:none; }
 `;
 
 const C = {
-  bg: "#f8f9fb",
+  bg: "#FBF8F3",
   card: "#ffffff",
-  cardBorder: "rgba(0,0,0,0.08)",
-  cardShadow: "0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)",
-  cardHover: "0 4px 16px rgba(0,0,0,0.08)",
-  text: "#111827",
-  textSoft: "#6b7280",
-  textMuted: "#9ca3af",
-  accent: "#0f766e",
+  cardBorder: "rgba(180,140,100,0.12)",
+  cardShadow: "0 2px 8px rgba(180,120,60,0.06), 0 1px 3px rgba(180,120,60,0.04)",
+  cardHover: "0 8px 28px rgba(180,120,60,0.12)",
+  text: "#2D1F14",
+  textSoft: "#7C6B5E",
+  textMuted: "#A89888",
+  accent: "#0d9488",
   accentLight: "#ccfbf1",
-  accentSoft: "rgba(15,118,110,0.06)",
-  warm: "#f97316",
-  warmLight: "#fff7ed",
-  divider: "rgba(0,0,0,0.06)",
-  heroGradient: "linear-gradient(135deg, #0d9488, #0284c7)",
+  accentSoft: "rgba(13,148,136,0.06)",
+  warm: "#E07A30",
+  warmLight: "#FFF4E8",
+  divider: "rgba(180,140,100,0.1)",
 };
 
-const cardStyle = {
-  background: C.card,
-  borderRadius: 16,
+const glass = {
+  background: "rgba(255,255,255,0.82)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+  borderRadius: 20,
   border: `1px solid ${C.cardBorder}`,
   boxShadow: C.cardShadow,
 };
@@ -371,10 +373,10 @@ function AnimatedNumber({ value, currency = "$", duration = 900 }) {
   return <>{fmt(display, currency)}</>;
 }
 
-function DonutChart({ data, size = 200 }) {
+function DonutChart({ data, size = 220 }) {
   const total = data.reduce((s, d) => s + d.value, 0);
   if (total === 0) return null;
-  const r = size / 2 - 12, ir = r * 0.68, gap = 0.025;
+  const r = size / 2 - 14, ir = r * 0.66, gap = 0.025;
   let cum = 0;
   const slices = data.map((d) => {
     const sa = (cum / total) * 2 * Math.PI - Math.PI / 2 + gap / 2;
@@ -389,42 +391,42 @@ function DonutChart({ data, size = 200 }) {
     <div style={{ position: "relative", width: size, height: size }}>
       <svg width={size} height={size}>
         {slices.map((s, i) => (
-          <path key={i} d={s.path} fill={s.color} stroke={C.card} strokeWidth="2.5"
-            style={{ transition: "transform .3s ease, opacity .3s", transformOrigin: `${size/2}px ${size/2}px`, transform: hovered === i ? "scale(1.05)" : "scale(1)", cursor: "pointer", opacity: hovered !== null && hovered !== i ? 0.35 : 1 }}
+          <path key={i} d={s.path} fill={s.color} stroke={C.card} strokeWidth="3"
+            style={{ transition: "transform .3s ease, opacity .3s", transformOrigin: `${size/2}px ${size/2}px`, transform: hovered === i ? "scale(1.06)" : "scale(1)", cursor: "pointer", opacity: hovered !== null && hovered !== i ? 0.3 : 1 }}
             onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)} />
         ))}
       </svg>
       <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", textAlign: "center", pointerEvents: "none" }}>
         {hovered !== null ? (<>
-          <div style={{ fontSize: size < 160 ? 8 : 10, color: C.textMuted, letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 2 }}>{slices[hovered].label}</div>
-          <div style={{ fontSize: size < 160 ? 15 : 20, fontWeight: 700, color: C.text }}>{fmt(slices[hovered].value)}</div>
-          <div style={{ fontSize: size < 160 ? 9 : 11, color: slices[hovered].color, fontWeight: 600 }}>{(slices[hovered].fraction * 100).toFixed(1)}%</div>
+          <div style={{ fontSize: size < 160 ? 10 : 12, color: C.textMuted, letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 3 }}>{slices[hovered].label}</div>
+          <div style={{ fontSize: size < 160 ? 17 : 24, fontWeight: 700, color: C.text }}>{fmt(slices[hovered].value)}</div>
+          <div style={{ fontSize: size < 160 ? 11 : 13, color: slices[hovered].color, fontWeight: 600 }}>{(slices[hovered].fraction * 100).toFixed(1)}%</div>
         </>) : (<>
-          <div style={{ fontSize: size < 160 ? 8 : 10, color: C.textMuted, letterSpacing: ".08em", textTransform: "uppercase" }}>Total</div>
-          <div style={{ fontSize: size < 160 ? 16 : 22, fontWeight: 700, color: C.accent }}>{fmt(total)}</div>
+          <div style={{ fontSize: size < 160 ? 10 : 12, color: C.textMuted, letterSpacing: ".08em", textTransform: "uppercase" }}>Total</div>
+          <div style={{ fontSize: size < 160 ? 18 : 26, fontWeight: 700, color: C.accent }}>{fmt(total)}</div>
         </>)}
       </div>
     </div>
   );
 }
 
-function BarChart({ data, height = 200 }) {
+function BarChart({ data, height = 220 }) {
   const maxVal = Math.max(...data.map(d => d.total), 1);
   const [hb, setHb] = useState(null);
   const [animated, setAnimated] = useState(false);
   useEffect(() => { setTimeout(() => setAnimated(true), 100); }, []);
   return (
-    <div style={{ width: "100%", height, display: "flex", alignItems: "flex-end", gap: 8, paddingBottom: 28, position: "relative" }}>
+    <div style={{ width: "100%", height, display: "flex", alignItems: "flex-end", gap: 10, paddingBottom: 32, position: "relative" }}>
       {data.map((d, i) => {
-        const barH = animated ? (d.total / maxVal) * (height - 48) : 0;
+        const barH = animated ? (d.total / maxVal) * (height - 56) : 0;
         return (
           <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}
             onMouseEnter={() => setHb(i)} onMouseLeave={() => setHb(null)}>
-            {hb === i && <div style={{ position: "absolute", bottom: barH + 34, left: "50%", transform: "translateX(-50%)", background: C.text, color: "#fff", padding: "5px 12px", borderRadius: 8, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap", zIndex: 10 }}>{fmt(d.total)}</div>}
-            <div style={{ width: "65%", minWidth: 20, maxWidth: 48, height: barH, borderRadius: "8px 8px 0 0", overflow: "hidden", cursor: "pointer", transition: `height .7s cubic-bezier(.4,0,.2,1) ${i*.06}s, opacity .2s`, opacity: hb !== null && hb !== i ? 0.4 : 1, display: "flex", flexDirection: "column-reverse" }}>
-              {d.segments.map((seg, j) => <div key={j} style={{ width: "100%", height: (seg.value / maxVal) * (height - 48), background: seg.color, flexShrink: 0 }} />)}
+            {hb === i && <div style={{ position: "absolute", bottom: barH + 38, left: "50%", transform: "translateX(-50%)", background: C.text, color: "#fff", padding: "6px 14px", borderRadius: 10, fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", zIndex: 10 }}>{fmt(d.total)}</div>}
+            <div style={{ width: "65%", minWidth: 22, maxWidth: 52, height: barH, borderRadius: "10px 10px 0 0", overflow: "hidden", cursor: "pointer", transition: `height .7s cubic-bezier(.4,0,.2,1) ${i*.06}s, opacity .2s`, opacity: hb !== null && hb !== i ? 0.35 : 1, display: "flex", flexDirection: "column-reverse" }}>
+              {d.segments.map((seg, j) => <div key={j} style={{ width: "100%", height: (seg.value / maxVal) * (height - 56), background: seg.color, flexShrink: 0 }} />)}
             </div>
-            <div style={{ fontSize: 10, color: C.textMuted, marginTop: 8, fontWeight: 500, letterSpacing: ".02em" }}>{d.label}</div>
+            <div style={{ fontSize: 12, color: C.textMuted, marginTop: 10, fontWeight: 500, letterSpacing: ".02em" }}>{d.label}</div>
           </div>
         );
       })}
@@ -450,19 +452,13 @@ function GlobeTab({ donations }) {
   useEffect(() => {
     fetch("https://unpkg.com/world-atlas@2.0.2/countries-110m.json")
       .then(res => res.json())
-      .then(data => {
-        const geoJson = topojson.feature(data, data.objects.countries);
-        setCountries(geoJson.features);
-        setGlobeReady(true);
-      })
+      .then(data => { setCountries(topojson.feature(data, data.objects.countries).features); setGlobeReady(true); })
       .catch(() => setFetchError(true));
   }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const observer = new ResizeObserver(entries => {
-      setContainerWidth(entries[0].contentRect.width);
-    });
+    const observer = new ResizeObserver(entries => setContainerWidth(entries[0].contentRect.width));
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, []);
@@ -470,17 +466,10 @@ function GlobeTab({ donations }) {
   useEffect(() => {
     if (!globeRef.current || !globeReady) return;
     const controls = globeRef.current.controls();
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.4;
-    controls.enableZoom = true;
-    controls.minDistance = 150;
-    controls.maxDistance = 500;
+    controls.autoRotate = true; controls.autoRotateSpeed = 0.4;
+    controls.enableZoom = true; controls.minDistance = 150; controls.maxDistance = 500;
     let timeout;
-    const pause = () => {
-      controls.autoRotate = false;
-      clearTimeout(timeout);
-      timeout = setTimeout(() => { controls.autoRotate = true; }, 3000);
-    };
+    const pause = () => { controls.autoRotate = false; clearTimeout(timeout); timeout = setTimeout(() => { controls.autoRotate = true; }, 3000); };
     controls.addEventListener("start", pause);
     return () => { controls.removeEventListener("start", pause); clearTimeout(timeout); };
   }, [globeReady]);
@@ -489,92 +478,72 @@ function GlobeTab({ donations }) {
 
   return (
     <div style={{ animation: "fadeSlideUp .4s ease" }}>
-      <div style={{ ...cardStyle, padding: "24px 28px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ ...glass, padding: "28px 32px", marginBottom: 18, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <h3 style={{ fontSize: 20, fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: C.text, margin: 0 }}>Global Impact</h3>
-          <p style={{ fontSize: 13, color: C.textSoft, fontWeight: 400, marginTop: 4 }}>
+          <h3 style={{ fontSize: 22, fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: C.text, margin: 0 }}>Global Impact</h3>
+          <p style={{ fontSize: 15, color: C.textSoft, fontWeight: 400, marginTop: 5 }}>
             Your donations reach {countryCount} {countryCount === 1 ? "country" : "countries"} worldwide
           </p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 10, color: C.textMuted, fontWeight: 500 }}>Less</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 12, color: C.textMuted, fontWeight: 500 }}>Less</span>
           <div style={{ width: 120, height: 8, borderRadius: 4, background: "linear-gradient(to right, #fed7aa, #f97316, #991b1b)" }} />
-          <span style={{ fontSize: 10, color: C.textMuted, fontWeight: 500 }}>More</span>
+          <span style={{ fontSize: 12, color: C.textMuted, fontWeight: 500 }}>More</span>
         </div>
       </div>
 
-      <div ref={containerRef} style={{ background: "#111827", borderRadius: 16, overflow: "hidden", position: "relative", minHeight: 520 }}>
+      <div ref={containerRef} style={{ background: "#111827", borderRadius: 20, overflow: "hidden", position: "relative", minHeight: 520 }}>
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 40%, rgba(15,118,110,0.08) 0%, transparent 70%)", pointerEvents: "none", zIndex: 1 }} />
         {!globeReady && !fetchError && (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, zIndex: 5 }}>
             <div style={{ width: 28, height: 28, border: "2px solid rgba(255,255,255,0.1)", borderTop: "2px solid rgba(255,255,255,0.6)", borderRadius: "50%", animation: "spin .8s linear infinite" }} />
-            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>Loading globe...</p>
+            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.4)" }}>Loading globe...</p>
           </div>
         )}
         {fetchError && (
           <div style={{ padding: 48, textAlign: "center" }}>
-            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>Unable to load map data. Please refresh to try again.</p>
+            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 15 }}>Unable to load map data. Please refresh to try again.</p>
           </div>
         )}
         {globeReady && (
-          <Globe
-            ref={globeRef}
-            width={containerWidth}
-            height={520}
-            backgroundColor="rgba(0,0,0,0)"
+          <Globe ref={globeRef} width={containerWidth} height={520} backgroundColor="rgba(0,0,0,0)"
             globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-            showAtmosphere={true}
-            atmosphereColor="rgba(15,118,110,0.3)"
-            atmosphereAltitude={0.15}
-            animateIn={true}
+            showAtmosphere={true} atmosphereColor="rgba(15,118,110,0.3)" atmosphereAltitude={0.15} animateIn={true}
             polygonsData={countries}
             polygonAltitude={d => countryData[getAlpha3(d)] ? 0.015 : 0.004}
-            polygonCapColor={d => {
-              const code = getAlpha3(d);
-              if (!code || !countryData[code]) return "rgba(255,255,255,0.06)";
-              return warmColorInterpolate(colorScale(countryData[code].total));
-            }}
-            polygonSideColor={d => {
-              const code = getAlpha3(d);
-              if (!code || !countryData[code]) return "rgba(255,255,255,0.02)";
-              return "rgba(249,115,22,0.2)";
-            }}
+            polygonCapColor={d => { const code = getAlpha3(d); if (!code || !countryData[code]) return "rgba(255,255,255,0.06)"; return warmColorInterpolate(colorScale(countryData[code].total)); }}
+            polygonSideColor={d => { const code = getAlpha3(d); if (!code || !countryData[code]) return "rgba(255,255,255,0.02)"; return "rgba(249,115,22,0.2)"; }}
             polygonStrokeColor={() => "rgba(255,255,255,0.1)"}
             polygonLabel={d => {
-              const code = getAlpha3(d);
-              const name = d.properties.name || "Unknown";
-              const data = code && countryData[code];
-              if (!data) {
-                return `<div style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:10px 16px;box-shadow:0 8px 24px rgba(0,0,0,0.12);font-family:'Inter',-apple-system,sans-serif;"><div style="font-size:13px;color:#111827;font-weight:500;">${name}</div><div style="font-size:11px;color:#9ca3af;margin-top:2px;">No donations</div></div>`;
-              }
+              const code = getAlpha3(d); const name = d.properties.name || "Unknown"; const data = code && countryData[code];
+              if (!data) return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:14px;padding:12px 18px;box-shadow:0 8px 24px rgba(0,0,0,0.12);font-family:'Inter',sans-serif;"><div style="font-size:15px;color:#2D1F14;font-weight:500;">${name}</div><div style="font-size:13px;color:#A89888;margin-top:3px;">No donations</div></div>`;
               const orgLines = Object.entries(data.orgs).sort((a, b) => b[1] - a[1]).map(([org, amt]) =>
-                `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05);"><span style="font-size:12px;color:#6b7280;">${org}</span><span style="font-size:12px;color:#111827;font-weight:600;white-space:nowrap;">${fmt(amt)}</span></div>`
+                `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:7px 0;border-bottom:1px solid rgba(180,140,100,0.08);"><span style="font-size:14px;color:#7C6B5E;">${org}</span><span style="font-size:14px;color:#2D1F14;font-weight:600;white-space:nowrap;">${fmt(amt)}</span></div>`
               ).join("");
-              return `<div style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px 22px;min-width:220px;max-width:320px;box-shadow:0 12px 32px rgba(0,0,0,0.15);font-family:'Inter',-apple-system,sans-serif;pointer-events:none;"><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;font-weight:500;">Country</div><div style="font-size:18px;font-weight:600;color:#111827;margin-bottom:14px;font-family:'DM Sans',sans-serif;">${name}</div><div style="margin-bottom:14px;">${orgLines}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid rgba(0,0,0,0.08);"><span style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Total</span><span style="font-size:18px;font-weight:700;color:#0f766e;">${fmt(data.total)}</span></div></div>`;
+              return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:16px;padding:20px 24px;min-width:240px;max-width:340px;box-shadow:0 12px 32px rgba(0,0,0,0.15);font-family:'Inter',sans-serif;"><div style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;font-weight:500;">Country</div><div style="font-size:20px;font-weight:600;color:#2D1F14;margin-bottom:16px;font-family:'DM Sans',sans-serif;">${name}</div><div style="margin-bottom:16px;">${orgLines}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(180,140,100,0.1);"><span style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Total</span><span style="font-size:20px;font-weight:700;color:#0d9488;">${fmt(data.total)}</span></div></div>`;
             }}
-            onPolygonHover={() => {}}
-            polygonsTransitionDuration={300}
+            onPolygonHover={() => {}} polygonsTransitionDuration={300}
           />
         )}
       </div>
 
       {countryCount > 0 && (
-        <div style={{ ...cardStyle, marginTop: 16, overflow: "hidden", animation: "fadeSlideUp .4s ease .1s both" }}>
-          <div style={{ padding: "18px 24px 12px" }}>
-            <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text, margin: 0 }}>Donations by country</h3>
+        <div style={{ ...glass, marginTop: 18, overflow: "hidden", animation: "fadeSlideUp .4s ease .1s both" }}>
+          <div style={{ padding: "20px 28px 14px" }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, color: C.text, margin: 0 }}>Donations by country</h3>
           </div>
           {Object.entries(countryData).sort((a, b) => b[1].total - a[1].total).map(([code, data], i) => (
-            <div key={code} style={{ padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${C.divider}`, animation: `fadeSlideUp .4s ease ${i * .04}s both`, transition: "background .15s" }}
+            <div key={code} style={{ padding: "16px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${C.divider}`, animation: `fadeSlideUp .4s ease ${i*.04}s both`, transition: "background .15s", cursor: "pointer" }}
               onMouseEnter={e => e.currentTarget.style.background = C.accentSoft}
               onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: warmColorInterpolate(colorScale(data.total)), flexShrink: 0 }} />
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div style={{ width: 12, height: 12, borderRadius: "50%", background: warmColorInterpolate(colorScale(data.total)), flexShrink: 0 }} />
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{COUNTRY_NAMES[code] || code}</div>
-                  <div style={{ fontSize: 11, color: C.textMuted, marginTop: 1 }}>{Object.keys(data.orgs).join(", ")}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{COUNTRY_NAMES[code] || code}</div>
+                  <div style={{ fontSize: 13, color: C.textMuted, marginTop: 2 }}>{Object.keys(data.orgs).join(", ")}</div>
                 </div>
               </div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{fmt(data.total)}</div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: C.text }}>{fmt(data.total)}</div>
             </div>
           ))}
         </div>
@@ -589,42 +558,39 @@ function LoginScreen({ onLogin }) {
   const [error, setError] = useState("");
   useEffect(() => {
     const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
+    script.src = "https://accounts.google.com/gsi/client"; script.async = true;
     script.onload = () => {
       window.google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: (response) => {
-          try {
-            const payload = JSON.parse(atob(response.credential.split(".")[1]));
-            onLogin({ email: payload.email, name: payload.name, picture: payload.picture });
-          } catch { setError("Login failed. Please try again."); }
-        },
-        auto_select: false,
+          try { const payload = JSON.parse(atob(response.credential.split(".")[1])); onLogin({ email: payload.email, name: payload.name, picture: payload.picture }); }
+          catch { setError("Login failed. Please try again."); }
+        }, auto_select: false,
       });
-      window.google.accounts.id.renderButton(
-        document.getElementById("google-signin-btn"),
-        { theme: "outline", size: "large", width: 300, text: "signin_with", shape: "pill" }
-      );
+      window.google.accounts.id.renderButton(document.getElementById("google-signin-btn"), { theme: "outline", size: "large", width: 300, text: "signin_with", shape: "pill" });
     };
     document.head.appendChild(script);
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(180deg, #f8f9fb 0%, #f0fdfa 100%)" }}>
-      <div style={{ width: 440, textAlign: "center", animation: "fadeSlideUp .6s ease" }}>
-        <div style={{ width: 60, height: 60, borderRadius: 16, background: C.heroGradient, margin: "0 auto 28px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 24px rgba(13,148,136,0.3)" }}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#FBF8F3", position: "relative", overflow: "hidden" }}>
+      {/* Organic blobs */}
+      <div style={{ position: "fixed", top: -120, right: -80, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(13,148,136,0.08) 0%, transparent 70%)", filter: "blur(60px)", animation: "float 12s ease-in-out infinite", pointerEvents: "none" }} />
+      <div style={{ position: "fixed", bottom: -100, left: -60, width: 350, height: 350, borderRadius: "50%", background: "radial-gradient(circle, rgba(224,122,48,0.06) 0%, transparent 70%)", filter: "blur(60px)", animation: "float 15s ease-in-out infinite 2s", pointerEvents: "none" }} />
+
+      <div style={{ width: 460, textAlign: "center", animation: "fadeSlideUp .6s ease", zIndex: 1 }}>
+        <div style={{ width: 64, height: 64, borderRadius: 18, background: "linear-gradient(135deg, #0d9488, #0284c7)", margin: "0 auto 32px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 24px rgba(13,148,136,0.3)" }}>
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
         </div>
-        <h1 style={{ fontSize: 34, fontFamily: "'DM Sans',sans-serif", fontWeight: 700, color: C.text, margin: "0 0 8px", letterSpacing: "-0.03em" }}>GiveTrack</h1>
-        <p style={{ color: C.textSoft, fontSize: 15, margin: "0 0 44px", fontWeight: 400 }}>Track the impact of your generosity</p>
+        <h1 style={{ fontSize: 38, fontFamily: "'DM Sans',sans-serif", fontWeight: 700, color: C.text, margin: "0 0 10px", letterSpacing: "-0.03em" }}>GiveTrack</h1>
+        <p style={{ color: C.textSoft, fontSize: 17, margin: "0 0 48px", fontWeight: 400 }}>Track the impact of your generosity</p>
 
-        <div style={{ ...cardStyle, padding: "44px 48px", boxShadow: "0 8px 32px rgba(0,0,0,0.06)" }}>
-          <p style={{ color: C.textSoft, fontSize: 14, marginBottom: 28, fontWeight: 400, lineHeight: 1.6 }}>Sign in with your company Google account to view your charitable giving.</p>
+        <div style={{ ...glass, padding: "48px 52px", boxShadow: "0 8px 40px rgba(180,120,60,0.08)" }}>
+          <p style={{ color: C.textSoft, fontSize: 16, marginBottom: 32, fontWeight: 400, lineHeight: 1.6 }}>Sign in with your company Google account to view your charitable giving.</p>
           <div id="google-signin-btn" style={{ display: "flex", justifyContent: "center" }}></div>
-          {error && <div style={{ color: "#dc2626", fontSize: 13, marginTop: 16, fontWeight: 500 }}>{error}</div>}
+          {error && <div style={{ color: "#dc2626", fontSize: 15, marginTop: 18, fontWeight: 500 }}>{error}</div>}
         </div>
       </div>
     </div>
@@ -643,9 +609,8 @@ export default function App() {
   const handleLogin = async (googleUser) => {
     setUser(googleUser); setLoading(true); setDataError("");
     try {
-      if (USE_DEMO_DATA) {
-        setDonations(DEMO_DATA[googleUser.email] || []);
-      } else {
+      if (USE_DEMO_DATA) { setDonations(DEMO_DATA[googleUser.email] || []); }
+      else {
         const res = await fetch("/api/sharepoint");
         if (!res.ok) throw new Error();
         const data = await res.json();
@@ -666,9 +631,9 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       {!user ? <LoginScreen onLogin={handleLogin} /> :
        loading ? (
-        <div style={{ minHeight: "100vh", background: C.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
-          <div style={{ width: 32, height: 32, border: `2px solid ${C.divider}`, borderTop: `2px solid ${C.accent}`, borderRadius: "50%", animation: "spin .8s linear infinite" }} />
-          <p style={{ color: C.textSoft, fontSize: 13, fontWeight: 500 }}>Loading your data...</p>
+        <div style={{ minHeight: "100vh", background: C.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 18 }}>
+          <div style={{ width: 36, height: 36, border: `2px solid ${C.divider}`, borderTop: `2px solid ${C.accent}`, borderRadius: "50%", animation: "spin .8s linear infinite" }} />
+          <p style={{ color: C.textSoft, fontSize: 15, fontWeight: 500 }}>Loading your data...</p>
         </div>
        ) : <Dashboard user={user} donations={donations} activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} dataError={dataError} />}
     </>
@@ -678,6 +643,9 @@ export default function App() {
 // ─── DASHBOARD ────────────────────────────────────────────────
 
 function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataError }) {
+  const [expandedOrg, setExpandedOrg] = useState(null);
+  const [imgErrors, setImgErrors] = useState({});
+
   const totalDonated = donations.reduce((s, d) => s + d.allocatedAmount, 0);
   const primaryCurrency = donations[0]?.currency || "$";
   const orgTotals = {}, orgUrls = {};
@@ -696,297 +664,329 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
   });
   const donutData = Object.entries(orgTotals).sort((a, b) => b[1] - a[1]).map(([n, v]) => ({ label: n, value: v, color: getOrgColor(n) }));
   const avgCycle = cycles.length > 0 ? totalDonated / cycles.length : 0;
-
-  // Impact calculations
   const countriesReached = [...new Set(donations.map(d => ORG_COUNTRY_MAP[d.orgName]).filter(Boolean))].length;
   const categoryTotals = {};
-  donations.forEach(d => {
-    const cat = ORG_CATEGORIES[d.orgName] || "Other";
-    categoryTotals[cat] = (categoryTotals[cat] || 0) + d.allocatedAmount;
-  });
+  donations.forEach(d => { const cat = ORG_CATEGORIES[d.orgName] || "Other"; categoryTotals[cat] = (categoryTotals[cat] || 0) + d.allocatedAmount; });
   const topCategory = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0];
   const categoryCount = Object.keys(categoryTotals).length;
-  const growth = monthlyData.length >= 2
-    ? ((monthlyData[monthlyData.length - 1].total - monthlyData[monthlyData.length - 2].total) / monthlyData[monthlyData.length - 2].total * 100)
-    : null;
 
-  // Monthly allocation breakdowns
-  const monthBreakdowns = months.map((m, idx) => {
+  const monthBreakdowns = months.map((m) => {
     const md = donations.filter(d => d.month === m);
     const total = md.reduce((s, d) => s + d.allocatedAmount, 0);
     const orgBreakdown = {};
     md.forEach(d => { orgBreakdown[d.orgName] = (orgBreakdown[d.orgName] || 0) + d.allocatedAmount; });
     const mDonut = Object.entries(orgBreakdown).sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ label: name, value, color: getOrgColor(name) }));
-    const prevMonthData = idx > 0 ? donations.filter(d => d.month === months[idx - 1]) : [];
-    const prevTotal = prevMonthData.reduce((s, d) => s + d.allocatedAmount, 0);
-    const change = idx > 0 && prevTotal > 0 ? ((total - prevTotal) / prevTotal * 100) : null;
-    return { month: m, total, donutData: mDonut, donationCount: md.length, change };
+    return { month: m, total, donutData: mDonut, donationCount: md.length };
   });
 
+  // Team data — aggregate all employees
+  const teamData = useMemo(() => {
+    const employees = [];
+    let teamTotal = 0;
+    const teamOrgTotals = {};
+    Object.entries(DEMO_DATA).forEach(([email, dons]) => {
+      const name = email.split("@")[0];
+      const displayName = name.charAt(0).toUpperCase() + name.slice(1);
+      const empTotal = dons.reduce((s, d) => s + d.allocatedAmount, 0);
+      const empOrgs = {};
+      dons.forEach(d => {
+        empOrgs[d.orgName] = (empOrgs[d.orgName] || 0) + d.allocatedAmount;
+        teamOrgTotals[d.orgName] = (teamOrgTotals[d.orgName] || 0) + d.allocatedAmount;
+      });
+      teamTotal += empTotal;
+      employees.push({ email, name: displayName, total: empTotal, orgCount: Object.keys(empOrgs).length, topOrg: Object.entries(empOrgs).sort((a, b) => b[1] - a[1])[0]?.[0] || "" });
+    });
+    employees.sort((a, b) => b.total - a.total);
+    const teamDonut = Object.entries(teamOrgTotals).sort((a, b) => b[1] - a[1]).map(([n, v]) => ({ label: n, value: v, color: getOrgColor(n) }));
+    return { employees, teamTotal, teamOrgCount: Object.keys(teamOrgTotals).length, teamDonut };
+  }, []);
+
   const tabs = [
-    { id: "overview", label: "Overview" },
-    { id: "breakdown", label: "Organizations" },
-    { id: "allocation", label: "Monthly Allocation" },
-    { id: "impact", label: "Impact" },
+    { id: "overview", label: "Overview", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg> },
+    { id: "breakdown", label: "Organizations", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> },
+    { id: "allocation", label: "Monthly", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
+    { id: "team", label: "Team", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+    { id: "impact", label: "Impact", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> },
   ];
 
-  const tabIcons = {
-    overview: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>,
-    breakdown: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>,
-    allocation: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
-    impact: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
-  };
-
   return (
-    <div style={{ minHeight: "100vh", background: C.bg }}>
-      {/* Gradient accent line */}
-      <div style={{ height: 3, background: "linear-gradient(90deg, #0d9488, #0284c7, #7c3aed, #e11d48, #f59e0b)", position: "fixed", top: 0, left: 0, right: 0, zIndex: 999 }} />
+    <div style={{ minHeight: "100vh", background: C.bg, position: "relative", overflow: "hidden" }}>
+      {/* Organic background blobs */}
+      <div style={{ position: "fixed", top: 80, right: -100, width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(13,148,136,0.05) 0%, transparent 70%)", filter: "blur(80px)", animation: "float 18s ease-in-out infinite", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", top: "50%", left: -120, width: 450, height: 450, borderRadius: "50%", background: "radial-gradient(circle, rgba(224,122,48,0.04) 0%, transparent 70%)", filter: "blur(80px)", animation: "float 22s ease-in-out infinite 3s", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", bottom: -80, right: "30%", width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(124,58,237,0.03) 0%, transparent 70%)", filter: "blur(80px)", animation: "float 20s ease-in-out infinite 6s", pointerEvents: "none", zIndex: 0 }} />
 
       {/* Header */}
-      <header style={{ padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.divider}`, background: "rgba(248,249,251,0.85)", backdropFilter: "blur(16px)", position: "sticky", top: 3, zIndex: 100, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: C.heroGradient, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <header style={{ padding: "18px 36px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.divider}`, background: "rgba(251,248,243,0.8)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 1px 3px rgba(180,120,60,0.04)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #0d9488, #0284c7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
           </div>
-          <span style={{ fontSize: 17, fontFamily: "'DM Sans',sans-serif", fontWeight: 700, color: C.text, letterSpacing: "-0.01em" }}>GiveTrack</span>
+          <span style={{ fontSize: 19, fontFamily: "'DM Sans',sans-serif", fontWeight: 700, color: C.text, letterSpacing: "-0.01em" }}>GiveTrack</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{user.name}</div>
-            <div style={{ fontSize: 11, color: C.textMuted }}>{user.email}</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{user.name}</div>
+            <div style={{ fontSize: 13, color: C.textMuted }}>{user.email}</div>
           </div>
-          {user.picture && <img src={user.picture} alt="" style={{ width: 34, height: 34, borderRadius: "50%", border: `2px solid ${C.divider}` }} />}
-          <button onClick={onLogout} style={{ padding: "7px 16px", background: "transparent", border: `1px solid ${C.cardBorder}`, borderRadius: 8, color: C.textSoft, fontSize: 12, cursor: "pointer", transition: "all .15s", fontWeight: 500 }}
-            onMouseEnter={e => { e.target.style.borderColor = "rgba(0,0,0,0.2)"; e.target.style.color = C.text; e.target.style.background = "rgba(0,0,0,0.02)"; }}
+          {user.picture && <img src={user.picture} alt="" style={{ width: 38, height: 38, borderRadius: "50%", border: `2px solid ${C.divider}` }} />}
+          <button onClick={onLogout} style={{ padding: "8px 18px", background: "transparent", border: `1px solid ${C.cardBorder}`, borderRadius: 10, color: C.textSoft, fontSize: 14, cursor: "pointer", transition: "all .15s", fontWeight: 500 }}
+            onMouseEnter={e => { e.target.style.borderColor = "rgba(180,140,100,0.25)"; e.target.style.color = C.text; e.target.style.background = "rgba(180,140,100,0.04)"; }}
             onMouseLeave={e => { e.target.style.borderColor = C.cardBorder; e.target.style.color = C.textSoft; e.target.style.background = "transparent"; }}>Sign out</button>
         </div>
       </header>
 
-      <div style={{ maxWidth: 1080, margin: "0 auto", padding: "40px 28px 80px" }}>
-        {/* Welcome */}
-        <div style={{ marginBottom: 40, animation: "fadeSlideUp .4s ease" }}>
-          <h2 style={{ fontSize: 30, fontFamily: "'DM Sans',sans-serif", fontWeight: 700, margin: "0 0 6px", color: C.text, letterSpacing: "-0.03em" }}>
-            Welcome back, {user.name.split(" ")[0]}
-          </h2>
-          <p style={{ color: C.textSoft, fontSize: 14, fontWeight: 400 }}>Here's the difference you're making.</p>
-        </div>
-
-        {dataError && <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 12, padding: "14px 18px", marginBottom: 24, color: "#dc2626", fontSize: 13, fontWeight: 500 }}>{dataError}</div>}
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "44px 32px 80px", position: "relative", zIndex: 1 }}>
+        {dataError && <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 14, padding: "16px 20px", marginBottom: 28, color: "#dc2626", fontSize: 15, fontWeight: 500 }}>{dataError}</div>}
 
         {donations.length === 0 && !dataError ? (
-          <div style={{ ...cardStyle, padding: "56px 32px", textAlign: "center", animation: "fadeSlideUp .4s ease" }}>
-            <div style={{ width: 52, height: 52, borderRadius: 14, background: C.accentLight, margin: "0 auto 20px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <div style={{ ...glass, padding: "64px 36px", textAlign: "center", animation: "fadeSlideUp .4s ease" }}>
+            <div style={{ width: 56, height: 56, borderRadius: 16, background: C.accentLight, margin: "0 auto 24px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             </div>
-            <h3 style={{ fontSize: 18, fontWeight: 600, color: C.text, marginBottom: 8 }}>No donations found</h3>
-            <p style={{ color: C.textSoft, fontSize: 14, maxWidth: 380, margin: "0 auto", lineHeight: 1.6 }}>We couldn't find any records linked to {user.email}. Please contact your administrator if this seems incorrect.</p>
+            <h3 style={{ fontSize: 20, fontWeight: 600, color: C.text, marginBottom: 10 }}>No donations found</h3>
+            <p style={{ color: C.textSoft, fontSize: 16, maxWidth: 400, margin: "0 auto", lineHeight: 1.6 }}>We couldn't find any records linked to {user.email}. Please contact your administrator.</p>
           </div>
         ) : donations.length > 0 && (<>
           {/* Tabs */}
-          <div style={{ display: "flex", gap: 0, marginBottom: 36, borderBottom: `1px solid ${C.divider}` }}>
+          <div style={{ display: "flex", gap: 2, marginBottom: 40, borderBottom: `1px solid ${C.divider}`, overflowX: "auto" }}>
             {tabs.map(t => (
               <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
-                padding: "12px 24px", background: "transparent", border: "none", borderBottom: activeTab === t.id ? `2.5px solid ${C.accent}` : "2.5px solid transparent",
-                color: activeTab === t.id ? C.text : C.textMuted, fontSize: 13, fontWeight: activeTab === t.id ? 600 : 400,
-                cursor: "pointer", transition: "all .2s", marginBottom: -1, display: "flex", alignItems: "center", gap: 6,
-              }}>
-                {tabIcons[t.id]}
-                {t.label}
+                padding: "14px 26px", background: "transparent", border: "none",
+                borderBottom: activeTab === t.id ? `3px solid ${C.accent}` : "3px solid transparent",
+                color: activeTab === t.id ? C.text : C.textMuted, fontSize: 15, fontWeight: activeTab === t.id ? 600 : 400,
+                cursor: "pointer", transition: "all .2s", marginBottom: -1, display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap",
+              }}
+                onMouseEnter={e => { if (activeTab !== t.id) e.target.style.color = C.textSoft; }}
+                onMouseLeave={e => { if (activeTab !== t.id) e.target.style.color = C.textMuted; }}>
+                {t.icon}{t.label}
               </button>
             ))}
           </div>
 
           {/* ═══════════════ OVERVIEW ═══════════════ */}
           {activeTab === "overview" && (<>
-            {/* KPI Cards */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 24 }}>
+            {/* Hero photo card — full width bento */}
+            <div style={{ borderRadius: 24, overflow: "hidden", position: "relative", height: 280, marginBottom: 20, animation: "fadeSlideUp .5s ease" }}>
+              <img src={HERO_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                onError={e => { e.target.style.display = "none"; }} />
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(13,148,136,0.85) 0%, rgba(2,132,199,0.75) 100%)" }} />
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "40px 48px" }}>
+                <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 10 }}>Total Donated</div>
+                <div style={{ fontSize: 56, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.03em", lineHeight: 1 }}>
+                  <AnimatedNumber value={totalDonated} currency={primaryCurrency} />
+                </div>
+                <div style={{ fontSize: 17, color: "rgba(255,255,255,0.7)", marginTop: 14, fontWeight: 400 }}>
+                  Welcome back, {user.name.split(" ")[0]} — across {cycles.length} payroll cycles
+                </div>
+              </div>
+            </div>
+
+            {/* 3 stat cards — bento grid */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18, marginBottom: 28 }}>
               {[
-                { label: "Total donated", value: totalDonated, sub: `${cycles.length} payroll cycles`, hero: true, icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> },
-                { label: "Per cycle", value: avgCycle, sub: "Average contribution", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> },
-                { label: "Organizations", value: orgCount, sub: `${categoryCount} cause areas`, isCount: true, icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> },
-                { label: "Giving streak", value: months.length, sub: `month${months.length !== 1 ? "s" : ""} strong`, isCount: true, icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> },
+                { label: "Per cycle", value: avgCycle, sub: "Average contribution", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> },
+                { label: "Organizations", value: orgCount, sub: `${categoryCount} cause areas`, isCount: true, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> },
+                { label: "Countries reached", value: countriesReached, sub: `${months.length} month${months.length !== 1 ? "s" : ""} active`, isCount: true, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> },
               ].map((card, i) => (
-                <div key={i} style={{
-                  ...cardStyle,
-                  padding: "22px 24px",
-                  animation: `fadeSlideUp .4s ease ${i*.05}s both`,
-                  transition: "box-shadow .2s, transform .2s",
-                  ...(card.hero ? { background: C.heroGradient, backgroundSize: "200% 200%", animation: `fadeSlideUp .4s ease both, gradientShift 8s ease infinite`, border: "none", boxShadow: "0 4px 20px rgba(13,148,136,0.25)" } : {}),
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.boxShadow = card.hero ? "0 8px 28px rgba(13,148,136,0.35)" : C.cardHover; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.boxShadow = card.hero ? "0 4px 20px rgba(13,148,136,0.25)" : C.cardShadow; e.currentTarget.style.transform = "translateY(0)"; }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: card.hero ? "rgba(255,255,255,0.15)" : C.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14, color: card.hero ? "#fff" : C.accent }}>
+                <div key={i} style={{ ...glass, padding: "26px 28px", animation: `fadeSlideUp .4s ease ${i*.06}s both`, transition: "box-shadow .2s, transform .2s", cursor: "default" }}
+                  onMouseEnter={e => { e.currentTarget.style.boxShadow = C.cardHover; e.currentTarget.style.transform = "translateY(-3px)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; e.currentTarget.style.transform = "translateY(0)"; }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: C.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16, color: C.accent }}>
                     {card.icon}
                   </div>
-                  <div style={{ fontSize: 11, color: card.hero ? "rgba(255,255,255,0.7)" : C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 8, fontWeight: 500 }}>{card.label}</div>
-                  <div style={{ fontSize: 28, fontWeight: 700, color: card.hero ? "#fff" : C.text, marginBottom: 4, lineHeight: 1, fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.02em" }}>
+                  <div style={{ fontSize: 13, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 10, fontWeight: 500 }}>{card.label}</div>
+                  <div style={{ fontSize: 34, fontWeight: 700, color: C.text, marginBottom: 6, lineHeight: 1, fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.02em" }}>
                     {card.isCount ? card.value : <AnimatedNumber value={card.value} currency={primaryCurrency} />}
                   </div>
-                  <div style={{ fontSize: 12, color: card.hero ? "rgba(255,255,255,0.6)" : C.textSoft, fontWeight: 400 }}>{card.sub}</div>
+                  <div style={{ fontSize: 14, color: C.textSoft, fontWeight: 400 }}>{card.sub}</div>
                 </div>
               ))}
             </div>
 
-            {/* Impact Insights Strip */}
-            <div style={{ ...cardStyle, background: "linear-gradient(135deg, rgba(13,148,136,0.04) 0%, rgba(2,132,193,0.04) 100%)", border: "1px solid rgba(13,148,136,0.1)", padding: "20px 28px", marginBottom: 24, animation: "fadeSlideUp .4s ease .1s both" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                <span style={{ fontSize: 12, fontWeight: 600, color: C.accent, textTransform: "uppercase", letterSpacing: ".06em" }}>Your Impact Story</span>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
-                <div>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: C.text, fontFamily: "'DM Sans',sans-serif" }}>{countriesReached}</div>
-                  <div style={{ fontSize: 11, color: C.textSoft, marginTop: 2 }}>Countries reached</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: C.text, fontFamily: "'DM Sans',sans-serif" }}>{categoryCount}</div>
-                  <div style={{ fontSize: 11, color: C.textSoft, marginTop: 2 }}>Cause areas</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: C.text, fontFamily: "'DM Sans',sans-serif" }}>
-                    {growth !== null ? (<span style={{ color: growth >= 0 ? "#059669" : "#dc2626" }}>{growth >= 0 ? "+" : ""}{growth.toFixed(0)}%</span>) : "—"}
-                  </div>
-                  <div style={{ fontSize: 11, color: C.textSoft, marginTop: 2 }}>Month-over-month</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: C.text, lineHeight: 1.3 }}>{topCategory ? topCategory[0] : "—"}</div>
-                  <div style={{ fontSize: 11, color: C.textSoft, marginTop: 2 }}>Top cause {topCategory ? `(${((topCategory[1] / totalDonated) * 100).toFixed(0)}%)` : ""}</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Charts */}
-            <div style={{ display: "grid", gridTemplateColumns: months.length > 1 ? "1.4fr 1fr" : "1fr", gap: 16 }}>
+            {/* Charts — asymmetric bento grid */}
+            <div style={{ display: "grid", gridTemplateColumns: months.length > 1 ? "1.5fr 1fr" : "1fr", gap: 18 }}>
               {months.length > 1 && (
-                <div style={{ ...cardStyle, padding: "26px 28px", animation: "fadeSlideUp .4s ease .15s both" }}>
-                  <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text, margin: "0 0 22px" }}>Monthly overview</h3>
+                <div style={{ ...glass, padding: "28px 32px", animation: "fadeSlideUp .4s ease .15s both" }}>
+                  <h3 style={{ fontSize: 17, fontWeight: 600, color: C.text, margin: "0 0 24px", fontFamily: "'DM Sans',sans-serif" }}>Monthly overview</h3>
                   <BarChart data={monthlyData} />
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "5px 16px", marginTop: 14, padding: "14px 0 0", borderTop: `1px solid ${C.divider}` }}>
-                    {Object.entries(orgTotals).sort((a, b) => b[1] - a[1]).map(([n, v]) => (
-                      <div key={n} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, color: C.textSoft, minWidth: 0, padding: "3px 0" }}>
-                        <div style={{ width: 7, height: 7, borderRadius: 2, background: getOrgColor(n), flexShrink: 0 }} />
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px 18px", marginTop: 16, padding: "16px 0 0", borderTop: `1px solid ${C.divider}` }}>
+                    {Object.entries(orgTotals).sort((a, b) => b[1] - a[1]).map(([n]) => (
+                      <div key={n} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: C.textSoft, minWidth: 0, padding: "4px 0" }}>
+                        <div style={{ width: 8, height: 8, borderRadius: 3, background: getOrgColor(n), flexShrink: 0 }} />
                         <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{n}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-              <div style={{ ...cardStyle, padding: "26px 28px", display: "flex", flexDirection: "column", alignItems: "center", animation: "fadeSlideUp .4s ease .2s both" }}>
-                <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text, margin: "0 0 22px", alignSelf: "flex-start" }}>Allocation breakdown</h3>
+              <div style={{ ...glass, padding: "28px 32px", display: "flex", flexDirection: "column", alignItems: "center", animation: "fadeSlideUp .4s ease .2s both" }}>
+                <h3 style={{ fontSize: 17, fontWeight: 600, color: C.text, margin: "0 0 24px", alignSelf: "flex-start", fontFamily: "'DM Sans',sans-serif" }}>Allocation breakdown</h3>
                 <DonutChart data={donutData} />
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 22, width: "100%" }}>
-                  {donutData.map((d, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 13 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flex: 1 }}>
-                        <div style={{ width: 8, height: 8, borderRadius: 3, background: d.color, flexShrink: 0 }} />
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 24, width: "100%" }}>
+                  {donutData.slice(0, 8).map((d, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 14 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
+                        <div style={{ width: 10, height: 10, borderRadius: 4, background: d.color, flexShrink: 0 }} />
                         <span style={{ color: C.textSoft, fontWeight: 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.label}</span>
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-                        <div style={{ width: 40, height: 4, borderRadius: 2, background: C.divider, overflow: "hidden" }}>
-                          <div style={{ width: `${(d.value / totalDonated) * 100}%`, height: "100%", background: d.color, borderRadius: 2 }} />
-                        </div>
-                        <span style={{ fontSize: 11, color: C.textMuted, fontWeight: 500, width: 28, textAlign: "right" }}>{((d.value / totalDonated) * 100).toFixed(0)}%</span>
-                        <span style={{ fontWeight: 600, color: C.text, minWidth: 60, textAlign: "right" }}>{fmt(d.value)}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+                        <span style={{ fontSize: 13, color: C.textMuted, fontWeight: 500, width: 32, textAlign: "right" }}>{((d.value / totalDonated) * 100).toFixed(0)}%</span>
+                        <span style={{ fontWeight: 600, color: C.text, minWidth: 68, textAlign: "right" }}>{fmt(d.value)}</span>
                       </div>
                     </div>
                   ))}
+                  {donutData.length > 8 && (
+                    <div style={{ fontSize: 13, color: C.textMuted, textAlign: "center", padding: "6px 0" }}>+{donutData.length - 8} more organizations</div>
+                  )}
                 </div>
+              </div>
+            </div>
+
+            {/* Top cause areas strip */}
+            <div style={{ ...glass, marginTop: 18, padding: "24px 32px", animation: "fadeSlideUp .4s ease .25s both" }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: C.accent, textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 16 }}>Your Cause Areas</div>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                {Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]).map(([cat, amt]) => (
+                  <div key={cat} style={{ padding: "10px 18px", borderRadius: 14, background: C.accentSoft, border: `1px solid rgba(13,148,136,0.1)`, display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{cat}</span>
+                    <span style={{ fontSize: 13, color: C.accent, fontWeight: 600 }}>{fmt(amt)}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </>)}
 
           {/* ═══════════════ ORGANIZATIONS ═══════════════ */}
           {activeTab === "breakdown" && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              {Object.entries(orgTotals).sort((a, b) => b[1] - a[1]).map(([name, total], i) => {
-                const od = donations.filter(d => d.orgName === name);
-                const ma = months.map(m => ({ month: m, amount: od.filter(d => d.month === m).reduce((s, d) => s + d.allocatedAmount, 0) }));
-                const maxM = Math.max(...ma.map(m => m.amount), 1);
-                const url = orgUrls[name];
-                const color = getOrgColor(name);
-                const category = ORG_CATEGORIES[name];
-                return (
-                  <div key={name} style={{ ...cardStyle, padding: "24px 26px", position: "relative", overflow: "hidden", animation: `fadeSlideUp .4s ease ${i*.05}s both`, transition: "box-shadow .2s, transform .2s" }}
-                    onMouseEnter={e => { e.currentTarget.style.boxShadow = C.cardHover; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; e.currentTarget.style.transform = "translateY(0)"; }}>
-                    <div style={{ position: "absolute", top: 0, left: 0, width: 4, height: "100%", background: color }} />
-                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
-                      <div>
-                        {url ? <a href={url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, fontWeight: 600, color: C.text, textDecoration: "none", transition: "color .2s" }} onMouseEnter={e => e.target.style.color = color} onMouseLeave={e => e.target.style.color = C.text}>{name} ↗</a>
-                          : <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{name}</div>}
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 5 }}>
-                          <span style={{ fontSize: 11, color: C.textMuted, fontWeight: 500 }}>{od.length} payment{od.length !== 1 ? "s" : ""}</span>
-                          {category && (
-                            <span style={{ fontSize: 9, fontWeight: 600, color: C.accent, background: C.accentLight, padding: "2px 8px", borderRadius: 20, textTransform: "uppercase", letterSpacing: ".04em" }}>{category}</span>
-                          )}
+            <div style={{ animation: "fadeSlideUp .3s ease" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+                {Object.entries(orgTotals).sort((a, b) => b[1] - a[1]).map(([name, total], i) => {
+                  const od = donations.filter(d => d.orgName === name);
+                  const url = orgUrls[name];
+                  const color = getOrgColor(name);
+                  const category = ORG_CATEGORIES[name];
+                  const img = ORG_IMAGES[name];
+                  const isExpanded = expandedOrg === name;
+                  const byMonth = {};
+                  od.forEach(d => { byMonth[d.month] = (byMonth[d.month] || 0) + d.allocatedAmount; });
+
+                  return (
+                    <div key={name} style={{ ...glass, overflow: "hidden", animation: `fadeSlideUp .4s ease ${i*.04}s both`, transition: "box-shadow .3s, transform .3s", cursor: "pointer" }}
+                      onClick={() => setExpandedOrg(isExpanded ? null : name)}
+                      onMouseEnter={e => { e.currentTarget.style.boxShadow = C.cardHover; e.currentTarget.style.transform = "translateY(-3px)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; e.currentTarget.style.transform = "translateY(0)"; }}>
+                      {/* Photo banner */}
+                      <div style={{ height: 140, position: "relative", overflow: "hidden", background: `linear-gradient(135deg, ${color}22, ${color}44)` }}>
+                        {img && !imgErrors[name] && (
+                          <img src={img} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                            onError={() => setImgErrors(prev => ({ ...prev, [name]: true }))} />
+                        )}
+                        <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)` }} />
+                        {/* Category badge */}
+                        {category && (
+                          <div style={{ position: "absolute", top: 14, right: 14, fontSize: 11, fontWeight: 600, color: "#fff", background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)", padding: "4px 12px", borderRadius: 20, textTransform: "uppercase", letterSpacing: ".04em" }}>{category}</div>
+                        )}
+                        {/* Name on photo */}
+                        <div style={{ position: "absolute", bottom: 14, left: 18, right: 18 }}>
+                          <div style={{ fontSize: 18, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans',sans-serif", textShadow: "0 1px 4px rgba(0,0,0,0.3)" }}>{name}</div>
                         </div>
                       </div>
-                      <div style={{ fontSize: 22, fontWeight: 700, color, fontFamily: "'DM Sans',sans-serif" }}>{fmt(total)}</div>
+
+                      {/* Card body */}
+                      <div style={{ padding: "18px 22px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div>
+                            <span style={{ fontSize: 13, color: C.textMuted, fontWeight: 500 }}>{od.length} payment{od.length !== 1 ? "s" : ""}</span>
+                            {url && (
+                              <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ marginLeft: 12, fontSize: 13, color: C.accent, textDecoration: "none", fontWeight: 500 }}>Visit site</a>
+                            )}
+                          </div>
+                          <div style={{ fontSize: 26, fontWeight: 700, color, fontFamily: "'DM Sans',sans-serif" }}>{fmt(total)}</div>
+                        </div>
+
+                        {/* Expand arrow */}
+                        <div style={{ display: "flex", justifyContent: "center", marginTop: 8 }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.textMuted} strokeWidth="2" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform .3s" }}>
+                            <polyline points="6 9 12 15 18 9"/>
+                          </svg>
+                        </div>
+
+                        {/* Expanded details */}
+                        {isExpanded && (
+                          <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${C.divider}`, animation: "fadeSlideUp .3s ease" }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: C.textSoft, marginBottom: 10, textTransform: "uppercase", letterSpacing: ".06em" }}>Donation History</div>
+                            {Object.entries(byMonth).map(([m, amt]) => (
+                              <div key={m} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${C.divider}` }}>
+                                <span style={{ fontSize: 14, color: C.text, fontWeight: 500 }}>{m}</span>
+                                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                  <div style={{ width: 60, height: 5, borderRadius: 3, background: C.divider, overflow: "hidden" }}>
+                                    <div style={{ width: `${(amt / total) * 100}%`, height: "100%", background: color, borderRadius: 3 }} />
+                                  </div>
+                                  <span style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{fmt(amt)}</span>
+                                </div>
+                              </div>
+                            ))}
+                            {od.length > 0 && (
+                              <div style={{ marginTop: 12, display: "flex", gap: 14, flexWrap: "wrap" }}>
+                                {[...new Set(od.map(d => d.cycle))].map(c => (
+                                  <span key={c} style={{ fontSize: 12, color: C.textMuted, background: "rgba(180,140,100,0.06)", padding: "4px 10px", borderRadius: 8 }}>{c}</span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 36 }}>
-                      {ma.map((m, j) => <div key={j} style={{ flex: 1, height: m.amount > 0 ? `${Math.max((m.amount/maxM)*100, 12)}%` : "4px", background: m.amount > 0 ? color : C.divider, borderRadius: "4px 4px 0 0", opacity: m.amount > 0 ? .3 + (m.amount/maxM)*.7 : .3, transition: "all .3s" }} />)}
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           )}
 
           {/* ═══════════════ MONTHLY ALLOCATION ═══════════════ */}
           {activeTab === "allocation" && (
             <div style={{ animation: "fadeSlideUp .3s ease" }}>
-              {/* Summary */}
-              <div style={{ ...cardStyle, background: "linear-gradient(135deg, rgba(13,148,136,0.04) 0%, rgba(2,132,193,0.04) 100%)", border: "1px solid rgba(13,148,136,0.1)", padding: "20px 28px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ ...glass, padding: "22px 32px", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: C.accent, textTransform: "uppercase", letterSpacing: ".06em" }}>Allocation Summary</div>
-                  <div style={{ fontSize: 14, color: C.textSoft, marginTop: 4 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: C.accent, textTransform: "uppercase", letterSpacing: ".06em" }}>Allocation Summary</div>
+                  <div style={{ fontSize: 16, color: C.textSoft, marginTop: 5 }}>
                     You've allocated <strong style={{ color: C.text }}>{fmt(totalDonated, primaryCurrency)}</strong> across <strong style={{ color: C.text }}>{months.length} month{months.length !== 1 ? "s" : ""}</strong>
                   </div>
                 </div>
-                <div style={{ fontSize: 11, color: C.textSoft }}>
-                  {orgCount} organizations · {donations.length} transactions
+                <div style={{ fontSize: 13, color: C.textSoft }}>
+                  {orgCount} organizations
                 </div>
               </div>
 
-              {/* Per-month cards (reverse chronological) */}
               {[...monthBreakdowns].reverse().map((mb, ci) => (
-                <div key={mb.month} style={{ ...cardStyle, marginBottom: 20, overflow: "hidden", animation: `fadeSlideUp .4s ease ${ci*.06}s both` }}>
-                  {/* Month header */}
-                  <div style={{ padding: "20px 28px", borderBottom: `1px solid ${C.divider}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div key={mb.month} style={{ ...glass, marginBottom: 22, overflow: "hidden", animation: `fadeSlideUp .4s ease ${ci*.06}s both` }}>
+                  <div style={{ padding: "22px 32px", borderBottom: `1px solid ${C.divider}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
-                      <h3 style={{ fontSize: 18, fontWeight: 600, color: C.text, fontFamily: "'DM Sans',sans-serif", margin: 0 }}>{mb.month}</h3>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
-                        <span style={{ fontSize: 12, color: C.textSoft }}>{mb.donationCount} transaction{mb.donationCount !== 1 ? "s" : ""}</span>
-                        {mb.change !== null && (
-                          <span style={{ fontSize: 11, fontWeight: 600, color: mb.change >= 0 ? "#059669" : "#dc2626", display: "flex", alignItems: "center", gap: 2 }}>
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ transform: mb.change < 0 ? "rotate(180deg)" : "none" }}><polyline points="18 15 12 9 6 15"/></svg>
-                            {Math.abs(mb.change).toFixed(1)}% from prev
-                          </span>
-                        )}
-                      </div>
+                      <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, fontFamily: "'DM Sans',sans-serif", margin: 0 }}>{mb.month}</h3>
+                      <span style={{ fontSize: 14, color: C.textSoft, marginTop: 4, display: "block" }}>{mb.donationCount} transaction{mb.donationCount !== 1 ? "s" : ""}</span>
                     </div>
-                    <div style={{ fontSize: 24, fontWeight: 700, color: C.accent, fontFamily: "'DM Sans',sans-serif" }}>{fmt(mb.total, primaryCurrency)}</div>
+                    <div style={{ fontSize: 28, fontWeight: 700, color: C.accent, fontFamily: "'DM Sans',sans-serif" }}>{fmt(mb.total, primaryCurrency)}</div>
                   </div>
 
-                  {/* Donut + breakdown */}
-                  <div style={{ padding: "24px 28px", display: "flex", gap: 32, alignItems: "flex-start" }}>
+                  <div style={{ padding: "26px 32px", display: "flex", gap: 36, alignItems: "flex-start" }}>
                     <div style={{ flexShrink: 0 }}>
-                      <DonutChart data={mb.donutData} size={160} />
+                      <DonutChart data={mb.donutData} size={170} />
                     </div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 0 }}>
                       {mb.donutData.map((d, i) => {
                         const pct = (d.value / mb.total) * 100;
                         return (
-                          <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: i < mb.donutData.length - 1 ? `1px solid ${C.divider}` : "none" }}>
-                            <div style={{ width: 8, height: 8, borderRadius: 3, background: d.color, flexShrink: 0 }} />
-                            <span style={{ fontSize: 12, color: C.text, fontWeight: 500, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.label}</span>
-                            <div style={{ width: 48, height: 4, borderRadius: 2, background: C.divider, overflow: "hidden", flexShrink: 0 }}>
-                              <div style={{ width: `${pct}%`, height: "100%", background: d.color, borderRadius: 2 }} />
+                          <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: i < mb.donutData.length - 1 ? `1px solid ${C.divider}` : "none" }}>
+                            <div style={{ width: 10, height: 10, borderRadius: 4, background: d.color, flexShrink: 0 }} />
+                            <span style={{ fontSize: 14, color: C.text, fontWeight: 500, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.label}</span>
+                            <div style={{ width: 52, height: 5, borderRadius: 3, background: C.divider, overflow: "hidden", flexShrink: 0 }}>
+                              <div style={{ width: `${pct}%`, height: "100%", background: d.color, borderRadius: 3 }} />
                             </div>
-                            <span style={{ fontSize: 11, color: C.textMuted, fontWeight: 500, width: 32, textAlign: "right", flexShrink: 0 }}>{pct.toFixed(0)}%</span>
-                            <span style={{ fontSize: 12, fontWeight: 600, color: C.text, width: 72, textAlign: "right", flexShrink: 0 }}>{fmt(d.value, primaryCurrency)}</span>
+                            <span style={{ fontSize: 13, color: C.textMuted, fontWeight: 500, width: 36, textAlign: "right", flexShrink: 0 }}>{pct.toFixed(0)}%</span>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: C.text, width: 80, textAlign: "right", flexShrink: 0 }}>{fmt(d.value, primaryCurrency)}</span>
                           </div>
                         );
                       })}
@@ -994,6 +994,74 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* ═══════════════ TEAM ═══════════════ */}
+          {activeTab === "team" && (
+            <div style={{ animation: "fadeSlideUp .3s ease" }}>
+              {/* Team hero */}
+              <div style={{ borderRadius: 24, overflow: "hidden", position: "relative", height: 240, marginBottom: 22 }}>
+                <img src="https://plus.unsplash.com/premium_photo-1681492057012-4155ebced687?w=1200&h=500&fit=crop&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(13,148,136,0.88) 0%, rgba(124,58,237,0.7) 100%)" }} />
+                <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "36px 48px" }}>
+                  <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 8 }}>Isara Team Impact</div>
+                  <div style={{ fontSize: 50, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.03em", lineHeight: 1 }}>
+                    {fmt(teamData.teamTotal)}
+                  </div>
+                  <div style={{ fontSize: 17, color: "rgba(255,255,255,0.7)", marginTop: 12 }}>
+                    {teamData.employees.length} team members supporting {teamData.teamOrgCount} organizations
+                  </div>
+                </div>
+              </div>
+
+              {/* Team donut + employee grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: 18, marginBottom: 22 }}>
+                <div style={{ ...glass, padding: "28px 32px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <h3 style={{ fontSize: 17, fontWeight: 600, color: C.text, margin: "0 0 24px", alignSelf: "flex-start", fontFamily: "'DM Sans',sans-serif" }}>Team Allocation</h3>
+                  <DonutChart data={teamData.teamDonut} size={200} />
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 20, width: "100%" }}>
+                    {teamData.teamDonut.slice(0, 6).map((d, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 13 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flex: 1 }}>
+                          <div style={{ width: 8, height: 8, borderRadius: 3, background: d.color, flexShrink: 0 }} />
+                          <span style={{ color: C.textSoft, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.label}</span>
+                        </div>
+                        <span style={{ fontWeight: 600, color: C.text }}>{fmt(d.value)}</span>
+                      </div>
+                    ))}
+                    {teamData.teamDonut.length > 6 && (
+                      <div style={{ fontSize: 12, color: C.textMuted, textAlign: "center", padding: "4px 0" }}>+{teamData.teamDonut.length - 6} more</div>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ ...glass, padding: "28px 32px" }}>
+                  <h3 style={{ fontSize: 17, fontWeight: 600, color: C.text, margin: "0 0 20px", fontFamily: "'DM Sans',sans-serif" }}>Team Members</h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                    {teamData.employees.map((emp, i) => {
+                      const hue = (i * 37 + 180) % 360;
+                      const initials = emp.name.charAt(0).toUpperCase();
+                      const isCurrentUser = emp.email === user.email;
+                      return (
+                        <div key={emp.email} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 0", borderBottom: i < teamData.employees.length - 1 ? `1px solid ${C.divider}` : "none" }}>
+                          <div style={{ width: 40, height: 40, borderRadius: 12, background: `hsl(${hue}, 45%, 55%)`, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans',sans-serif", flexShrink: 0 }}>
+                            {initials}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 15, fontWeight: 600, color: C.text, display: "flex", alignItems: "center", gap: 8 }}>
+                              {emp.name}
+                              {isCurrentUser && <span style={{ fontSize: 10, fontWeight: 600, color: C.accent, background: C.accentLight, padding: "2px 8px", borderRadius: 10 }}>You</span>}
+                            </div>
+                            <div style={{ fontSize: 13, color: C.textMuted }}>{emp.orgCount} org{emp.orgCount !== 1 ? "s" : ""} · {emp.topOrg}</div>
+                          </div>
+                          <div style={{ fontSize: 16, fontWeight: 700, color: C.text, fontFamily: "'DM Sans',sans-serif" }}>{fmt(emp.total)}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -1005,11 +1073,11 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
       </div>
 
       {/* Footer */}
-      <div style={{ textAlign: "center", padding: "28px 0 36px", borderTop: `1px solid ${C.divider}` }}>
-        <p style={{ color: C.textMuted, fontSize: 12, fontStyle: "italic", fontWeight: 400, letterSpacing: ".01em", lineHeight: 1.6 }}>
+      <div style={{ textAlign: "center", padding: "32px 0 40px", borderTop: `1px solid ${C.divider}`, position: "relative", zIndex: 1 }}>
+        <p style={{ color: C.textMuted, fontSize: 14, fontStyle: "italic", fontWeight: 400, letterSpacing: ".01em", lineHeight: 1.6 }}>
           "No one has ever become poor by giving." — Anne Frank
         </p>
-        <p style={{ color: C.textMuted, fontSize: 11, letterSpacing: ".06em", fontWeight: 500, marginTop: 10 }}>GiveTrack · {new Date().getFullYear()}</p>
+        <p style={{ color: C.textMuted, fontSize: 13, letterSpacing: ".06em", fontWeight: 500, marginTop: 12 }}>GiveTrack · {new Date().getFullYear()}</p>
       </div>
     </div>
   );
