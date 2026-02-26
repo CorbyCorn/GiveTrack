@@ -643,7 +643,7 @@ function GlobeTab({ donations }) {
       </div>
 
       <div ref={containerRef} style={{ background: "#2d3748", borderRadius: 20, overflow: "hidden", position: "relative", minHeight: 520 }}>
-        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 40%, rgba(99,102,241,0.1) 0%, rgba(15,118,110,0.08) 40%, transparent 70%)", pointerEvents: "none", zIndex: 1 }} />
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 40%, rgba(255,247,230,0.12) 0%, rgba(255,237,200,0.06) 40%, transparent 70%)", pointerEvents: "none", zIndex: 1 }} />
         {!globeReady && !fetchError && (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, zIndex: 5 }}>
             <div style={{ width: 28, height: 28, border: "2px solid rgba(255,255,255,0.1)", borderTop: "2px solid rgba(255,255,255,0.6)", borderRadius: "50%", animation: "spin .8s linear infinite" }} />
@@ -658,7 +658,7 @@ function GlobeTab({ donations }) {
         {globeReady && (
           <Globe ref={globeRef} width={containerWidth} height={520} backgroundColor="rgba(0,0,0,0)"
             globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-            showAtmosphere={true} atmosphereColor="rgba(99,102,241,0.25)" atmosphereAltitude={0.18} animateIn={true}
+            showAtmosphere={true} atmosphereColor="rgba(255,237,200,0.3)" atmosphereAltitude={0.18} animateIn={true}
             polygonsData={countries}
             polygonAltitude={() => 0.002}
             polygonCapColor={() => "rgba(255,255,255,0.03)"}
