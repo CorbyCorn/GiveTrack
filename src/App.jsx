@@ -120,11 +120,11 @@ function aggregateDonationsByCountry(donations) {
 
 function warmColorInterpolate(t) {
   const stops = [
-    { r: 232, g: 228, b: 223 },
-    { r: 210, g: 190, b: 155 },
-    { r: 196, g: 168, b: 130 },
-    { r: 160, g: 145, b: 115 },
-    { r: 100, g: 121, b: 109 },
+    { r: 247, g: 234, b: 216 },
+    { r: 240, g: 196, b: 160 },
+    { r: 232, g: 145, b: 106 },
+    { r: 212, g: 96, b: 74 },
+    { r: 181, g: 48, b: 42 },
   ];
   const idx = Math.max(0, Math.min(1, t)) * (stops.length - 1);
   const lo = Math.floor(idx);
@@ -450,21 +450,21 @@ function GlobeTab({ donations }) {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 10, color: C.textMuted }}>Less</span>
-          <div style={{ width: 100, height: 8, borderRadius: 4, background: `linear-gradient(to right, #e8e4df, ${C.warm}, ${C.accent})` }} />
+          <div style={{ width: 100, height: 8, borderRadius: 4, background: "linear-gradient(to right, #f7ead8, #e8916a, #b5302a)" }} />
           <span style={{ fontSize: 10, color: C.textMuted }}>More</span>
         </div>
       </div>
 
-      <div ref={containerRef} style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)", borderRadius: 14, border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden", position: "relative", minHeight: 500 }}>
+      <div ref={containerRef} style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.cardBorder}`, overflow: "hidden", position: "relative", minHeight: 500 }}>
         {!globeReady && !fetchError && (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, zIndex: 5 }}>
-            <div style={{ width: 28, height: 28, border: "2px solid rgba(255,255,255,0.1)", borderTop: "2px solid rgba(255,255,255,0.6)", borderRadius: "50%", animation: "spin .8s linear infinite" }} />
-            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Loading globe...</p>
+            <div style={{ width: 28, height: 28, border: `2px solid ${C.divider}`, borderTop: `2px solid ${C.accent}`, borderRadius: "50%", animation: "spin .8s linear infinite" }} />
+            <p style={{ fontSize: 12, color: C.textSoft }}>Loading globe...</p>
           </div>
         )}
         {fetchError && (
           <div style={{ padding: 48, textAlign: "center" }}>
-            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>Unable to load map data. Please refresh to try again.</p>
+            <p style={{ color: C.textSoft, fontSize: 13 }}>Unable to load map data. Please refresh to try again.</p>
           </div>
         )}
         {globeReady && (
@@ -473,24 +473,24 @@ function GlobeTab({ donations }) {
             width={containerWidth}
             height={500}
             backgroundColor="rgba(0,0,0,0)"
-            globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+            globeImageUrl="//unpkg.com/three-globe/example/img/earth-water.png"
             showAtmosphere={true}
-            atmosphereColor="rgba(100,121,109,0.4)"
-            atmosphereAltitude={0.15}
+            atmosphereColor="rgba(100,121,109,0.25)"
+            atmosphereAltitude={0.12}
             animateIn={true}
             polygonsData={countries}
             polygonAltitude={d => countryData[getAlpha3(d)] ? 0.012 : 0.004}
             polygonCapColor={d => {
               const code = getAlpha3(d);
-              if (!code || !countryData[code]) return "rgba(255,255,255,0.05)";
+              if (!code || !countryData[code]) return "rgba(210,205,200,0.4)";
               return warmColorInterpolate(colorScale(countryData[code].total));
             }}
             polygonSideColor={d => {
               const code = getAlpha3(d);
-              if (!code || !countryData[code]) return "rgba(255,255,255,0.01)";
-              return "rgba(100,121,109,0.2)";
+              if (!code || !countryData[code]) return "rgba(180,175,170,0.15)";
+              return "rgba(181,48,42,0.15)";
             }}
-            polygonStrokeColor={() => "rgba(255,255,255,0.08)"}
+            polygonStrokeColor={() => "rgba(0,0,0,0.06)"}
             polygonLabel={d => {
               const code = getAlpha3(d);
               const name = d.properties.name || "Unknown";
