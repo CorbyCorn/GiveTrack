@@ -5,7 +5,7 @@ import * as topojson from "topojson-client";
 
 /*
  * GiveTrack — Employee Charitable Giving Dashboard
- * Zen / Modern Minimal Design
+ * Premium Modern Design
  */
 
 const GOOGLE_CLIENT_ID = "296721826980-i3sgo6dgklh7v8fppql7mumdnuv0lu33.apps.googleusercontent.com";
@@ -24,7 +24,6 @@ function extractOrgName(paidTo) {
     try {
       const url = new URL(paidTo);
       let name = url.hostname.replace("www.", "").split(".")[0];
-      // Specific known mappings for cleaner names
       const nameMap = {
         "evidenceaction": "Evidence Action",
         "ncchcfoundation": "NCCHC Foundation",
@@ -52,10 +51,9 @@ function extractOrgName(paidTo) {
 }
 
 const PALETTE = [
-  "#7b9ea8", "#c4956a", "#8b7bb5", "#6b9e78", "#c47a7a",
-  "#a89b5e", "#6a8fc4", "#b87ba8", "#5e9e9e", "#c49a6a",
-  "#9b7b8e", "#6aab8f", "#b08c6a", "#7a8bb5", "#a8856a",
-  "#6a9bb0", "#b57b7b", "#8aab6a", "#9a7aab", "#ab9a6a",
+  "#0f766e", "#0369a1", "#7c3aed", "#db2777", "#ea580c",
+  "#ca8a04", "#059669", "#4f46e5", "#be185d", "#d97706",
+  "#0891b2", "#6d28d9",
 ];
 
 function getOrgColor(name) {
@@ -120,11 +118,11 @@ function aggregateDonationsByCountry(donations) {
 
 function warmColorInterpolate(t) {
   const stops = [
-    { r: 247, g: 234, b: 216 },
-    { r: 240, g: 196, b: 160 },
-    { r: 232, g: 145, b: 106 },
-    { r: 212, g: 96, b: 74 },
-    { r: 181, g: 48, b: 42 },
+    { r: 254, g: 235, b: 210 },
+    { r: 253, g: 186, b: 116 },
+    { r: 249, g: 115, b: 22 },
+    { r: 220, g: 60, b: 40 },
+    { r: 153, g: 27, b: 27 },
   ];
   const idx = Math.max(0, Math.min(1, t)) * (stops.length - 1);
   const lo = Math.floor(idx);
@@ -278,32 +276,40 @@ function parseSpreadsheetData(rows, userEmail) {
 
 // ─── STYLES ───────────────────────────────────────────────────
 
-const FONTS_URL = "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:wght@400;500;600&display=swap";
+const FONTS_URL = "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap";
 const GLOBAL_CSS = `
-  @keyframes fadeSlideUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeSlideUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
   @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
   @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
   * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:'Inter',-apple-system,sans-serif; background:#f7f5f2; color:#2c2c2c; -webkit-font-smoothing:antialiased; }
-  ::-webkit-scrollbar { width:5px; } ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.12); border-radius:3px; }
-  ::selection { background:rgba(100,121,109,0.2); } input::placeholder { color:#b5b0a8; }
+  body { font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f8f9fb; color:#111827; -webkit-font-smoothing:antialiased; }
+  ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.15); border-radius:3px; }
+  ::selection { background:rgba(15,118,110,0.15); }
 `;
 
-// Colors
 const C = {
-  bg: "#f7f5f2",
+  bg: "#f8f9fb",
   card: "#ffffff",
-  cardBorder: "rgba(0,0,0,0.06)",
-  text: "#2c2c2c",
-  textSoft: "#787470",
-  textMuted: "#a8a4a0",
-  accent: "#64796d",
-  accentLight: "#e8eeea",
-  accentSoft: "rgba(100,121,109,0.08)",
-  warm: "#c4a882",
-  warmLight: "#f0ebe3",
-  divider: "rgba(0,0,0,0.05)",
+  cardBorder: "rgba(0,0,0,0.08)",
+  cardShadow: "0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)",
+  cardHover: "0 4px 16px rgba(0,0,0,0.08)",
+  text: "#111827",
+  textSoft: "#6b7280",
+  textMuted: "#9ca3af",
+  accent: "#0f766e",
+  accentLight: "#ccfbf1",
+  accentSoft: "rgba(15,118,110,0.06)",
+  warm: "#f97316",
+  warmLight: "#fff7ed",
+  divider: "rgba(0,0,0,0.06)",
+};
+
+const cardStyle = {
+  background: C.card,
+  borderRadius: 16,
+  border: `1px solid ${C.cardBorder}`,
+  boxShadow: C.cardShadow,
 };
 
 // ─── COMPONENTS ───────────────────────────────────────────────
@@ -327,7 +333,7 @@ function AnimatedNumber({ value, currency = "$", duration = 900 }) {
 function DonutChart({ data, size = 200 }) {
   const total = data.reduce((s, d) => s + d.value, 0);
   if (total === 0) return null;
-  const r = size / 2 - 12, ir = r * 0.65, gap = 0.025;
+  const r = size / 2 - 12, ir = r * 0.68, gap = 0.025;
   let cum = 0;
   const slices = data.map((d) => {
     const sa = (cum / total) * 2 * Math.PI - Math.PI / 2 + gap / 2;
@@ -342,19 +348,19 @@ function DonutChart({ data, size = 200 }) {
     <div style={{ position: "relative", width: size, height: size }}>
       <svg width={size} height={size}>
         {slices.map((s, i) => (
-          <path key={i} d={s.path} fill={s.color} stroke="#fff" strokeWidth="2.5"
-            style={{ transition: "transform .3s ease, opacity .3s", transformOrigin: `${size/2}px ${size/2}px`, transform: hovered === i ? "scale(1.04)" : "scale(1)", cursor: "pointer", opacity: hovered !== null && hovered !== i ? 0.4 : 1 }}
+          <path key={i} d={s.path} fill={s.color} stroke={C.card} strokeWidth="2.5"
+            style={{ transition: "transform .3s ease, opacity .3s", transformOrigin: `${size/2}px ${size/2}px`, transform: hovered === i ? "scale(1.05)" : "scale(1)", cursor: "pointer", opacity: hovered !== null && hovered !== i ? 0.35 : 1 }}
             onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)} />
         ))}
       </svg>
       <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", textAlign: "center", pointerEvents: "none" }}>
         {hovered !== null ? (<>
           <div style={{ fontSize: 10, color: C.textMuted, letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 2 }}>{slices[hovered].label}</div>
-          <div style={{ fontSize: 20, fontWeight: 600, color: C.text }}>{fmt(slices[hovered].value)}</div>
-          <div style={{ fontSize: 11, color: slices[hovered].color, fontWeight: 500 }}>{(slices[hovered].fraction * 100).toFixed(1)}%</div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: C.text }}>{fmt(slices[hovered].value)}</div>
+          <div style={{ fontSize: 11, color: slices[hovered].color, fontWeight: 600 }}>{(slices[hovered].fraction * 100).toFixed(1)}%</div>
         </>) : (<>
           <div style={{ fontSize: 10, color: C.textMuted, letterSpacing: ".08em", textTransform: "uppercase" }}>Total</div>
-          <div style={{ fontSize: 22, fontWeight: 600, color: C.text }}>{fmt(total)}</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: C.accent }}>{fmt(total)}</div>
         </>)}
       </div>
     </div>
@@ -373,11 +379,11 @@ function BarChart({ data, height = 200 }) {
         return (
           <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}
             onMouseEnter={() => setHb(i)} onMouseLeave={() => setHb(null)}>
-            {hb === i && <div style={{ position: "absolute", bottom: barH + 34, left: "50%", transform: "translateX(-50%)", background: C.text, color: "#fff", padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 500, whiteSpace: "nowrap", zIndex: 10 }}>{fmt(d.total)}</div>}
-            <div style={{ width: "65%", minWidth: 20, maxWidth: 48, height: barH, borderRadius: "6px 6px 0 0", overflow: "hidden", cursor: "pointer", transition: `height .7s cubic-bezier(.4,0,.2,1) ${i*.06}s, opacity .2s`, opacity: hb !== null && hb !== i ? 0.5 : 1, display: "flex", flexDirection: "column-reverse" }}>
+            {hb === i && <div style={{ position: "absolute", bottom: barH + 34, left: "50%", transform: "translateX(-50%)", background: C.text, color: "#fff", padding: "5px 12px", borderRadius: 8, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap", zIndex: 10 }}>{fmt(d.total)}</div>}
+            <div style={{ width: "65%", minWidth: 20, maxWidth: 48, height: barH, borderRadius: "8px 8px 0 0", overflow: "hidden", cursor: "pointer", transition: `height .7s cubic-bezier(.4,0,.2,1) ${i*.06}s, opacity .2s`, opacity: hb !== null && hb !== i ? 0.4 : 1, display: "flex", flexDirection: "column-reverse" }}>
               {d.segments.map((seg, j) => <div key={j} style={{ width: "100%", height: (seg.value / maxVal) * (height - 48), background: seg.color, flexShrink: 0 }} />)}
             </div>
-            <div style={{ fontSize: 10, color: C.textMuted, marginTop: 8, fontWeight: 400, letterSpacing: ".02em" }}>{d.label}</div>
+            <div style={{ fontSize: 10, color: C.textMuted, marginTop: 8, fontWeight: 500, letterSpacing: ".02em" }}>{d.label}</div>
           </div>
         );
       })}
@@ -441,67 +447,68 @@ function GlobeTab({ donations }) {
 
   return (
     <div style={{ animation: "fadeSlideUp .4s ease" }}>
-      <div style={{ background: C.card, borderRadius: 14, padding: "22px 26px", border: `1px solid ${C.cardBorder}`, marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center", animation: "fadeSlideUp .4s ease" }}>
+      <div style={{ ...cardStyle, padding: "24px 28px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <h3 style={{ fontSize: 18, fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, color: C.text, margin: 0 }}>Global Impact</h3>
-          <p style={{ fontSize: 12, color: C.textSoft, fontWeight: 300, marginTop: 4 }}>
+          <h3 style={{ fontSize: 20, fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: C.text, margin: 0 }}>Global Impact</h3>
+          <p style={{ fontSize: 13, color: C.textSoft, fontWeight: 400, marginTop: 4 }}>
             Your donations reach {countryCount} {countryCount === 1 ? "country" : "countries"} worldwide
           </p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 10, color: C.textMuted }}>Less</span>
-          <div style={{ width: 100, height: 8, borderRadius: 4, background: "linear-gradient(to right, #f7ead8, #e8916a, #b5302a)" }} />
-          <span style={{ fontSize: 10, color: C.textMuted }}>More</span>
+          <span style={{ fontSize: 10, color: C.textMuted, fontWeight: 500 }}>Less</span>
+          <div style={{ width: 120, height: 8, borderRadius: 4, background: "linear-gradient(to right, #fed7aa, #f97316, #991b1b)" }} />
+          <span style={{ fontSize: 10, color: C.textMuted, fontWeight: 500 }}>More</span>
         </div>
       </div>
 
-      <div ref={containerRef} style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.cardBorder}`, overflow: "hidden", position: "relative", minHeight: 500 }}>
+      <div ref={containerRef} style={{ background: "#111827", borderRadius: 16, overflow: "hidden", position: "relative", minHeight: 520 }}>
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 40%, rgba(15,118,110,0.08) 0%, transparent 70%)", pointerEvents: "none", zIndex: 1 }} />
         {!globeReady && !fetchError && (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, zIndex: 5 }}>
-            <div style={{ width: 28, height: 28, border: `2px solid ${C.divider}`, borderTop: `2px solid ${C.accent}`, borderRadius: "50%", animation: "spin .8s linear infinite" }} />
-            <p style={{ fontSize: 12, color: C.textSoft }}>Loading globe...</p>
+            <div style={{ width: 28, height: 28, border: "2px solid rgba(255,255,255,0.1)", borderTop: "2px solid rgba(255,255,255,0.6)", borderRadius: "50%", animation: "spin .8s linear infinite" }} />
+            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>Loading globe...</p>
           </div>
         )}
         {fetchError && (
           <div style={{ padding: 48, textAlign: "center" }}>
-            <p style={{ color: C.textSoft, fontSize: 13 }}>Unable to load map data. Please refresh to try again.</p>
+            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>Unable to load map data. Please refresh to try again.</p>
           </div>
         )}
         {globeReady && (
           <Globe
             ref={globeRef}
             width={containerWidth}
-            height={500}
+            height={520}
             backgroundColor="rgba(0,0,0,0)"
-            globeImageUrl="//unpkg.com/three-globe/example/img/earth-water.png"
+            globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
             showAtmosphere={true}
-            atmosphereColor="rgba(100,121,109,0.25)"
-            atmosphereAltitude={0.12}
+            atmosphereColor="rgba(15,118,110,0.3)"
+            atmosphereAltitude={0.15}
             animateIn={true}
             polygonsData={countries}
-            polygonAltitude={d => countryData[getAlpha3(d)] ? 0.012 : 0.004}
+            polygonAltitude={d => countryData[getAlpha3(d)] ? 0.015 : 0.004}
             polygonCapColor={d => {
               const code = getAlpha3(d);
-              if (!code || !countryData[code]) return "rgba(210,205,200,0.4)";
+              if (!code || !countryData[code]) return "rgba(255,255,255,0.06)";
               return warmColorInterpolate(colorScale(countryData[code].total));
             }}
             polygonSideColor={d => {
               const code = getAlpha3(d);
-              if (!code || !countryData[code]) return "rgba(180,175,170,0.15)";
-              return "rgba(181,48,42,0.15)";
+              if (!code || !countryData[code]) return "rgba(255,255,255,0.02)";
+              return "rgba(249,115,22,0.2)";
             }}
-            polygonStrokeColor={() => "rgba(0,0,0,0.06)"}
+            polygonStrokeColor={() => "rgba(255,255,255,0.1)"}
             polygonLabel={d => {
               const code = getAlpha3(d);
               const name = d.properties.name || "Unknown";
               const data = code && countryData[code];
               if (!data) {
-                return `<div style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;padding:10px 16px;box-shadow:0 4px 12px rgba(0,0,0,0.08);font-family:'Inter',-apple-system,sans-serif;"><div style="font-size:13px;color:#2c2c2c;font-weight:500;">${name}</div><div style="font-size:11px;color:#a8a4a0;margin-top:2px;">No donations</div></div>`;
+                return `<div style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:10px 16px;box-shadow:0 8px 24px rgba(0,0,0,0.12);font-family:'Inter',-apple-system,sans-serif;"><div style="font-size:13px;color:#111827;font-weight:500;">${name}</div><div style="font-size:11px;color:#9ca3af;margin-top:2px;">No donations</div></div>`;
               }
               const orgLines = Object.entries(data.orgs).sort((a, b) => b[1] - a[1]).map(([org, amt]) =>
-                `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.05);"><span style="font-size:12px;color:#787470;">${org}</span><span style="font-size:12px;color:#2c2c2c;font-weight:500;white-space:nowrap;">${fmt(amt)}</span></div>`
+                `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05);"><span style="font-size:12px;color:#6b7280;">${org}</span><span style="font-size:12px;color:#111827;font-weight:600;white-space:nowrap;">${fmt(amt)}</span></div>`
               ).join("");
-              return `<div style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:16px 20px;min-width:220px;max-width:320px;box-shadow:0 8px 24px rgba(0,0,0,0.12);font-family:'Inter',-apple-system,sans-serif;pointer-events:none;"><div style="font-size:10px;color:#a8a4a0;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Country</div><div style="font-size:16px;font-weight:500;color:#2c2c2c;margin-bottom:12px;font-family:'Cormorant Garamond',serif;">${name}</div><div style="margin-bottom:12px;">${orgLines}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid rgba(0,0,0,0.08);"><span style="font-size:11px;color:#a8a4a0;text-transform:uppercase;letter-spacing:.06em;">Total</span><span style="font-size:16px;font-weight:600;color:#64796d;">${fmt(data.total)}</span></div></div>`;
+              return `<div style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px 22px;min-width:220px;max-width:320px;box-shadow:0 12px 32px rgba(0,0,0,0.15);font-family:'Inter',-apple-system,sans-serif;pointer-events:none;"><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;font-weight:500;">Country</div><div style="font-size:18px;font-weight:600;color:#111827;margin-bottom:14px;font-family:'DM Sans',sans-serif;">${name}</div><div style="margin-bottom:14px;">${orgLines}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid rgba(0,0,0,0.08);"><span style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Total</span><span style="font-size:18px;font-weight:700;color:#0f766e;">${fmt(data.total)}</span></div></div>`;
             }}
             onPolygonHover={setHoverD}
             polygonsTransitionDuration={300}
@@ -510,20 +517,22 @@ function GlobeTab({ donations }) {
       </div>
 
       {countryCount > 0 && (
-        <div style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.cardBorder}`, marginTop: 14, overflow: "hidden", animation: "fadeSlideUp .4s ease .1s both" }}>
-          <div style={{ padding: "16px 22px 10px" }}>
-            <h3 style={{ fontSize: 13, fontWeight: 500, color: C.text, margin: 0 }}>Donations by country</h3>
+        <div style={{ ...cardStyle, marginTop: 16, overflow: "hidden", animation: "fadeSlideUp .4s ease .1s both" }}>
+          <div style={{ padding: "18px 24px 12px" }}>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text, margin: 0 }}>Donations by country</h3>
           </div>
           {Object.entries(countryData).sort((a, b) => b[1].total - a[1].total).map(([code, data], i) => (
-            <div key={code} style={{ padding: "12px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${C.divider}`, animation: `fadeSlideUp .4s ease ${i * .04}s both` }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: warmColorInterpolate(colorScale(data.total)), flexShrink: 0 }} />
+            <div key={code} style={{ padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${C.divider}`, animation: `fadeSlideUp .4s ease ${i * .04}s both`, transition: "background .15s" }}
+              onMouseEnter={e => e.currentTarget.style.background = C.accentSoft}
+              onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: warmColorInterpolate(colorScale(data.total)), flexShrink: 0 }} />
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: C.text }}>{COUNTRY_NAMES[code] || code}</div>
-                  <div style={{ fontSize: 11, color: C.textMuted }}>{Object.keys(data.orgs).join(", ")}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{COUNTRY_NAMES[code] || code}</div>
+                  <div style={{ fontSize: 11, color: C.textMuted, marginTop: 1 }}>{Object.keys(data.orgs).join(", ")}</div>
                 </div>
               </div>
-              <div style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{fmt(data.total)}</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{fmt(data.total)}</div>
             </div>
           ))}
         </div>
@@ -561,20 +570,19 @@ function LoginScreen({ onLogin }) {
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: C.bg }}>
-      <div style={{ width: 420, textAlign: "center", animation: "fadeSlideUp .6s ease" }}>
-        {/* Logo mark */}
-        <div style={{ width: 48, height: 48, borderRadius: 12, background: C.accent, margin: "0 auto 24px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <div style={{ width: 440, textAlign: "center", animation: "fadeSlideUp .6s ease" }}>
+        <div style={{ width: 56, height: 56, borderRadius: 14, background: C.accent, margin: "0 auto 28px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(15,118,110,0.25)" }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
         </div>
-        <h1 style={{ fontSize: 28, fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, color: C.text, margin: "0 0 6px", letterSpacing: "-0.01em" }}>GiveTrack</h1>
-        <p style={{ color: C.textSoft, fontSize: 14, margin: "0 0 40px", fontWeight: 300 }}>Your personal donation dashboard</p>
+        <h1 style={{ fontSize: 32, fontFamily: "'DM Sans',sans-serif", fontWeight: 700, color: C.text, margin: "0 0 8px", letterSpacing: "-0.02em" }}>GiveTrack</h1>
+        <p style={{ color: C.textSoft, fontSize: 15, margin: "0 0 44px", fontWeight: 400 }}>Your personal donation dashboard</p>
 
-        <div style={{ background: "#fff", borderRadius: 16, padding: "36px 40px", border: `1px solid ${C.cardBorder}`, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
-          <p style={{ color: C.textSoft, fontSize: 13, marginBottom: 24, fontWeight: 400, lineHeight: 1.5 }}>Sign in with your company Google account to view your charitable giving.</p>
+        <div style={{ ...cardStyle, padding: "40px 44px", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
+          <p style={{ color: C.textSoft, fontSize: 14, marginBottom: 28, fontWeight: 400, lineHeight: 1.6 }}>Sign in with your company Google account to view your charitable giving.</p>
           <div id="google-signin-btn" style={{ display: "flex", justifyContent: "center" }}></div>
-          {error && <div style={{ color: "#c0392b", fontSize: 13, marginTop: 16 }}>{error}</div>}
+          {error && <div style={{ color: "#dc2626", fontSize: 13, marginTop: 16, fontWeight: 500 }}>{error}</div>}
         </div>
       </div>
     </div>
@@ -618,7 +626,7 @@ export default function App() {
        loading ? (
         <div style={{ minHeight: "100vh", background: C.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
           <div style={{ width: 32, height: 32, border: `2px solid ${C.divider}`, borderTop: `2px solid ${C.accent}`, borderRadius: "50%", animation: "spin .8s linear infinite" }} />
-          <p style={{ color: C.textSoft, fontSize: 13 }}>Loading your data...</p>
+          <p style={{ color: C.textSoft, fontSize: 13, fontWeight: 500 }}>Loading your data...</p>
         </div>
        ) : <Dashboard user={user} donations={donations} activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} dataError={dataError} />}
     </>
@@ -657,53 +665,53 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
   return (
     <div style={{ minHeight: "100vh", background: C.bg }}>
       {/* Header */}
-      <header style={{ padding: "12px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.divider}`, background: "rgba(247,245,242,0.9)", backdropFilter: "blur(12px)", position: "sticky", top: 0, zIndex: 100 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 7, background: C.accent, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <header style={{ padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.divider}`, background: "rgba(248,249,251,0.85)", backdropFilter: "blur(16px)", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: C.accent, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
           </div>
-          <span style={{ fontSize: 16, fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, color: C.text }}>GiveTrack</span>
+          <span style={{ fontSize: 17, fontFamily: "'DM Sans',sans-serif", fontWeight: 700, color: C.text, letterSpacing: "-0.01em" }}>GiveTrack</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 13, fontWeight: 500, color: C.text }}>{user.name}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{user.name}</div>
             <div style={{ fontSize: 11, color: C.textMuted }}>{user.email}</div>
           </div>
-          {user.picture && <img src={user.picture} alt="" style={{ width: 32, height: 32, borderRadius: "50%", border: `1px solid ${C.divider}` }} />}
-          <button onClick={onLogout} style={{ padding: "6px 14px", background: "transparent", border: `1px solid ${C.divider}`, borderRadius: 6, color: C.textSoft, fontSize: 12, cursor: "pointer", transition: "all .15s", fontWeight: 400 }}
-            onMouseEnter={e => { e.target.style.borderColor = "rgba(0,0,0,0.15)"; e.target.style.color = C.text; }}
-            onMouseLeave={e => { e.target.style.borderColor = C.divider; e.target.style.color = C.textSoft; }}>Sign out</button>
+          {user.picture && <img src={user.picture} alt="" style={{ width: 34, height: 34, borderRadius: "50%", border: `2px solid ${C.divider}` }} />}
+          <button onClick={onLogout} style={{ padding: "7px 16px", background: "transparent", border: `1px solid ${C.cardBorder}`, borderRadius: 8, color: C.textSoft, fontSize: 12, cursor: "pointer", transition: "all .15s", fontWeight: 500 }}
+            onMouseEnter={e => { e.target.style.borderColor = "rgba(0,0,0,0.2)"; e.target.style.color = C.text; e.target.style.background = "rgba(0,0,0,0.02)"; }}
+            onMouseLeave={e => { e.target.style.borderColor = C.cardBorder; e.target.style.color = C.textSoft; e.target.style.background = "transparent"; }}>Sign out</button>
         </div>
       </header>
 
-      <div style={{ maxWidth: 1080, margin: "0 auto", padding: "36px 28px 72px" }}>
+      <div style={{ maxWidth: 1080, margin: "0 auto", padding: "40px 28px 80px" }}>
         {/* Welcome */}
-        <div style={{ marginBottom: 36, animation: "fadeSlideUp .4s ease" }}>
-          <h2 style={{ fontSize: 26, fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, margin: "0 0 4px", color: C.text }}>
+        <div style={{ marginBottom: 40, animation: "fadeSlideUp .4s ease" }}>
+          <h2 style={{ fontSize: 28, fontFamily: "'DM Sans',sans-serif", fontWeight: 700, margin: "0 0 6px", color: C.text, letterSpacing: "-0.02em" }}>
             Welcome back, {user.name.split(" ")[0]}
           </h2>
-          <p style={{ color: C.textSoft, fontSize: 13, fontWeight: 300 }}>Your charitable giving at a glance.</p>
+          <p style={{ color: C.textSoft, fontSize: 14, fontWeight: 400 }}>Your charitable giving at a glance.</p>
         </div>
 
-        {dataError && <div style={{ background: "#fdf2f2", border: "1px solid #fde8e8", borderRadius: 10, padding: "14px 18px", marginBottom: 24, color: "#c0392b", fontSize: 13 }}>{dataError}</div>}
+        {dataError && <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 12, padding: "14px 18px", marginBottom: 24, color: "#dc2626", fontSize: 13, fontWeight: 500 }}>{dataError}</div>}
 
         {donations.length === 0 && !dataError ? (
-          <div style={{ background: C.card, border: `1px solid ${C.cardBorder}`, borderRadius: 16, padding: "48px 32px", textAlign: "center", animation: "fadeSlideUp .4s ease" }}>
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: C.accentLight, margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <div style={{ ...cardStyle, padding: "56px 32px", textAlign: "center", animation: "fadeSlideUp .4s ease" }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: C.accentLight, margin: "0 auto 20px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             </div>
-            <h3 style={{ fontSize: 18, fontWeight: 500, color: C.text, marginBottom: 6 }}>No donations found</h3>
-            <p style={{ color: C.textSoft, fontSize: 13, maxWidth: 360, margin: "0 auto", lineHeight: 1.5 }}>We couldn't find any records linked to {user.email}. Please contact your administrator if this seems incorrect.</p>
+            <h3 style={{ fontSize: 18, fontWeight: 600, color: C.text, marginBottom: 8 }}>No donations found</h3>
+            <p style={{ color: C.textSoft, fontSize: 14, maxWidth: 380, margin: "0 auto", lineHeight: 1.6 }}>We couldn't find any records linked to {user.email}. Please contact your administrator if this seems incorrect.</p>
           </div>
         ) : donations.length > 0 && (<>
           {/* Tabs */}
-          <div style={{ display: "flex", gap: 0, marginBottom: 32, borderBottom: `1px solid ${C.divider}` }}>
+          <div style={{ display: "flex", gap: 0, marginBottom: 36, borderBottom: `1px solid ${C.divider}` }}>
             {tabs.map(t => (
               <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
-                padding: "10px 20px", background: "transparent", border: "none", borderBottom: activeTab === t.id ? `2px solid ${C.accent}` : "2px solid transparent",
-                color: activeTab === t.id ? C.text : C.textMuted, fontSize: 13, fontWeight: activeTab === t.id ? 500 : 400,
+                padding: "12px 24px", background: "transparent", border: "none", borderBottom: activeTab === t.id ? `2.5px solid ${C.accent}` : "2.5px solid transparent",
+                color: activeTab === t.id ? C.text : C.textMuted, fontSize: 13, fontWeight: activeTab === t.id ? 600 : 400,
                 cursor: "pointer", transition: "all .2s", marginBottom: -1, display: "flex", alignItems: "center", gap: 6,
               }}>
                 {t.id === "impact" && (
@@ -718,39 +726,45 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
 
           {/* OVERVIEW */}
           {activeTab === "overview" && (<>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 28 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 28 }}>
               {[
-                { label: "Total donated", value: totalDonated, sub: `${cycles.length} payroll cycles` },
+                { label: "Total donated", value: totalDonated, sub: `${cycles.length} payroll cycles`, hero: true },
                 { label: "Per cycle", value: avgCycle, sub: "Average contribution" },
                 { label: "Organizations", value: orgCount, sub: "Supported", isCount: true },
                 { label: "Payments", value: donations.length, sub: "Transactions", isCount: true },
               ].map((card, i) => (
-                <div key={i} style={{ background: C.card, borderRadius: 14, padding: "22px 24px", border: `1px solid ${C.cardBorder}`, animation: `fadeSlideUp .4s ease ${i*.04}s both`, transition: "box-shadow .2s" }}
-                  onMouseEnter={e => e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)"}
-                  onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}>
-                  <div style={{ fontSize: 11, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 8 }}>{card.label}</div>
-                  <div style={{ fontSize: 28, fontWeight: 600, color: C.text, marginBottom: 4, lineHeight: 1 }}>
+                <div key={i} style={{
+                  ...cardStyle,
+                  padding: "24px 26px",
+                  animation: `fadeSlideUp .4s ease ${i*.05}s both`,
+                  transition: "box-shadow .2s, transform .2s",
+                  ...(card.hero ? { background: C.accent, border: "none", boxShadow: "0 4px 16px rgba(15,118,110,0.2)" } : {}),
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.boxShadow = card.hero ? "0 8px 24px rgba(15,118,110,0.3)" : C.cardHover; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.boxShadow = card.hero ? "0 4px 16px rgba(15,118,110,0.2)" : C.cardShadow; e.currentTarget.style.transform = "translateY(0)"; }}>
+                  <div style={{ fontSize: 11, color: card.hero ? "rgba(255,255,255,0.7)" : C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 10, fontWeight: 500 }}>{card.label}</div>
+                  <div style={{ fontSize: 30, fontWeight: 700, color: card.hero ? "#fff" : C.text, marginBottom: 4, lineHeight: 1, fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.02em" }}>
                     {card.isCount ? card.value : <AnimatedNumber value={card.value} currency={primaryCurrency} />}
                   </div>
-                  <div style={{ fontSize: 12, color: C.textSoft, fontWeight: 300 }}>{card.sub}</div>
+                  <div style={{ fontSize: 12, color: card.hero ? "rgba(255,255,255,0.6)" : C.textSoft, fontWeight: 400 }}>{card.sub}</div>
                 </div>
               ))}
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: months.length > 1 ? "1.4fr 1fr" : "1fr", gap: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: months.length > 1 ? "1.4fr 1fr" : "1fr", gap: 16 }}>
               {months.length > 1 && (
-                <div style={{ background: C.card, borderRadius: 14, padding: "24px 26px", border: `1px solid ${C.cardBorder}`, animation: "fadeSlideUp .4s ease .15s both" }}>
-                  <h3 style={{ fontSize: 13, fontWeight: 500, color: C.text, margin: "0 0 20px", letterSpacing: ".01em" }}>Monthly overview</h3>
+                <div style={{ ...cardStyle, padding: "26px 28px", animation: "fadeSlideUp .4s ease .15s both" }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text, margin: "0 0 22px" }}>Monthly overview</h3>
                   <BarChart data={monthlyData} />
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginTop: 8 }}>
-                    {Object.keys(orgTotals).map(n => <div key={n} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.textSoft }}><div style={{ width: 7, height: 7, borderRadius: 2, background: getOrgColor(n) }} />{n}</div>)}
+                    {Object.keys(orgTotals).map(n => <div key={n} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.textSoft, fontWeight: 400 }}><div style={{ width: 8, height: 8, borderRadius: 3, background: getOrgColor(n) }} />{n}</div>)}
                   </div>
                 </div>
               )}
-              <div style={{ background: C.card, borderRadius: 14, padding: "24px 26px", border: `1px solid ${C.cardBorder}`, display: "flex", flexDirection: "column", alignItems: "center", animation: "fadeSlideUp .4s ease .2s both" }}>
-                <h3 style={{ fontSize: 13, fontWeight: 500, color: C.text, margin: "0 0 20px", alignSelf: "flex-start" }}>Allocation breakdown</h3>
+              <div style={{ ...cardStyle, padding: "26px 28px", display: "flex", flexDirection: "column", alignItems: "center", animation: "fadeSlideUp .4s ease .2s both" }}>
+                <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text, margin: "0 0 22px", alignSelf: "flex-start" }}>Allocation breakdown</h3>
                 <DonutChart data={donutData} />
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 20, width: "100%" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 22, width: "100%" }}>
                   {donutData.map((d, i) => (
                     <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 13 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -758,8 +772,8 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                         <span style={{ color: C.textSoft, fontWeight: 400 }}>{d.label}</span>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <span style={{ fontSize: 11, color: C.textMuted }}>{((d.value / totalDonated) * 100).toFixed(0)}%</span>
-                        <span style={{ fontWeight: 500, color: C.text, minWidth: 60, textAlign: "right" }}>{fmt(d.value)}</span>
+                        <span style={{ fontSize: 11, color: C.textMuted, fontWeight: 500 }}>{((d.value / totalDonated) * 100).toFixed(0)}%</span>
+                        <span style={{ fontWeight: 600, color: C.text, minWidth: 60, textAlign: "right" }}>{fmt(d.value)}</span>
                       </div>
                     </div>
                   ))}
@@ -770,7 +784,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
 
           {/* ORGANIZATIONS */}
           {activeTab === "breakdown" && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               {Object.entries(orgTotals).sort((a, b) => b[1] - a[1]).map(([name, total], i) => {
                 const od = donations.filter(d => d.orgName === name);
                 const ma = months.map(m => ({ month: m, amount: od.filter(d => d.month === m).reduce((s, d) => s + d.allocatedAmount, 0) }));
@@ -778,20 +792,20 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                 const url = orgUrls[name];
                 const color = getOrgColor(name);
                 return (
-                  <div key={name} style={{ background: C.card, borderRadius: 14, padding: "22px 24px", border: `1px solid ${C.cardBorder}`, position: "relative", overflow: "hidden", animation: `fadeSlideUp .4s ease ${i*.05}s both`, transition: "box-shadow .2s" }}
-                    onMouseEnter={e => e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)"}
-                    onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}>
-                    <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: color, borderRadius: "3px 0 0 3px" }} />
-                    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
+                  <div key={name} style={{ ...cardStyle, padding: "24px 26px", position: "relative", overflow: "hidden", animation: `fadeSlideUp .4s ease ${i*.05}s both`, transition: "box-shadow .2s, transform .2s" }}
+                    onMouseEnter={e => { e.currentTarget.style.boxShadow = C.cardHover; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; e.currentTarget.style.transform = "translateY(0)"; }}>
+                    <div style={{ position: "absolute", top: 0, left: 0, width: 4, height: "100%", background: color }} />
+                    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
                       <div>
-                        {url ? <a href={url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, fontWeight: 500, color: C.text, textDecoration: "none", transition: "color .2s" }} onMouseEnter={e => e.target.style.color = color} onMouseLeave={e => e.target.style.color = C.text}>{name} ↗</a>
-                          : <div style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{name}</div>}
-                        <div style={{ fontSize: 11, color: C.textMuted, marginTop: 2 }}>{od.length} payment{od.length !== 1 ? "s" : ""}</div>
+                        {url ? <a href={url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, fontWeight: 600, color: C.text, textDecoration: "none", transition: "color .2s" }} onMouseEnter={e => e.target.style.color = color} onMouseLeave={e => e.target.style.color = C.text}>{name} ↗</a>
+                          : <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{name}</div>}
+                        <div style={{ fontSize: 11, color: C.textMuted, marginTop: 3, fontWeight: 500 }}>{od.length} payment{od.length !== 1 ? "s" : ""}</div>
                       </div>
-                      <div style={{ fontSize: 22, fontWeight: 600, color }}>{fmt(total)}</div>
+                      <div style={{ fontSize: 22, fontWeight: 700, color, fontFamily: "'DM Sans',sans-serif" }}>{fmt(total)}</div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 32 }}>
-                      {ma.map((m, j) => <div key={j} style={{ flex: 1, height: m.amount > 0 ? `${Math.max((m.amount/maxM)*100, 10)}%` : "3px", background: m.amount > 0 ? color : C.divider, borderRadius: "3px 3px 0 0", opacity: m.amount > 0 ? .3 + (m.amount/maxM)*.7 : .3, transition: "all .3s" }} />)}
+                    <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 36 }}>
+                      {ma.map((m, j) => <div key={j} style={{ flex: 1, height: m.amount > 0 ? `${Math.max((m.amount/maxM)*100, 12)}%` : "4px", background: m.amount > 0 ? color : C.divider, borderRadius: "4px 4px 0 0", opacity: m.amount > 0 ? .3 + (m.amount/maxM)*.7 : .3, transition: "all .3s" }} />)}
                     </div>
                   </div>
                 );
@@ -807,26 +821,26 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                 const ct = cd.reduce((s, d) => s + d.allocatedAmount, 0);
                 return (
                   <div key={cycle} style={{ marginBottom: 24, animation: `fadeSlideUp .4s ease ${ci*.06}s both` }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                      <h3 style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{cycle}</h3>
-                      <span style={{ fontSize: 13, fontWeight: 500, color: C.accent }}>{fmt(ct, primaryCurrency)}</span>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{cycle}</h3>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: C.accent }}>{fmt(ct, primaryCurrency)}</span>
                     </div>
-                    <div style={{ background: C.card, borderRadius: 12, border: `1px solid ${C.cardBorder}`, overflow: "hidden" }}>
+                    <div style={{ ...cardStyle, overflow: "hidden" }}>
                       {cd.map((d, i) => {
                         const color = getOrgColor(d.orgName);
                         return (
-                          <div key={i} style={{ padding: "13px 20px", display: "flex", alignItems: "center", gap: 14, borderBottom: i < cd.length - 1 ? `1px solid ${C.divider}` : "none", transition: "background .15s" }}
-                            onMouseEnter={e => e.currentTarget.style.background = "rgba(0,0,0,0.01)"}
+                          <div key={i} style={{ padding: "14px 22px", display: "flex", alignItems: "center", gap: 14, borderBottom: i < cd.length - 1 ? `1px solid ${C.divider}` : "none", transition: "background .15s" }}
+                            onMouseEnter={e => e.currentTarget.style.background = C.accentSoft}
                             onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                            <div style={{ width: 4, height: 28, borderRadius: 2, background: color, flexShrink: 0, opacity: 0.6 }} />
+                            <div style={{ width: 3, height: 32, borderRadius: 2, background: color, flexShrink: 0 }} />
                             <div style={{ flex: 1 }}>
                               {d.paidTo?.startsWith("http") ? (
-                                <a href={d.paidTo} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, fontWeight: 500, color: C.text, textDecoration: "none" }}
+                                <a href={d.paidTo} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, fontWeight: 600, color: C.text, textDecoration: "none" }}
                                   onMouseEnter={e => e.target.style.color = color} onMouseLeave={e => e.target.style.color = C.text}>{d.orgName} ↗</a>
-                              ) : <div style={{ fontSize: 13, fontWeight: 500, color: C.text }}>{d.orgName}</div>}
-                              <div style={{ fontSize: 11, color: C.textMuted, marginTop: 1 }}>{d.paidDate} · {d.percentage}%</div>
+                              ) : <div style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{d.orgName}</div>}
+                              <div style={{ fontSize: 11, color: C.textMuted, marginTop: 2, fontWeight: 400 }}>{d.paidDate} · {d.percentage}%</div>
                             </div>
-                            <div style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{fmt(d.allocatedAmount, d.currency)}</div>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{fmt(d.allocatedAmount, d.currency)}</div>
                           </div>
                         );
                       })}
@@ -844,8 +858,8 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
         </>)}
       </div>
 
-      <div style={{ textAlign: "center", padding: "16px 0 28px", borderTop: `1px solid ${C.divider}` }}>
-        <p style={{ color: C.textMuted, fontSize: 11, letterSpacing: ".04em", fontWeight: 300 }}>GiveTrack · {new Date().getFullYear()}</p>
+      <div style={{ textAlign: "center", padding: "20px 0 32px", borderTop: `1px solid ${C.divider}` }}>
+        <p style={{ color: C.textMuted, fontSize: 11, letterSpacing: ".06em", fontWeight: 500 }}>GiveTrack · {new Date().getFullYear()}</p>
       </div>
     </div>
   );
