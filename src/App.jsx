@@ -136,12 +136,12 @@ const HERO_IMAGE = "https://images.unsplash.com/photo-1722963220475-979db2dbf216
 const ORG_COUNTRY_MAP = {
   "Save the Children": "COD", "Doctors Without Borders": "COD",
   "Médecins Sans Frontières": "COD", "Médecins sans Frontières": "COD",
-  "GiveWell": "NGA", "Sea Shepherd": "MEX", "Evidence Action": "IND",
+  "GiveWell": "NGA", "Evidence Action": "IND",
   "Open Door Legal": "USA", "Wholesome Wave": "USA", "Room to Read": "NPL",
   "Asylum Access": "KEN", "School on Wheels": "USA", "Malaria Consortium": "NGA",
   "The Washing Machine Project": "IND", "Action Against Hunger": "SYR",
-  "Clean Ocean Action": "USA", "Middle East Children's Alliance": "PSE",
-  "Oceana": "USA", "WWF": "CHN", "En Ptahy Vidchui": "UKR",
+  "Middle East Children's Alliance": "PSE",
+  "WWF": "CHN", "En Ptahy Vidchui": "UKR",
   "Give To IV": "USA", "NCCHC Foundation": "USA", "Radiance SF": "USA",
   "Reality SF": "USA", "SFHS": "USA",
 };
@@ -156,6 +156,12 @@ const COUNTRY_NAMES = {
   USA: "United States", COD: "DR Congo", NGA: "Nigeria", MEX: "Mexico",
   IND: "India", NPL: "Nepal", KEN: "Kenya", SYR: "Syria",
   PSE: "Palestine", CHN: "China", UKR: "Ukraine",
+};
+
+const OCEAN_ORGS = {
+  "Sea Shepherd": { lat: 5, lng: -120, label: "Eastern Pacific" },
+  "Oceana": { lat: 30, lng: -45, label: "North Atlantic" },
+  "Clean Ocean Action": { lat: 38, lng: -72, label: "Atlantic Coast" },
 };
 
 function aggregateDonationsByCountry(donations) {
@@ -180,7 +186,7 @@ function warmColorInterpolate(t) {
   const r = Math.round(stops[lo].r + (stops[hi].r - stops[lo].r) * f);
   const g = Math.round(stops[lo].g + (stops[hi].g - stops[lo].g) * f);
   const b = Math.round(stops[lo].b + (stops[hi].b - stops[lo].b) * f);
-  return `rgb(${r},${g},${b})`;
+  return `rgba(${r},${g},${b},0.55)`;
 }
 
 // ─── ORG CATEGORIES ──────────────────────────────────────────
@@ -534,6 +540,19 @@ function GlobeTab({ donations }) {
   const colorScale = useMemo(() => scaleSqrt().domain([0, maxDonation]).range([0, 1]), [maxDonation]);
   const countryCount = Object.keys(countryData).length;
 
+  const oceanPointsData = useMemo(() => {
+    const orgTotals = {};
+    donations.forEach(d => {
+      if (OCEAN_ORGS[d.orgName]) {
+        orgTotals[d.orgName] = (orgTotals[d.orgName] || 0) + d.allocatedAmount;
+      }
+    });
+    return Object.entries(orgTotals).map(([name, total]) => {
+      const loc = OCEAN_ORGS[name];
+      return { lat: loc.lat, lng: loc.lng, name, total, label: loc.label, color: "rgba(14,165,233,0.85)" };
+    });
+  }, [donations]);
+
   useEffect(() => {
     fetch("https://unpkg.com/world-atlas@2.0.2/countries-110m.json")
       .then(res => res.json())
@@ -567,7 +586,7 @@ function GlobeTab({ donations }) {
         <div>
           <h3 style={{ fontSize: 22, fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: C.text, margin: 0 }}>Global Impact</h3>
           <p style={{ fontSize: 15, color: C.textSoft, fontWeight: 400, marginTop: 5 }}>
-            Your donations reach {countryCount} {countryCount === 1 ? "country" : "countries"} worldwide
+            Your donations reach {countryCount} {countryCount === 1 ? "country" : "countries"}{oceanPointsData.length > 0 ? " and the world's oceans" : ""}
           </p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -595,9 +614,9 @@ function GlobeTab({ donations }) {
             globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
             showAtmosphere={true} atmosphereColor="rgba(15,118,110,0.3)" atmosphereAltitude={0.15} animateIn={true}
             polygonsData={countries}
-            polygonAltitude={d => countryData[getAlpha3(d)] ? 0.015 : 0.004}
+            polygonAltitude={d => countryData[getAlpha3(d)] ? 0.006 : 0.002}
             polygonCapColor={d => { const code = getAlpha3(d); if (!code || !countryData[code]) return "rgba(255,255,255,0.1)"; return warmColorInterpolate(colorScale(countryData[code].total)); }}
-            polygonSideColor={d => { const code = getAlpha3(d); if (!code || !countryData[code]) return "rgba(255,255,255,0.04)"; return "rgba(249,115,22,0.25)"; }}
+            polygonSideColor={d => { const code = getAlpha3(d); if (!code || !countryData[code]) return "rgba(255,255,255,0.02)"; return "rgba(249,115,22,0.15)"; }}
             polygonStrokeColor={() => "rgba(255,255,255,0.15)"}
             polygonLabel={d => {
               const code = getAlpha3(d); const name = d.properties.name || "Unknown"; const data = code && countryData[code];
@@ -608,14 +627,21 @@ function GlobeTab({ donations }) {
               return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:16px;padding:20px 24px;min-width:240px;max-width:340px;box-shadow:0 12px 32px rgba(0,0,0,0.15);font-family:'Inter',sans-serif;"><div style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;font-weight:500;">Country</div><div style="font-size:20px;font-weight:600;color:#2D1F14;margin-bottom:16px;font-family:'DM Sans',sans-serif;">${name}</div><div style="margin-bottom:16px;">${orgLines}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(180,140,100,0.1);"><span style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Total</span><span style="font-size:20px;font-weight:700;color:#0d9488;">${fmt(data.total)}</span></div></div>`;
             }}
             onPolygonHover={() => {}} polygonsTransitionDuration={300}
+            pointsData={oceanPointsData}
+            pointLat={d => d.lat}
+            pointLng={d => d.lng}
+            pointAltitude={0.01}
+            pointRadius={d => Math.max(0.5, Math.min(1.5, d.total / 400))}
+            pointColor={d => d.color}
+            pointLabel={d => `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(14,165,233,0.2);border-radius:16px;padding:20px 24px;min-width:220px;max-width:320px;box-shadow:0 12px 32px rgba(0,0,0,0.15);font-family:'Inter',sans-serif;"><div style="font-size:12px;color:#0ea5e9;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;font-weight:500;">Ocean Conservation</div><div style="font-size:20px;font-weight:600;color:#2D1F14;margin-bottom:6px;font-family:'DM Sans',sans-serif;">${d.name}</div><div style="font-size:13px;color:#A89888;margin-bottom:16px;">${d.label}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(14,165,233,0.15);"><span style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Total</span><span style="font-size:20px;font-weight:700;color:#0ea5e9;">${fmt(d.total)}</span></div></div>`}
           />
         )}
       </div>
 
-      {countryCount > 0 && (
+      {(countryCount > 0 || oceanPointsData.length > 0) && (
         <div style={{ ...glass, marginTop: 18, overflow: "hidden", animation: "fadeSlideUp .4s ease .1s both" }}>
           <div style={{ padding: "20px 28px 14px" }}>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: C.text, margin: 0 }}>Donations by country</h3>
+            <h3 style={{ fontSize: 16, fontWeight: 600, color: C.text, margin: 0 }}>Donations by region</h3>
           </div>
           {Object.entries(countryData).sort((a, b) => b[1].total - a[1].total).map(([code, data], i) => (
             <div key={code} style={{ padding: "16px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${C.divider}`, animation: `fadeSlideUp .4s ease ${i*.04}s both`, transition: "background .15s", cursor: "pointer" }}
@@ -631,6 +657,27 @@ function GlobeTab({ donations }) {
               <div style={{ fontSize: 16, fontWeight: 600, color: C.text }}>{fmt(data.total)}</div>
             </div>
           ))}
+          {oceanPointsData.length > 0 && (
+            <>
+              <div style={{ padding: "14px 28px 8px", borderTop: `1px solid ${C.divider}` }}>
+                <span style={{ fontSize: 12, color: "#0ea5e9", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600 }}>Ocean Conservation</span>
+              </div>
+              {oceanPointsData.map((pt, i) => (
+                <div key={pt.name} style={{ padding: "16px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${C.divider}`, animation: `fadeSlideUp .4s ease ${(Object.keys(countryData).length + i)*.04}s both`, transition: "background .15s", cursor: "pointer" }}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(14,165,233,0.04)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#0ea5e9", flexShrink: 0 }} />
+                    <div>
+                      <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{pt.name}</div>
+                      <div style={{ fontSize: 13, color: C.textMuted, marginTop: 2 }}>{pt.label}</div>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: C.text }}>{fmt(pt.total)}</div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       )}
     </div>
