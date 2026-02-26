@@ -83,10 +83,10 @@ const ORG_IMAGES = {
   "Evidence Action": "https://assets.evidenceaction.org/web/images/_1280xAUTO_crop_center-center_none/ea-kids.jpg",
   "Open Door Legal": "https://opendoorlegal.org/wp-content/uploads/2019/08/claudia-for-web.jpg",
   "Wholesome Wave": "https://images.squarespace-cdn.com/content/v1/5febb5b1df316630764c4dec/1b65a895-6b11-4898-b025-f7e397195b1c/ww-little-girl-eating-watermelon.png",
-  "Room to Read": "https://images.unsplash.com/photo-1547057981-d08930168f03?w=800&h=500&fit=crop&q=80",
+  "Room to Read": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=500&fit=crop&q=80",
   "Asylum Access": "https://asylumaccess.org/wp-content/uploads/2025/05/AAE201609-Skoll-GabrielDiamond1-1ahaje.jpg",
   "School on Wheels": "https://schoolonwheels.org/wp-content/uploads/2026/02/jordan-and-anne.jpg",
-  "Malaria Consortium": "https://images.unsplash.com/photo-1576694781392-55b0cb5c9ae0?w=800&h=500&fit=crop&q=80",
+  "Malaria Consortium": "https://images.unsplash.com/photo-1694286068362-5dcea7ed282a?w=800&h=500&fit=crop&q=80",
   "The Washing Machine Project": "https://images.squarespace-cdn.com/content/v1/61aa260eae89d2514d87e72a/97bd3be0-03a9-4a2f-b1b8-00bcdb61d495/uganda24-hand-wash-young-lady_DPI300.jpg",
   "Action Against Hunger": "https://www.actionagainsthunger.org/app/themes/actionagainsthunger/assets/images/aah-og.jpg",
   "Clean Ocean Action": "https://images.unsplash.com/photo-1583749063749-423914dce445?w=800&h=500&fit=crop&q=80",
@@ -112,10 +112,10 @@ const ORG_IMAGE_POS = {
   "Evidence Action": "center 40%",        // row of children's faces centered
   "Open Door Legal": "center 25%",        // woman portrait, face upper center
   "Wholesome Wave": "center 20%",         // little girl eating watermelon
-  "Room to Read": "center center",        // colorful books on shelf
+  "Room to Read": "center 30%",           // children in classroom
   "Asylum Access": "center 30%",          // two women smiling together
   "School on Wheels": "center 25%",       // volunteer tutoring child
-  "Malaria Consortium": "center center",  // mosquito net / health intervention
+  "Malaria Consortium": "60% 25%",        // health worker feeding child in Africa
   "The Washing Machine Project": "center 20%", // young woman hand-washing
   "Action Against Hunger": "60% 30%",     // mother in orange with baby
   "Clean Ocean Action": "center center",  // clean coastline
@@ -730,6 +730,7 @@ export default function App() {
 function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataError }) {
   const [expandedOrg, setExpandedOrg] = useState(null);
   const [imgErrors, setImgErrors] = useState({});
+  const [fetchedImages, setFetchedImages] = useState({});
 
   const totalDonated = donations.reduce((s, d) => s + d.allocatedAmount, 0);
   const primaryCurrency = donations[0]?.currency || "$";
@@ -738,6 +739,24 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
     orgTotals[d.orgName] = (orgTotals[d.orgName] || 0) + d.allocatedAmount;
     if (d.paidTo?.startsWith("http")) orgUrls[d.orgName] = d.paidTo;
   });
+
+  // Auto-fetch og:image for orgs not in the hardcoded ORG_IMAGES map
+  useEffect(() => {
+    const orgsNeedingImages = Object.keys(orgTotals).filter(
+      name => !ORG_IMAGES[name] && !fetchedImages[name] && orgUrls[name]
+    );
+    orgsNeedingImages.forEach(name => {
+      const url = orgUrls[name];
+      fetch(`/api/og-image?url=${encodeURIComponent(url)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.image) {
+            setFetchedImages(prev => ({ ...prev, [name]: data.image }));
+          }
+        })
+        .catch(() => {});
+    });
+  }, [Object.keys(orgTotals).join(",")]);
   const orgCount = Object.keys(orgTotals).length;
   const months = sortMonths([...new Set(donations.map(d => d.month).filter(Boolean))]);
   const cycles = [...new Set(donations.map(d => d.cycle).filter(Boolean))];
@@ -960,7 +979,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                   const url = orgUrls[name];
                   const color = getOrgColor(name);
                   const category = ORG_CATEGORIES[name];
-                  const img = ORG_IMAGES[name];
+                  const img = ORG_IMAGES[name] || fetchedImages[name];
                   const isExpanded = expandedOrg === name;
                   const byMonth = {};
                   od.forEach(d => { byMonth[d.month] = (byMonth[d.month] || 0) + d.allocatedAmount; });
@@ -1135,9 +1154,9 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                       {orgs.map((orgName) => {
-                        const img = ORG_IMAGES[orgName];
+                        const img = ORG_IMAGES[orgName] || fetchedImages[orgName];
                         const desc = ORG_DESCRIPTIONS[orgName] || "";
-                        const website = ORG_WEBSITES[orgName];
+                        const website = ORG_WEBSITES[orgName] || orgUrls[orgName];
                         const color = getOrgColor(orgName);
                         return (
                           <div key={orgName} style={{ display: "flex", gap: 14, padding: "16px 18px", borderRadius: 14, border: `1px solid ${C.divider}`, transition: "all .2s", background: "rgba(255,255,255,0.4)" }}
