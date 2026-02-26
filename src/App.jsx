@@ -164,6 +164,15 @@ const OCEAN_ORGS = {
   "Clean Ocean Action": { lat: 38, lng: -72, label: "Atlantic Coast" },
 };
 
+const SF = { lat: 37.77, lng: -122.42 };
+
+const COUNTRY_CENTROIDS = {
+  USA: { lat: 39.8, lng: -98.6 }, COD: { lat: -2.9, lng: 23.6 }, NGA: { lat: 9.1, lng: 7.5 },
+  MEX: { lat: 23.6, lng: -102.5 }, IND: { lat: 20.6, lng: 78.9 }, NPL: { lat: 28.4, lng: 84.1 },
+  KEN: { lat: 0.02, lng: 37.9 }, SYR: { lat: 35.0, lng: 38.5 },
+  PSE: { lat: 31.9, lng: 35.2 }, CHN: { lat: 35.9, lng: 104.2 }, UKR: { lat: 48.4, lng: 31.2 },
+};
+
 function aggregateDonationsByCountry(donations) {
   const result = {};
   donations.forEach(d => {
@@ -553,6 +562,23 @@ function GlobeTab({ donations }) {
     });
   }, [donations]);
 
+  const allDestinations = useMemo(() => {
+    const maxAll = Math.max(maxDonation, ...oceanPointsData.map(d => d.total), 1);
+    const countryDests = Object.entries(countryData).map(([code, data]) => {
+      const c = COUNTRY_CENTROIDS[code];
+      if (!c) return null;
+      return { lat: c.lat, lng: c.lng, name: COUNTRY_NAMES[code] || code, total: data.total, orgs: data.orgs, isOcean: false, maxRadius: 2 + (data.total / maxAll) * 4, color: warmColorInterpolate(colorScale(data.total)) };
+    }).filter(Boolean);
+    const oceanDests = oceanPointsData.map(d => ({
+      ...d, isOcean: true, orgs: { [d.name]: d.total }, maxRadius: 2 + (d.total / maxAll) * 4, color: "rgba(14,165,233,0.85)"
+    }));
+    return [...countryDests, ...oceanDests];
+  }, [countryData, oceanPointsData, maxDonation, colorScale]);
+
+  const arcsData = useMemo(() => allDestinations.map(d => ({
+    startLat: SF.lat, startLng: SF.lng, endLat: d.lat, endLng: d.lng, name: d.name, total: d.total, orgs: d.orgs, isOcean: d.isOcean, color: d.color
+  })), [allDestinations]);
+
   useEffect(() => {
     fetch("https://unpkg.com/world-atlas@2.0.2/countries-110m.json")
       .then(res => res.json())
@@ -589,10 +615,15 @@ function GlobeTab({ donations }) {
             Your donations reach {countryCount} {countryCount === 1 ? "country" : "countries"}{oceanPointsData.length > 0 ? " and the world's oceans" : ""}
           </p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 12, color: C.textMuted, fontWeight: 500 }}>Less</span>
-          <div style={{ width: 120, height: 8, borderRadius: 4, background: "linear-gradient(to right, #fed7aa, #f97316, #991b1b)" }} />
-          <span style={{ fontSize: 12, color: C.textMuted, fontWeight: 500 }}>More</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#f97316" }} />
+            <span style={{ fontSize: 12, color: C.textMuted, fontWeight: 500 }}>Land</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#0ea5e9" }} />
+            <span style={{ fontSize: 12, color: C.textMuted, fontWeight: 500 }}>Ocean</span>
+          </div>
         </div>
       </div>
 
@@ -614,10 +645,10 @@ function GlobeTab({ donations }) {
             globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
             showAtmosphere={true} atmosphereColor="rgba(15,118,110,0.3)" atmosphereAltitude={0.15} animateIn={true}
             polygonsData={countries}
-            polygonAltitude={d => countryData[getAlpha3(d)] ? 0.006 : 0.002}
-            polygonCapColor={d => { const code = getAlpha3(d); if (!code || !countryData[code]) return "rgba(255,255,255,0.1)"; return warmColorInterpolate(colorScale(countryData[code].total)); }}
-            polygonSideColor={d => { const code = getAlpha3(d); if (!code || !countryData[code]) return "rgba(255,255,255,0.02)"; return "rgba(249,115,22,0.15)"; }}
-            polygonStrokeColor={() => "rgba(255,255,255,0.15)"}
+            polygonAltitude={() => 0.002}
+            polygonCapColor={() => "rgba(255,255,255,0.05)"}
+            polygonSideColor={() => "rgba(0,0,0,0)"}
+            polygonStrokeColor={() => "rgba(255,255,255,0.12)"}
             polygonLabel={d => {
               const code = getAlpha3(d); const name = d.properties.name || "Unknown"; const data = code && countryData[code];
               if (!data) return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:14px;padding:12px 18px;box-shadow:0 8px 24px rgba(0,0,0,0.12);font-family:'Inter',sans-serif;"><div style="font-size:15px;color:#2D1F14;font-weight:500;">${name}</div><div style="font-size:13px;color:#A89888;margin-top:3px;">No donations</div></div>`;
@@ -627,24 +658,33 @@ function GlobeTab({ donations }) {
               return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:16px;padding:20px 24px;min-width:240px;max-width:340px;box-shadow:0 12px 32px rgba(0,0,0,0.15);font-family:'Inter',sans-serif;"><div style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;font-weight:500;">Country</div><div style="font-size:20px;font-weight:600;color:#2D1F14;margin-bottom:16px;font-family:'DM Sans',sans-serif;">${name}</div><div style="margin-bottom:16px;">${orgLines}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(180,140,100,0.1);"><span style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Total</span><span style="font-size:20px;font-weight:700;color:#0d9488;">${fmt(data.total)}</span></div></div>`;
             }}
             onPolygonHover={() => {}} polygonsTransitionDuration={300}
-            ringsData={oceanPointsData}
+            arcsData={arcsData}
+            arcStartLat={d => d.startLat}
+            arcStartLng={d => d.startLng}
+            arcEndLat={d => d.endLat}
+            arcEndLng={d => d.endLng}
+            arcColor={d => d.isOcean ? ["rgba(14,165,233,0.6)", "rgba(14,165,233,0.3)"] : ["rgba(249,115,22,0.6)", "rgba(249,115,22,0.3)"]}
+            arcStroke={0.5}
+            arcDashLength={0.6}
+            arcDashGap={0.3}
+            arcDashAnimateTime={2000}
+            arcAltitudeAutoScale={0.4}
+            arcLabel={d => {
+              const orgLines = Object.entries(d.orgs).sort((a, b) => b[1] - a[1]).map(([org, amt]) =>
+                `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:7px 0;border-bottom:1px solid rgba(180,140,100,0.08);"><span style="font-size:14px;color:#7C6B5E;">${org}</span><span style="font-size:14px;color:#2D1F14;font-weight:600;white-space:nowrap;">${fmt(amt)}</span></div>`
+              ).join("");
+              const accent = d.isOcean ? "#0ea5e9" : "#0d9488";
+              const typeLabel = d.isOcean ? "Ocean Conservation" : "Country";
+              return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:16px;padding:20px 24px;min-width:240px;max-width:340px;box-shadow:0 12px 32px rgba(0,0,0,0.15);font-family:'Inter',sans-serif;"><div style="font-size:12px;color:${accent};text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;font-weight:500;">${typeLabel}</div><div style="font-size:20px;font-weight:600;color:#2D1F14;margin-bottom:16px;font-family:'DM Sans',sans-serif;">${d.name}</div><div style="margin-bottom:16px;">${orgLines}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(180,140,100,0.1);"><span style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Total</span><span style="font-size:20px;font-weight:700;color:${accent};">${fmt(d.total)}</span></div></div>`;
+            }}
+            ringsData={allDestinations}
             ringLat={d => d.lat}
             ringLng={d => d.lng}
             ringAltitude={0.005}
-            ringColor={() => t => `rgba(14,165,233,${1 - t})`}
-            ringMaxRadius={3}
+            ringColor={d => t => d.isOcean ? `rgba(14,165,233,${1 - t})` : `rgba(249,115,22,${1 - t})`}
+            ringMaxRadius={d => d.maxRadius}
             ringPropagationSpeed={1.5}
             ringRepeatPeriod={1400}
-            labelsData={oceanPointsData}
-            labelLat={d => d.lat}
-            labelLng={d => d.lng}
-            labelAltitude={0.01}
-            labelText={d => d.name}
-            labelSize={1.2}
-            labelDotRadius={0.4}
-            labelColor={() => "rgba(14,165,233,0.9)"}
-            labelResolution={3}
-            labelLabel={d => `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(14,165,233,0.2);border-radius:16px;padding:20px 24px;min-width:220px;max-width:320px;box-shadow:0 12px 32px rgba(0,0,0,0.15);font-family:'Inter',sans-serif;"><div style="font-size:12px;color:#0ea5e9;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;font-weight:500;">Ocean Conservation</div><div style="font-size:20px;font-weight:600;color:#2D1F14;margin-bottom:6px;font-family:'DM Sans',sans-serif;">${d.name}</div><div style="font-size:13px;color:#A89888;margin-bottom:16px;">${d.label}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(14,165,233,0.15);"><span style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Total</span><span style="font-size:20px;font-weight:700;color:#0ea5e9;">${fmt(d.total)}</span></div></div>`}
           />
         )}
       </div>
@@ -659,7 +699,7 @@ function GlobeTab({ donations }) {
               onMouseEnter={e => e.currentTarget.style.background = C.accentSoft}
               onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <div style={{ width: 12, height: 12, borderRadius: "50%", background: warmColorInterpolate(colorScale(data.total)), flexShrink: 0 }} />
+                <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#f97316", flexShrink: 0 }} />
                 <div>
                   <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{COUNTRY_NAMES[code] || code}</div>
                   <div style={{ fontSize: 13, color: C.textMuted, marginTop: 2 }}>{Object.keys(data.orgs).join(", ")}</div>
