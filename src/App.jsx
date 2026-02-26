@@ -627,13 +627,24 @@ function GlobeTab({ donations }) {
               return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:16px;padding:20px 24px;min-width:240px;max-width:340px;box-shadow:0 12px 32px rgba(0,0,0,0.15);font-family:'Inter',sans-serif;"><div style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;font-weight:500;">Country</div><div style="font-size:20px;font-weight:600;color:#2D1F14;margin-bottom:16px;font-family:'DM Sans',sans-serif;">${name}</div><div style="margin-bottom:16px;">${orgLines}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(180,140,100,0.1);"><span style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Total</span><span style="font-size:20px;font-weight:700;color:#0d9488;">${fmt(data.total)}</span></div></div>`;
             }}
             onPolygonHover={() => {}} polygonsTransitionDuration={300}
-            pointsData={oceanPointsData}
-            pointLat={d => d.lat}
-            pointLng={d => d.lng}
-            pointAltitude={0.01}
-            pointRadius={d => Math.max(0.5, Math.min(1.5, d.total / 400))}
-            pointColor={d => d.color}
-            pointLabel={d => `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(14,165,233,0.2);border-radius:16px;padding:20px 24px;min-width:220px;max-width:320px;box-shadow:0 12px 32px rgba(0,0,0,0.15);font-family:'Inter',sans-serif;"><div style="font-size:12px;color:#0ea5e9;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;font-weight:500;">Ocean Conservation</div><div style="font-size:20px;font-weight:600;color:#2D1F14;margin-bottom:6px;font-family:'DM Sans',sans-serif;">${d.name}</div><div style="font-size:13px;color:#A89888;margin-bottom:16px;">${d.label}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(14,165,233,0.15);"><span style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Total</span><span style="font-size:20px;font-weight:700;color:#0ea5e9;">${fmt(d.total)}</span></div></div>`}
+            ringsData={oceanPointsData}
+            ringLat={d => d.lat}
+            ringLng={d => d.lng}
+            ringAltitude={0.005}
+            ringColor={() => t => `rgba(14,165,233,${1 - t})`}
+            ringMaxRadius={3}
+            ringPropagationSpeed={1.5}
+            ringRepeatPeriod={1400}
+            labelsData={oceanPointsData}
+            labelLat={d => d.lat}
+            labelLng={d => d.lng}
+            labelAltitude={0.01}
+            labelText={d => d.name}
+            labelSize={1.2}
+            labelDotRadius={0.4}
+            labelColor={() => "rgba(14,165,233,0.9)"}
+            labelResolution={3}
+            labelLabel={d => `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(14,165,233,0.2);border-radius:16px;padding:20px 24px;min-width:220px;max-width:320px;box-shadow:0 12px 32px rgba(0,0,0,0.15);font-family:'Inter',sans-serif;"><div style="font-size:12px;color:#0ea5e9;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;font-weight:500;">Ocean Conservation</div><div style="font-size:20px;font-weight:600;color:#2D1F14;margin-bottom:6px;font-family:'DM Sans',sans-serif;">${d.name}</div><div style="font-size:13px;color:#A89888;margin-bottom:16px;">${d.label}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(14,165,233,0.15);"><span style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Total</span><span style="font-size:20px;font-weight:700;color:#0ea5e9;">${fmt(d.total)}</span></div></div>`}
           />
         )}
       </div>
