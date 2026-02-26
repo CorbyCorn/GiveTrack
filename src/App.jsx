@@ -79,20 +79,20 @@ const ORG_IMAGES = {
   "Médecins Sans Frontières": "https://www.doctorswithoutborders.org/sites/default/files/styles/crop_top_level_hero_mobile_375_221/public/image_base_media/2018/06/MSF141690.jpg",
   "Médecins sans Frontières": "https://www.doctorswithoutborders.org/sites/default/files/styles/crop_top_level_hero_mobile_375_221/public/image_base_media/2018/06/MSF141690.jpg",
   "GiveWell": "https://assets.evidenceaction.org/web/images/_1280xAUTO_crop_center-center_none/ea-doctor.jpg",
-  "Sea Shepherd": "https://seashepherd.org/wp-content/uploads/2026/01/240506-SISO-CF-FadCrewPullingLine-JamesPullsLine-IMG_2366.jpg",
+  "Sea Shepherd": "https://images.unsplash.com/photo-1610581950163-c37ae06c3a96?w=800&h=500&fit=crop&q=80",
   "Evidence Action": "https://assets.evidenceaction.org/web/images/_1280xAUTO_crop_center-center_none/ea-kids.jpg",
   "Open Door Legal": "https://opendoorlegal.org/wp-content/uploads/2019/08/claudia-for-web.jpg",
   "Wholesome Wave": "https://images.squarespace-cdn.com/content/v1/5febb5b1df316630764c4dec/1b65a895-6b11-4898-b025-f7e397195b1c/ww-little-girl-eating-watermelon.png",
-  "Room to Read": "https://plus.unsplash.com/premium_photo-1664106242909-41922802ba52?w=800&h=500&fit=crop&q=80",
+  "Room to Read": "https://images.unsplash.com/photo-1547057981-d08930168f03?w=800&h=500&fit=crop&q=80",
   "Asylum Access": "https://asylumaccess.org/wp-content/uploads/2025/05/AAE201609-Skoll-GabrielDiamond1-1ahaje.jpg",
   "School on Wheels": "https://schoolonwheels.org/wp-content/uploads/2026/02/jordan-and-anne.jpg",
-  "Malaria Consortium": "https://assets.evidenceaction.org/web/images/_1280xAUTO_crop_center-center_none/ea-doctor.jpg",
+  "Malaria Consortium": "https://images.unsplash.com/photo-1576694781392-55b0cb5c9ae0?w=800&h=500&fit=crop&q=80",
   "The Washing Machine Project": "https://images.squarespace-cdn.com/content/v1/61aa260eae89d2514d87e72a/97bd3be0-03a9-4a2f-b1b8-00bcdb61d495/uganda24-hand-wash-young-lady_DPI300.jpg",
   "Action Against Hunger": "https://www.actionagainsthunger.org/app/themes/actionagainsthunger/assets/images/aah-og.jpg",
-  "Clean Ocean Action": "https://plus.unsplash.com/premium_photo-1661889099855-b44dc39e88c9?w=800&h=500&fit=crop&q=80",
+  "Clean Ocean Action": "https://images.unsplash.com/photo-1583749063749-423914dce445?w=800&h=500&fit=crop&q=80",
   "Middle East Children's Alliance": "https://www.mecaforpeace.org/wp-content/uploads/2024/12/DSC04045-scaled.jpg",
-  "Oceana": "https://plus.unsplash.com/premium_photo-1661889099855-b44dc39e88c9?w=800&h=500&fit=crop&q=80",
-  "WWF": "https://plus.unsplash.com/premium_photo-1710846907411-41eb2e4d354c?w=800&h=500&fit=crop&q=80",
+  "Oceana": "https://images.unsplash.com/photo-1676186013887-fa1c4c658274?w=800&h=500&fit=crop&q=80",
+  "WWF": "https://images.unsplash.com/photo-1535759802691-bf5a6cfe6ce9?w=800&h=500&fit=crop&q=80",
   "En Ptahy Vidchui": "https://plus.unsplash.com/premium_photo-1663126366512-62a1e0494bad?w=800&h=500&fit=crop&q=80",
   "Give To IV": "https://give.intervarsity.org/themes/custom/donate/images/meta_img/metatag.jpg",
   "NCCHC Foundation": "https://images.unsplash.com/photo-1617565980755-d57f254b0ba7?w=800&h=500&fit=crop&q=80",
@@ -108,20 +108,20 @@ const ORG_IMAGE_POS = {
   "Médecins Sans Frontières": "30% 30%",
   "Médecins sans Frontières": "30% 30%",
   "GiveWell": "40% 30%",                  // healthcare worker examining patient
-  "Sea Shepherd": "35% 35%",              // crew member on ship with flag
+  "Sea Shepherd": "center 40%",            // dramatic ocean waves
   "Evidence Action": "center 40%",        // row of children's faces centered
   "Open Door Legal": "center 25%",        // woman portrait, face upper center
   "Wholesome Wave": "center 20%",         // little girl eating watermelon
-  "Room to Read": "center 30%",           // smiling boy reading a book
+  "Room to Read": "center center",        // colorful books on shelf
   "Asylum Access": "center 30%",          // two women smiling together
   "School on Wheels": "center 25%",       // volunteer tutoring child
-  "Malaria Consortium": "40% 30%",        // healthcare worker
+  "Malaria Consortium": "center center",  // mosquito net / health intervention
   "The Washing Machine Project": "center 20%", // young woman hand-washing
   "Action Against Hunger": "60% 30%",     // mother in orange with baby
-  "Clean Ocean Action": "30% 40%",        // two scuba divers underwater
+  "Clean Ocean Action": "center center",  // clean coastline
   "Middle East Children's Alliance": "center 35%", // MECA workers with children
-  "Oceana": "30% 40%",                    // scuba divers
-  "WWF": "center 30%",                    // two rangers in safari vehicle
+  "Oceana": "center center",              // coral reef underwater
+  "WWF": "center center",                 // African wildlife safari
   "En Ptahy Vidchui": "center 30%",       // three men with Ukraine aid box
   "Give To IV": "center 25%",             // five young people arms around each other
   "NCCHC Foundation": "center 20%",       // medical professional smiling
@@ -198,6 +198,62 @@ const ORG_CATEGORIES = {
   "Give To IV": "Community", "NCCHC Foundation": "Healthcare",
   "Radiance SF": "Community", "Reality SF": "Community", "SFHS": "Healthcare",
   "Middle East Children's Alliance": "Children & Youth",
+};
+
+const ORG_DESCRIPTIONS = {
+  "Save the Children": "Working to improve the lives of children through better education, health care, and economic opportunities.",
+  "Doctors Without Borders": "Providing independent, impartial medical humanitarian assistance to people affected by conflict, epidemics, and disasters.",
+  "Médecins Sans Frontières": "Providing independent, impartial medical humanitarian assistance to people affected by conflict, epidemics, and disasters.",
+  "Médecins sans Frontières": "Providing independent, impartial medical humanitarian assistance to people affected by conflict, epidemics, and disasters.",
+  "GiveWell": "Searching for the charities that save or improve lives the most per dollar donated.",
+  "Sea Shepherd": "Defending, conserving, and protecting the world's oceans through direct-action campaigns.",
+  "Evidence Action": "Scaling proven interventions that improve the lives of millions in the developing world.",
+  "Open Door Legal": "Providing free civil legal services to ensure equal access to justice for all.",
+  "Wholesome Wave": "Making fresh, locally grown fruits and vegetables affordable for underserved communities.",
+  "Room to Read": "Transforming the lives of millions of children through literacy and gender equality in education.",
+  "Asylum Access": "Making human rights a reality for refugees worldwide through legal aid and policy advocacy.",
+  "School on Wheels": "Providing free tutoring and mentoring for children experiencing homelessness.",
+  "Malaria Consortium": "Delivering proven programs to prevent and treat malaria and other communicable diseases.",
+  "The Washing Machine Project": "Providing off-grid washing machines to communities displaced by conflict and natural disaster.",
+  "Action Against Hunger": "Ending hunger and malnutrition in children while providing communities with access to safe water.",
+  "Clean Ocean Action": "Protecting the waters of the NY/NJ coast through research, education, and citizen action.",
+  "Middle East Children's Alliance": "Supporting children and families in Palestine and Lebanon through direct aid and community programs.",
+  "Oceana": "Protecting and restoring the world's oceans through policy advocacy, science, and law.",
+  "WWF": "Conserving nature and reducing the most pressing threats to the diversity of life on Earth.",
+  "En Ptahy Vidchui": "Providing humanitarian aid and support to communities affected by the conflict in Ukraine.",
+  "Give To IV": "Supporting campus ministries that help college students explore faith and develop as leaders.",
+  "NCCHC Foundation": "Advancing the quality of health care in jails, prisons, and juvenile detention facilities.",
+  "Radiance SF": "Empowering women in San Francisco through community, mentorship, and professional development.",
+  "Reality SF": "Serving the San Francisco community through food pantries, housing support, and neighborhood care.",
+  "SFHS": "Providing Catholic college-preparatory education that develops the whole person in faith, intellect, and character.",
+};
+
+const ORG_WEBSITES = {
+  "Save the Children": "https://www.savethechildren.org",
+  "Doctors Without Borders": "https://www.doctorswithoutborders.org",
+  "Médecins Sans Frontières": "https://www.doctorswithoutborders.org",
+  "Médecins sans Frontières": "https://www.doctorswithoutborders.org",
+  "GiveWell": "https://www.givewell.org",
+  "Sea Shepherd": "https://seashepherd.org",
+  "Evidence Action": "https://www.evidenceaction.org",
+  "Open Door Legal": "https://opendoorlegal.org",
+  "Wholesome Wave": "https://www.wholesomewave.org",
+  "Room to Read": "https://www.roomtoread.org",
+  "Asylum Access": "https://www.asylumaccess.org",
+  "School on Wheels": "https://schoolonwheels.org",
+  "Malaria Consortium": "https://www.malariaconsortium.org",
+  "The Washing Machine Project": "https://www.thewashingmachineproject.org",
+  "Action Against Hunger": "https://www.actionagainsthunger.org",
+  "Clean Ocean Action": "https://www.cleanoceanaction.org",
+  "Middle East Children's Alliance": "https://www.mecaforpeace.org",
+  "Oceana": "https://oceana.org",
+  "WWF": "https://www.worldwildlife.org",
+  "En Ptahy Vidchui": "https://en.ptahy.vidchui.org",
+  "Give To IV": "https://givetoiv.org",
+  "NCCHC Foundation": "https://ncchcfoundation.org",
+  "Radiance SF": "https://www.radiancesf.org",
+  "Reality SF": "https://realitysf.com",
+  "SFHS": "https://www.sfhs.com",
 };
 
 // ─── DEMO DATA ────────────────────────────────────────────────
@@ -427,12 +483,12 @@ function DonutChart({ data, size = 220 }) {
       </svg>
       <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", textAlign: "center", pointerEvents: "none" }}>
         {hovered !== null ? (<>
-          <div style={{ fontSize: size < 160 ? 10 : 12, color: C.textMuted, letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 3 }}>{slices[hovered].label}</div>
-          <div style={{ fontSize: size < 160 ? 17 : 24, fontWeight: 700, color: C.text }}>{fmt(slices[hovered].value)}</div>
-          <div style={{ fontSize: size < 160 ? 11 : 13, color: slices[hovered].color, fontWeight: 600 }}>{(slices[hovered].fraction * 100).toFixed(1)}%</div>
+          <div style={{ fontSize: size < 180 ? 10 : 12, color: C.textMuted, letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 3 }}>{slices[hovered].label}</div>
+          <div style={{ fontSize: size < 180 ? 16 : 24, fontWeight: 700, color: C.text }}>{fmt(slices[hovered].value)}</div>
+          <div style={{ fontSize: size < 180 ? 11 : 13, color: slices[hovered].color, fontWeight: 600 }}>{(slices[hovered].fraction * 100).toFixed(1)}%</div>
         </>) : (<>
-          <div style={{ fontSize: size < 160 ? 10 : 12, color: C.textMuted, letterSpacing: ".08em", textTransform: "uppercase" }}>Total</div>
-          <div style={{ fontSize: size < 160 ? 18 : 26, fontWeight: 700, color: C.accent }}>{fmt(total)}</div>
+          <div style={{ fontSize: size < 180 ? 10 : 12, color: C.textMuted, letterSpacing: ".08em", textTransform: "uppercase" }}>Total</div>
+          <div style={{ fontSize: size < 180 ? 16 : 26, fontWeight: 700, color: C.accent }}>{fmt(total)}</div>
         </>)}
       </div>
     </div>
@@ -708,26 +764,33 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
     return { month: m, total, donutData: mDonut, donationCount: md.length };
   });
 
-  // Team data — aggregate all employees
+  // Team data — aggregate totals only (no individual breakdowns for privacy)
   const teamData = useMemo(() => {
-    const employees = [];
     let teamTotal = 0;
-    const teamOrgTotals = {};
-    Object.entries(DEMO_DATA).forEach(([email, dons]) => {
-      const name = email.split("@")[0];
-      const displayName = name.charAt(0).toUpperCase() + name.slice(1);
-      const empTotal = dons.reduce((s, d) => s + d.allocatedAmount, 0);
-      const empOrgs = {};
+    const teamOrgs = new Set();
+    const memberCount = Object.keys(DEMO_DATA).length;
+    Object.values(DEMO_DATA).forEach(dons => {
       dons.forEach(d => {
-        empOrgs[d.orgName] = (empOrgs[d.orgName] || 0) + d.allocatedAmount;
-        teamOrgTotals[d.orgName] = (teamOrgTotals[d.orgName] || 0) + d.allocatedAmount;
+        teamTotal += d.allocatedAmount;
+        teamOrgs.add(d.orgName);
       });
-      teamTotal += empTotal;
-      employees.push({ email, name: displayName, total: empTotal, orgCount: Object.keys(empOrgs).length, topOrg: Object.entries(empOrgs).sort((a, b) => b[1] - a[1])[0]?.[0] || "" });
     });
-    employees.sort((a, b) => b.total - a.total);
-    const teamDonut = Object.entries(teamOrgTotals).sort((a, b) => b[1] - a[1]).map(([n, v]) => ({ label: n, value: v, color: getOrgColor(n) }));
-    return { employees, teamTotal, teamOrgCount: Object.keys(teamOrgTotals).length, teamDonut };
+    // Deduplicate variant org names (MSF variants → Doctors Without Borders)
+    const deduped = new Set();
+    teamOrgs.forEach(name => {
+      if (name === "Médecins Sans Frontières" || name === "Médecins sans Frontières") deduped.add("Doctors Without Borders");
+      else deduped.add(name);
+    });
+    // Group orgs by category
+    const orgsByCategory = {};
+    deduped.forEach(name => {
+      const cat = ORG_CATEGORIES[name] || "Other";
+      if (!orgsByCategory[cat]) orgsByCategory[cat] = [];
+      orgsByCategory[cat].push(name);
+    });
+    // Sort categories by number of orgs (descending), then alphabetically
+    const sortedCategories = Object.entries(orgsByCategory).sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
+    return { teamTotal, memberCount, orgCount: deduped.size, orgsByCategory: sortedCategories };
   }, []);
 
   const tabs = [
@@ -908,7 +971,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                       onMouseEnter={e => { e.currentTarget.style.boxShadow = C.cardHover; e.currentTarget.style.transform = "translateY(-3px)"; }}
                       onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; e.currentTarget.style.transform = "translateY(0)"; }}>
                       {/* Photo banner */}
-                      <div style={{ height: 140, position: "relative", overflow: "hidden", background: `linear-gradient(135deg, ${color}22, ${color}44)` }}>
+                      <div style={{ height: 180, position: "relative", overflow: "hidden", background: `linear-gradient(135deg, ${color}22, ${color}44)` }}>
                         {img && !imgErrors[name] && (
                           <img src={img} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", objectPosition: ORG_IMAGE_POS[name] || "center center" }}
                             onError={() => setImgErrors(prev => ({ ...prev, [name]: true }))} />
@@ -1031,7 +1094,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
             <div style={{ animation: "fadeSlideUp .3s ease" }}>
               {/* Team hero */}
               <div style={{ borderRadius: 24, overflow: "hidden", position: "relative", height: 240, marginBottom: 22 }}>
-                <img src="https://plus.unsplash.com/premium_photo-1681492057012-4155ebced687?w=1200&h=500&fit=crop&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=500&fit=crop&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(13,148,136,0.88) 0%, rgba(124,58,237,0.7) 100%)" }} />
                 <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "36px 48px" }}>
                   <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 8 }}>Isara Team Impact</div>
@@ -1039,57 +1102,76 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                     {fmt(teamData.teamTotal)}
                   </div>
                   <div style={{ fontSize: 17, color: "rgba(255,255,255,0.7)", marginTop: 12 }}>
-                    {teamData.employees.length} team members supporting {teamData.teamOrgCount} organizations
+                    {teamData.memberCount} team members supporting {teamData.orgCount} organizations
                   </div>
                 </div>
               </div>
 
-              {/* Team donut + employee grid */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: 18, marginBottom: 22 }}>
-                <div style={{ ...glass, padding: "28px 32px", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  <h3 style={{ fontSize: 17, fontWeight: 600, color: C.text, margin: "0 0 24px", alignSelf: "flex-start", fontFamily: "'DM Sans',sans-serif" }}>Team Allocation</h3>
-                  <DonutChart data={teamData.teamDonut} size={200} />
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 20, width: "100%" }}>
-                    {teamData.teamDonut.slice(0, 6).map((d, i) => (
-                      <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 13 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flex: 1 }}>
-                          <div style={{ width: 8, height: 8, borderRadius: 3, background: d.color, flexShrink: 0 }} />
-                          <span style={{ color: C.textSoft, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.label}</span>
-                        </div>
-                        <span style={{ fontWeight: 600, color: C.text }}>{fmt(d.value)}</span>
-                      </div>
-                    ))}
-                    {teamData.teamDonut.length > 6 && (
-                      <div style={{ fontSize: 12, color: C.textMuted, textAlign: "center", padding: "4px 0" }}>+{teamData.teamDonut.length - 6} more</div>
-                    )}
+              {/* Summary stats */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18, marginBottom: 22 }}>
+                {[
+                  { label: "Team Members", value: teamData.memberCount, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+                  { label: "Organizations", value: teamData.orgCount, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> },
+                  { label: "Cause Areas", value: teamData.orgsByCategory.length, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> },
+                ].map((stat, i) => (
+                  <div key={i} style={{ ...glass, padding: "24px 28px", animation: `fadeSlideUp .4s ease ${i*.06}s both` }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, background: C.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14, color: C.accent }}>{stat.icon}</div>
+                    <div style={{ fontSize: 13, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 8, fontWeight: 500 }}>{stat.label}</div>
+                    <div style={{ fontSize: 32, fontWeight: 700, color: C.text, fontFamily: "'DM Sans',sans-serif", lineHeight: 1 }}>{stat.value}</div>
                   </div>
-                </div>
+                ))}
+              </div>
 
-                <div style={{ ...glass, padding: "28px 32px" }}>
-                  <h3 style={{ fontSize: 17, fontWeight: 600, color: C.text, margin: "0 0 20px", fontFamily: "'DM Sans',sans-serif" }}>Team Members</h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-                    {teamData.employees.map((emp, i) => {
-                      const hue = (i * 37 + 180) % 360;
-                      const initials = emp.name.charAt(0).toUpperCase();
-                      const isCurrentUser = emp.email === user.email;
-                      return (
-                        <div key={emp.email} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 0", borderBottom: i < teamData.employees.length - 1 ? `1px solid ${C.divider}` : "none" }}>
-                          <div style={{ width: 40, height: 40, borderRadius: 12, background: `hsl(${hue}, 45%, 55%)`, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans',sans-serif", flexShrink: 0 }}>
-                            {initials}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 15, fontWeight: 600, color: C.text, display: "flex", alignItems: "center", gap: 8 }}>
-                              {emp.name}
-                              {isCurrentUser && <span style={{ fontSize: 10, fontWeight: 600, color: C.accent, background: C.accentLight, padding: "2px 8px", borderRadius: 10 }}>You</span>}
+              {/* Organizations we support — grouped by category */}
+              <div style={{ ...glass, padding: "32px 36px", animation: "fadeSlideUp .4s ease .1s both" }}>
+                <h3 style={{ fontSize: 20, fontWeight: 600, color: C.text, margin: "0 0 8px", fontFamily: "'DM Sans',sans-serif" }}>Organizations We Support</h3>
+                <p style={{ fontSize: 15, color: C.textSoft, margin: "0 0 28px" }}>Our team collectively supports these organizations across {teamData.orgsByCategory.length} cause areas.</p>
+
+                {teamData.orgsByCategory.map(([category, orgs], ci) => (
+                  <div key={category} style={{ marginBottom: ci < teamData.orgsByCategory.length - 1 ? 28 : 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: C.accent, textTransform: "uppercase", letterSpacing: ".08em" }}>{category}</div>
+                      <div style={{ flex: 1, height: 1, background: C.divider }} />
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                      {orgs.map((orgName) => {
+                        const img = ORG_IMAGES[orgName];
+                        const desc = ORG_DESCRIPTIONS[orgName] || "";
+                        const website = ORG_WEBSITES[orgName];
+                        const color = getOrgColor(orgName);
+                        return (
+                          <div key={orgName} style={{ display: "flex", gap: 14, padding: "16px 18px", borderRadius: 14, border: `1px solid ${C.divider}`, transition: "all .2s", background: "rgba(255,255,255,0.4)" }}
+                            onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(13,148,136,0.2)"; e.currentTarget.style.background = C.accentSoft; }}
+                            onMouseLeave={e => { e.currentTarget.style.borderColor = C.divider; e.currentTarget.style.background = "rgba(255,255,255,0.4)"; }}>
+                            {/* Org thumbnail */}
+                            <div style={{ width: 52, height: 52, borderRadius: 12, overflow: "hidden", flexShrink: 0, background: `linear-gradient(135deg, ${color}22, ${color}44)` }}>
+                              {img && !imgErrors[orgName] ? (
+                                <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: ORG_IMAGE_POS[orgName] || "center center" }}
+                                  onError={() => setImgErrors(prev => ({ ...prev, [orgName]: true }))} />
+                              ) : (
+                                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700, color, fontFamily: "'DM Sans',sans-serif" }}>
+                                  {orgName.charAt(0)}
+                                </div>
+                              )}
                             </div>
-                            <div style={{ fontSize: 13, color: C.textMuted }}>{emp.orgCount} org{emp.orgCount !== 1 ? "s" : ""} · {emp.topOrg}</div>
+                            {/* Org info */}
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 4 }}>{orgName}</div>
+                              <div style={{ fontSize: 13, color: C.textSoft, lineHeight: 1.5, marginBottom: 6 }}>{desc}</div>
+                              {website && (
+                                <a href={website} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: C.accent, textDecoration: "none", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 4 }}
+                                  onClick={e => e.stopPropagation()}>
+                                  Visit website
+                                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                </a>
+                              )}
+                            </div>
                           </div>
-                          <div style={{ fontSize: 16, fontWeight: 700, color: C.text, fontFamily: "'DM Sans',sans-serif" }}>{fmt(emp.total)}</div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           )}
