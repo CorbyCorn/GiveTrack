@@ -577,8 +577,8 @@ function GlobeTab({ donations }) {
         </div>
       </div>
 
-      <div ref={containerRef} style={{ background: "#111827", borderRadius: 20, overflow: "hidden", position: "relative", minHeight: 520 }}>
-        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 40%, rgba(15,118,110,0.08) 0%, transparent 70%)", pointerEvents: "none", zIndex: 1 }} />
+      <div ref={containerRef} style={{ background: "#1e293b", borderRadius: 20, overflow: "hidden", position: "relative", minHeight: 520 }}>
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 40%, rgba(15,118,110,0.12) 0%, transparent 70%)", pointerEvents: "none", zIndex: 1 }} />
         {!globeReady && !fetchError && (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, zIndex: 5 }}>
             <div style={{ width: 28, height: 28, border: "2px solid rgba(255,255,255,0.1)", borderTop: "2px solid rgba(255,255,255,0.6)", borderRadius: "50%", animation: "spin .8s linear infinite" }} />
@@ -596,9 +596,9 @@ function GlobeTab({ donations }) {
             showAtmosphere={true} atmosphereColor="rgba(15,118,110,0.3)" atmosphereAltitude={0.15} animateIn={true}
             polygonsData={countries}
             polygonAltitude={d => countryData[getAlpha3(d)] ? 0.015 : 0.004}
-            polygonCapColor={d => { const code = getAlpha3(d); if (!code || !countryData[code]) return "rgba(255,255,255,0.06)"; return warmColorInterpolate(colorScale(countryData[code].total)); }}
-            polygonSideColor={d => { const code = getAlpha3(d); if (!code || !countryData[code]) return "rgba(255,255,255,0.02)"; return "rgba(249,115,22,0.2)"; }}
-            polygonStrokeColor={() => "rgba(255,255,255,0.1)"}
+            polygonCapColor={d => { const code = getAlpha3(d); if (!code || !countryData[code]) return "rgba(255,255,255,0.1)"; return warmColorInterpolate(colorScale(countryData[code].total)); }}
+            polygonSideColor={d => { const code = getAlpha3(d); if (!code || !countryData[code]) return "rgba(255,255,255,0.04)"; return "rgba(249,115,22,0.25)"; }}
+            polygonStrokeColor={() => "rgba(255,255,255,0.15)"}
             polygonLabel={d => {
               const code = getAlpha3(d); const name = d.properties.name || "Unknown"; const data = code && countryData[code];
               if (!data) return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:14px;padding:12px 18px;box-shadow:0 8px 24px rgba(0,0,0,0.12);font-family:'Inter',sans-serif;"><div style="font-size:15px;color:#2D1F14;font-weight:500;">${name}</div><div style="font-size:13px;color:#A89888;margin-top:3px;">No donations</div></div>`;
@@ -886,7 +886,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(13,148,136,0.85) 0%, rgba(2,132,199,0.75) 100%)" }} />
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "40px 48px" }}>
                 <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 10 }}>Total Donated</div>
-                <div style={{ fontSize: 56, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2)" }}>
+                <div style={{ fontSize: 60, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.25), 0 0 80px rgba(255,255,255,0.15)" }}>
                   <AnimatedNumber value={totalDonated} currency={primaryCurrency} />
                 </div>
                 <div style={{ fontSize: 17, color: "rgba(255,255,255,0.7)", marginTop: 14, fontWeight: 400 }}>
@@ -1010,7 +1010,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                       <div style={{ padding: "18px 22px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <div>
-                            <span style={{ fontSize: 13, color: C.textMuted, fontWeight: 500 }}>{od.length} payment{od.length !== 1 ? "s" : ""}</span>
+                            <span style={{ fontSize: 13, color: C.textMuted, fontWeight: 500 }}>{od.length} contribution{od.length !== 1 ? "s" : ""}</span>
                             {url && (
                               <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ marginLeft: 12, fontSize: 13, color: C.accent, textDecoration: "none", fontWeight: 500 }}>Visit site</a>
                             )}
@@ -1115,7 +1115,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
               <div style={{ borderRadius: 24, overflow: "hidden", position: "relative", height: 240, marginBottom: 22, background: "linear-gradient(135deg, rgba(13,148,136,1) 0%, rgba(124,58,237,0.85) 100%)" }}>
                 <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "36px 48px" }}>
                   <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 8 }}>Isara Team Impact</div>
-                  <div style={{ fontSize: 50, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2)" }}>
+                  <div style={{ fontSize: 54, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.25), 0 0 80px rgba(255,255,255,0.15)" }}>
                     {fmt(teamData.teamTotal)}
                   </div>
                   <div style={{ fontSize: 17, color: "rgba(255,255,255,0.7)", marginTop: 12 }}>
