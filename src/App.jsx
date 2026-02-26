@@ -1,4 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import Globe from "react-globe.gl";
+import { scaleSqrt } from "d3-scale";
+import * as topojson from "topojson-client";
 
 /*
  * GiveTrack — Employee Charitable Giving Dashboard
@@ -59,6 +62,78 @@ function getOrgColor(name) {
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
   return PALETTE[Math.abs(hash) % PALETTE.length];
+}
+
+// ─── GLOBE DATA ──────────────────────────────────────────────
+
+const ORG_COUNTRY_MAP = {
+  "Save the Children": "COD",
+  "Doctors Without Borders": "COD",
+  "Médecins Sans Frontières": "COD",
+  "Médecins sans Frontières": "COD",
+  "GiveWell": "NGA",
+  "Sea Shepherd": "MEX",
+  "Evidence Action": "IND",
+  "Open Door Legal": "USA",
+  "Wholesome Wave": "USA",
+  "Room to Read": "NPL",
+  "Asylum Access": "KEN",
+  "School on Wheels": "USA",
+  "Malaria Consortium": "NGA",
+  "The Washing Machine Project": "IND",
+  "Action Against Hunger": "SYR",
+  "Clean Ocean Action": "USA",
+  "Middle East Children's Alliance": "PSE",
+  "Oceana": "USA",
+  "WWF": "CHN",
+  "En Ptahy Vidchui": "UKR",
+  "Give To IV": "USA",
+  "NCCHC Foundation": "USA",
+  "Radiance SF": "USA",
+  "Reality SF": "USA",
+  "SFHS": "USA",
+};
+
+const ISO_NUM_TO_ALPHA3 = {
+  "840": "USA", "180": "COD", "566": "NGA", "484": "MEX",
+  "356": "IND", "524": "NPL", "404": "KEN", "760": "SYR",
+  "275": "PSE", "156": "CHN", "804": "UKR",
+};
+
+const COUNTRY_NAMES = {
+  USA: "United States", COD: "DR Congo", NGA: "Nigeria", MEX: "Mexico",
+  IND: "India", NPL: "Nepal", KEN: "Kenya", SYR: "Syria",
+  PSE: "Palestine", CHN: "China", UKR: "Ukraine",
+};
+
+function aggregateDonationsByCountry(donations) {
+  const result = {};
+  donations.forEach(d => {
+    const code = ORG_COUNTRY_MAP[d.orgName];
+    if (!code) return;
+    if (!result[code]) result[code] = { total: 0, orgs: {} };
+    result[code].total += d.allocatedAmount;
+    result[code].orgs[d.orgName] = (result[code].orgs[d.orgName] || 0) + d.allocatedAmount;
+  });
+  return result;
+}
+
+function warmColorInterpolate(t) {
+  const stops = [
+    { r: 232, g: 228, b: 223 },
+    { r: 210, g: 190, b: 155 },
+    { r: 196, g: 168, b: 130 },
+    { r: 160, g: 145, b: 115 },
+    { r: 100, g: 121, b: 109 },
+  ];
+  const idx = Math.max(0, Math.min(1, t)) * (stops.length - 1);
+  const lo = Math.floor(idx);
+  const hi = Math.min(lo + 1, stops.length - 1);
+  const f = idx - lo;
+  const r = Math.round(stops[lo].r + (stops[hi].r - stops[lo].r) * f);
+  const g = Math.round(stops[lo].g + (stops[hi].g - stops[lo].g) * f);
+  const b = Math.round(stops[lo].b + (stops[hi].b - stops[lo].b) * f);
+  return `rgb(${r},${g},${b})`;
 }
 
 // ─── DEMO DATA ────────────────────────────────────────────────
@@ -310,6 +385,153 @@ function BarChart({ data, height = 200 }) {
   );
 }
 
+function GlobeTab({ donations }) {
+  const globeRef = useRef();
+  const containerRef = useRef();
+  const [countries, setCountries] = useState([]);
+  const [globeReady, setGlobeReady] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(800);
+  const [hoverD, setHoverD] = useState(null);
+
+  const countryData = useMemo(() => aggregateDonationsByCountry(donations), [donations]);
+  const maxDonation = useMemo(() => Math.max(...Object.values(countryData).map(d => d.total), 1), [countryData]);
+  const colorScale = useMemo(() => scaleSqrt().domain([0, maxDonation]).range([0, 1]), [maxDonation]);
+  const countryCount = Object.keys(countryData).length;
+
+  useEffect(() => {
+    fetch("https://unpkg.com/world-atlas@2.0.2/countries-110m.json")
+      .then(res => res.json())
+      .then(data => {
+        const geoJson = topojson.feature(data, data.objects.countries);
+        setCountries(geoJson.features);
+        setGlobeReady(true);
+      })
+      .catch(() => setFetchError(true));
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver(entries => {
+      setContainerWidth(entries[0].contentRect.width);
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!globeRef.current || !globeReady) return;
+    const controls = globeRef.current.controls();
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.4;
+    controls.enableZoom = true;
+    controls.minDistance = 150;
+    controls.maxDistance = 500;
+    let timeout;
+    const pause = () => {
+      controls.autoRotate = false;
+      clearTimeout(timeout);
+      timeout = setTimeout(() => { controls.autoRotate = true; }, 3000);
+    };
+    controls.addEventListener("start", pause);
+    return () => { controls.removeEventListener("start", pause); clearTimeout(timeout); };
+  }, [globeReady]);
+
+  const getAlpha3 = (feat) => ISO_NUM_TO_ALPHA3[String(feat.id)] || null;
+
+  return (
+    <div style={{ animation: "fadeSlideUp .4s ease" }}>
+      <div style={{ background: C.card, borderRadius: 14, padding: "22px 26px", border: `1px solid ${C.cardBorder}`, marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center", animation: "fadeSlideUp .4s ease" }}>
+        <div>
+          <h3 style={{ fontSize: 18, fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, color: C.text, margin: 0 }}>Global Impact</h3>
+          <p style={{ fontSize: 12, color: C.textSoft, fontWeight: 300, marginTop: 4 }}>
+            Your donations reach {countryCount} {countryCount === 1 ? "country" : "countries"} worldwide
+          </p>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 10, color: C.textMuted }}>Less</span>
+          <div style={{ width: 100, height: 8, borderRadius: 4, background: `linear-gradient(to right, #e8e4df, ${C.warm}, ${C.accent})` }} />
+          <span style={{ fontSize: 10, color: C.textMuted }}>More</span>
+        </div>
+      </div>
+
+      <div ref={containerRef} style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)", borderRadius: 14, border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden", position: "relative", minHeight: 500 }}>
+        {!globeReady && !fetchError && (
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, zIndex: 5 }}>
+            <div style={{ width: 28, height: 28, border: "2px solid rgba(255,255,255,0.1)", borderTop: "2px solid rgba(255,255,255,0.6)", borderRadius: "50%", animation: "spin .8s linear infinite" }} />
+            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Loading globe...</p>
+          </div>
+        )}
+        {fetchError && (
+          <div style={{ padding: 48, textAlign: "center" }}>
+            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>Unable to load map data. Please refresh to try again.</p>
+          </div>
+        )}
+        {globeReady && (
+          <Globe
+            ref={globeRef}
+            width={containerWidth}
+            height={500}
+            backgroundColor="rgba(0,0,0,0)"
+            globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+            showAtmosphere={true}
+            atmosphereColor="rgba(100,121,109,0.4)"
+            atmosphereAltitude={0.15}
+            animateIn={true}
+            polygonsData={countries}
+            polygonAltitude={d => countryData[getAlpha3(d)] ? 0.012 : 0.004}
+            polygonCapColor={d => {
+              const code = getAlpha3(d);
+              if (!code || !countryData[code]) return "rgba(255,255,255,0.05)";
+              return warmColorInterpolate(colorScale(countryData[code].total));
+            }}
+            polygonSideColor={d => {
+              const code = getAlpha3(d);
+              if (!code || !countryData[code]) return "rgba(255,255,255,0.01)";
+              return "rgba(100,121,109,0.2)";
+            }}
+            polygonStrokeColor={() => "rgba(255,255,255,0.08)"}
+            polygonLabel={d => {
+              const code = getAlpha3(d);
+              const name = d.properties.name || "Unknown";
+              const data = code && countryData[code];
+              if (!data) {
+                return `<div style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;padding:10px 16px;box-shadow:0 4px 12px rgba(0,0,0,0.08);font-family:'Inter',-apple-system,sans-serif;"><div style="font-size:13px;color:#2c2c2c;font-weight:500;">${name}</div><div style="font-size:11px;color:#a8a4a0;margin-top:2px;">No donations</div></div>`;
+              }
+              const orgLines = Object.entries(data.orgs).sort((a, b) => b[1] - a[1]).map(([org, amt]) =>
+                `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.05);"><span style="font-size:12px;color:#787470;">${org}</span><span style="font-size:12px;color:#2c2c2c;font-weight:500;white-space:nowrap;">${fmt(amt)}</span></div>`
+              ).join("");
+              return `<div style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:16px 20px;min-width:220px;max-width:320px;box-shadow:0 8px 24px rgba(0,0,0,0.12);font-family:'Inter',-apple-system,sans-serif;pointer-events:none;"><div style="font-size:10px;color:#a8a4a0;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Country</div><div style="font-size:16px;font-weight:500;color:#2c2c2c;margin-bottom:12px;font-family:'Cormorant Garamond',serif;">${name}</div><div style="margin-bottom:12px;">${orgLines}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid rgba(0,0,0,0.08);"><span style="font-size:11px;color:#a8a4a0;text-transform:uppercase;letter-spacing:.06em;">Total</span><span style="font-size:16px;font-weight:600;color:#64796d;">${fmt(data.total)}</span></div></div>`;
+            }}
+            onPolygonHover={setHoverD}
+            polygonsTransitionDuration={300}
+          />
+        )}
+      </div>
+
+      {countryCount > 0 && (
+        <div style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.cardBorder}`, marginTop: 14, overflow: "hidden", animation: "fadeSlideUp .4s ease .1s both" }}>
+          <div style={{ padding: "16px 22px 10px" }}>
+            <h3 style={{ fontSize: 13, fontWeight: 500, color: C.text, margin: 0 }}>Donations by country</h3>
+          </div>
+          {Object.entries(countryData).sort((a, b) => b[1].total - a[1].total).map(([code, data], i) => (
+            <div key={code} style={{ padding: "12px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${C.divider}`, animation: `fadeSlideUp .4s ease ${i * .04}s both` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: warmColorInterpolate(colorScale(data.total)), flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: C.text }}>{COUNTRY_NAMES[code] || code}</div>
+                  <div style={{ fontSize: 11, color: C.textMuted }}>{Object.keys(data.orgs).join(", ")}</div>
+                </div>
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{fmt(data.total)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── LOGIN ────────────────────────────────────────────────────
 
 function LoginScreen({ onLogin }) {
@@ -429,6 +651,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
     { id: "overview", label: "Overview" },
     { id: "breakdown", label: "Organizations" },
     { id: "history", label: "History" },
+    { id: "impact", label: "Impact" },
   ];
 
   return (
@@ -481,8 +704,15 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
               <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
                 padding: "10px 20px", background: "transparent", border: "none", borderBottom: activeTab === t.id ? `2px solid ${C.accent}` : "2px solid transparent",
                 color: activeTab === t.id ? C.text : C.textMuted, fontSize: 13, fontWeight: activeTab === t.id ? 500 : 400,
-                cursor: "pointer", transition: "all .2s", marginBottom: -1,
-              }}>{t.label}</button>
+                cursor: "pointer", transition: "all .2s", marginBottom: -1, display: "flex", alignItems: "center", gap: 6,
+              }}>
+                {t.id === "impact" && (
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  </svg>
+                )}
+                {t.label}
+              </button>
             ))}
           </div>
 
@@ -605,6 +835,11 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                 );
               })}
             </div>
+          )}
+
+          {/* IMPACT GLOBE */}
+          {activeTab === "impact" && (
+            <GlobeTab donations={donations} />
           )}
         </>)}
       </div>
