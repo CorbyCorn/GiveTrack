@@ -49,10 +49,10 @@ function extractOrgName(paidTo) {
 }
 
 const PALETTE = [
-  "#64796d", "#8fa89a", "#5c7a6e", "#7d9b8c", "#4a6b5c",
-  "#6b8f7e", "#94b5a4", "#3d5e4f", "#a8c5b5", "#526e60",
-  "#7a9487", "#88a99a", "#607b6d", "#9bb3a5", "#4e6d5e",
-  "#6d8c7d", "#82a393", "#5a7668", "#a0bfaf", "#486758",
+  "#7b9ea8", "#c4956a", "#8b7bb5", "#6b9e78", "#c47a7a",
+  "#a89b5e", "#6a8fc4", "#b87ba8", "#5e9e9e", "#c49a6a",
+  "#9b7b8e", "#6aab8f", "#b08c6a", "#7a8bb5", "#a8856a",
+  "#6a9bb0", "#b57b7b", "#8aab6a", "#9a7aab", "#ab9a6a",
 ];
 
 function getOrgColor(name) {
