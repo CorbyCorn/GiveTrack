@@ -129,7 +129,7 @@ const ORG_IMAGE_POS = {
   "Reality SF": "center 30%",             // volunteers at food pantry
   "SFHS": "center 30%",                   // SFHS students smiling together
 };
-const HERO_IMAGE = "https://plus.unsplash.com/premium_photo-1683134050449-080429c850a4?w=1200&h=600&fit=crop&q=80";
+const HERO_IMAGE = "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=1200&h=600&fit=crop&q=80";
 
 // ─── GLOBE DATA ──────────────────────────────────────────────
 
@@ -886,7 +886,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(13,148,136,0.85) 0%, rgba(2,132,199,0.75) 100%)" }} />
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "40px 48px" }}>
                 <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 10 }}>Total Donated</div>
-                <div style={{ fontSize: 56, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.03em", lineHeight: 1 }}>
+                <div style={{ fontSize: 56, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2)" }}>
                   <AnimatedNumber value={totalDonated} currency={primaryCurrency} />
                 </div>
                 <div style={{ fontSize: 17, color: "rgba(255,255,255,0.7)", marginTop: 14, fontWeight: 400 }}>
@@ -1112,12 +1112,10 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
           {activeTab === "team" && (
             <div style={{ animation: "fadeSlideUp .3s ease" }}>
               {/* Team hero */}
-              <div style={{ borderRadius: 24, overflow: "hidden", position: "relative", height: 240, marginBottom: 22 }}>
-                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=500&fit=crop&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(13,148,136,0.88) 0%, rgba(124,58,237,0.7) 100%)" }} />
+              <div style={{ borderRadius: 24, overflow: "hidden", position: "relative", height: 240, marginBottom: 22, background: "linear-gradient(135deg, rgba(13,148,136,1) 0%, rgba(124,58,237,0.85) 100%)" }}>
                 <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "36px 48px" }}>
                   <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 8 }}>Isara Team Impact</div>
-                  <div style={{ fontSize: 50, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.03em", lineHeight: 1 }}>
+                  <div style={{ fontSize: 50, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2)" }}>
                     {fmt(teamData.teamTotal)}
                   </div>
                   <div style={{ fontSize: 17, color: "rgba(255,255,255,0.7)", marginTop: 12 }}>
