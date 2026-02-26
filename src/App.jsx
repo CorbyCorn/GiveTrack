@@ -173,6 +173,25 @@ const COUNTRY_CENTROIDS = {
   PSE: { lat: 31.9, lng: 35.2 }, CHN: { lat: 35.9, lng: 104.2 }, UKR: { lat: 48.4, lng: 31.2 },
 };
 
+// Bright "beam of light" colors — one per destination
+const LIGHT_COLORS = {
+  USA: "#fbbf24",   // amber/gold
+  COD: "#f472b6",   // pink
+  NGA: "#a78bfa",   // violet
+  IND: "#34d399",   // emerald
+  NPL: "#fb923c",   // orange
+  KEN: "#facc15",   // yellow
+  SYR: "#f87171",   // rose
+  PSE: "#38bdf8",   // sky blue
+  CHN: "#c084fc",   // purple
+  UKR: "#2dd4bf",   // teal
+  MEX: "#fcd34d",   // amber light
+  // Ocean orgs
+  "Sea Shepherd": "#22d3ee",   // cyan
+  "Oceana": "#67e8f9",         // light cyan
+  "Clean Ocean Action": "#06b6d4", // darker cyan
+};
+
 function aggregateDonationsByCountry(donations) {
   const result = {};
   donations.forEach(d => {
@@ -567,16 +586,17 @@ function GlobeTab({ donations }) {
     const countryDests = Object.entries(countryData).map(([code, data]) => {
       const c = COUNTRY_CENTROIDS[code];
       if (!c) return null;
-      return { lat: c.lat, lng: c.lng, name: COUNTRY_NAMES[code] || code, total: data.total, orgs: data.orgs, isOcean: false, maxRadius: 2 + (data.total / maxAll) * 4, color: warmColorInterpolate(colorScale(data.total)) };
+      const lightColor = LIGHT_COLORS[code] || "#fbbf24";
+      return { lat: c.lat, lng: c.lng, name: COUNTRY_NAMES[code] || code, code, total: data.total, orgs: data.orgs, isOcean: false, maxRadius: 2 + (data.total / maxAll) * 4, color: lightColor };
     }).filter(Boolean);
     const oceanDests = oceanPointsData.map(d => ({
-      ...d, isOcean: true, orgs: { [d.name]: d.total }, maxRadius: 2 + (d.total / maxAll) * 4, color: "rgba(14,165,233,0.85)"
+      ...d, isOcean: true, orgs: { [d.name]: d.total }, maxRadius: 2 + (d.total / maxAll) * 4, color: LIGHT_COLORS[d.name] || "#22d3ee"
     }));
     return [...countryDests, ...oceanDests];
-  }, [countryData, oceanPointsData, maxDonation, colorScale]);
+  }, [countryData, oceanPointsData, maxDonation]);
 
   const arcsData = useMemo(() => allDestinations.map(d => ({
-    startLat: SF.lat, startLng: SF.lng, endLat: d.lat, endLng: d.lng, name: d.name, total: d.total, orgs: d.orgs, isOcean: d.isOcean, color: d.color
+    startLat: SF.lat, startLng: SF.lng, endLat: d.lat, endLng: d.lng, name: d.name, total: d.total, orgs: d.orgs, isOcean: d.isOcean, color: d.color, code: d.code
   })), [allDestinations]);
 
   useEffect(() => {
@@ -615,20 +635,15 @@ function GlobeTab({ donations }) {
             Your donations reach {countryCount} {countryCount === 1 ? "country" : "countries"}{oceanPointsData.length > 0 ? " and the world's oceans" : ""}
           </p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#f97316" }} />
-            <span style={{ fontSize: 12, color: C.textMuted, fontWeight: 500 }}>Land</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#0ea5e9" }} />
-            <span style={{ fontSize: 12, color: C.textMuted, fontWeight: 500 }}>Ocean</span>
-          </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ fontSize: 12, color: C.textMuted, fontWeight: 500, marginRight: 4 }}>From SF</span>
+          <div style={{ width: 40, height: 3, borderRadius: 2, background: "linear-gradient(to right, #fbbf24, #f472b6, #34d399, #22d3ee)", opacity: 0.7 }} />
+          <span style={{ fontSize: 12, color: C.textMuted, fontWeight: 500 }}>to the world</span>
         </div>
       </div>
 
-      <div ref={containerRef} style={{ background: "#1e293b", borderRadius: 20, overflow: "hidden", position: "relative", minHeight: 520 }}>
-        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 40%, rgba(15,118,110,0.12) 0%, transparent 70%)", pointerEvents: "none", zIndex: 1 }} />
+      <div ref={containerRef} style={{ background: "#2d3748", borderRadius: 20, overflow: "hidden", position: "relative", minHeight: 520 }}>
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 40%, rgba(99,102,241,0.1) 0%, rgba(15,118,110,0.08) 40%, transparent 70%)", pointerEvents: "none", zIndex: 1 }} />
         {!globeReady && !fetchError && (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, zIndex: 5 }}>
             <div style={{ width: 28, height: 28, border: "2px solid rgba(255,255,255,0.1)", borderTop: "2px solid rgba(255,255,255,0.6)", borderRadius: "50%", animation: "spin .8s linear infinite" }} />
@@ -643,12 +658,12 @@ function GlobeTab({ donations }) {
         {globeReady && (
           <Globe ref={globeRef} width={containerWidth} height={520} backgroundColor="rgba(0,0,0,0)"
             globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-            showAtmosphere={true} atmosphereColor="rgba(15,118,110,0.3)" atmosphereAltitude={0.15} animateIn={true}
+            showAtmosphere={true} atmosphereColor="rgba(99,102,241,0.25)" atmosphereAltitude={0.18} animateIn={true}
             polygonsData={countries}
             polygonAltitude={() => 0.002}
-            polygonCapColor={() => "rgba(255,255,255,0.05)"}
+            polygonCapColor={() => "rgba(255,255,255,0.03)"}
             polygonSideColor={() => "rgba(0,0,0,0)"}
-            polygonStrokeColor={() => "rgba(255,255,255,0.12)"}
+            polygonStrokeColor={() => "rgba(255,255,255,0.18)"}
             polygonLabel={d => {
               const code = getAlpha3(d); const name = d.properties.name || "Unknown"; const data = code && countryData[code];
               if (!data) return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:14px;padding:12px 18px;box-shadow:0 8px 24px rgba(0,0,0,0.12);font-family:'Inter',sans-serif;"><div style="font-size:15px;color:#2D1F14;font-weight:500;">${name}</div><div style="font-size:13px;color:#A89888;margin-top:3px;">No donations</div></div>`;
@@ -663,7 +678,7 @@ function GlobeTab({ donations }) {
             arcStartLng={d => d.startLng}
             arcEndLat={d => d.endLat}
             arcEndLng={d => d.endLng}
-            arcColor={d => d.isOcean ? ["rgba(14,165,233,0.6)", "rgba(14,165,233,0.3)"] : ["rgba(249,115,22,0.6)", "rgba(249,115,22,0.3)"]}
+            arcColor={d => [`${d.color}cc`, `${d.color}55`]}
             arcStroke={0.5}
             arcDashLength={0.6}
             arcDashGap={0.3}
@@ -673,7 +688,7 @@ function GlobeTab({ donations }) {
               const orgLines = Object.entries(d.orgs).sort((a, b) => b[1] - a[1]).map(([org, amt]) =>
                 `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:7px 0;border-bottom:1px solid rgba(180,140,100,0.08);"><span style="font-size:14px;color:#7C6B5E;">${org}</span><span style="font-size:14px;color:#2D1F14;font-weight:600;white-space:nowrap;">${fmt(amt)}</span></div>`
               ).join("");
-              const accent = d.isOcean ? "#0ea5e9" : "#0d9488";
+              const accent = d.color;
               const typeLabel = d.isOcean ? "Ocean Conservation" : "Country";
               return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:16px;padding:20px 24px;min-width:240px;max-width:340px;box-shadow:0 12px 32px rgba(0,0,0,0.15);font-family:'Inter',sans-serif;"><div style="font-size:12px;color:${accent};text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;font-weight:500;">${typeLabel}</div><div style="font-size:20px;font-weight:600;color:#2D1F14;margin-bottom:16px;font-family:'DM Sans',sans-serif;">${d.name}</div><div style="margin-bottom:16px;">${orgLines}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(180,140,100,0.1);"><span style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Total</span><span style="font-size:20px;font-weight:700;color:${accent};">${fmt(d.total)}</span></div></div>`;
             }}
@@ -681,7 +696,11 @@ function GlobeTab({ donations }) {
             ringLat={d => d.lat}
             ringLng={d => d.lng}
             ringAltitude={0.005}
-            ringColor={d => t => d.isOcean ? `rgba(14,165,233,${1 - t})` : `rgba(249,115,22,${1 - t})`}
+            ringColor={d => {
+              const hex = d.color;
+              const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+              return t => `rgba(${r},${g},${b},${1 - t})`;
+            }}
             ringMaxRadius={d => d.maxRadius}
             ringPropagationSpeed={1.5}
             ringRepeatPeriod={1400}
@@ -699,7 +718,7 @@ function GlobeTab({ donations }) {
               onMouseEnter={e => e.currentTarget.style.background = C.accentSoft}
               onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#f97316", flexShrink: 0 }} />
+                <div style={{ width: 12, height: 12, borderRadius: "50%", background: LIGHT_COLORS[code] || "#fbbf24", flexShrink: 0 }} />
                 <div>
                   <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{COUNTRY_NAMES[code] || code}</div>
                   <div style={{ fontSize: 13, color: C.textMuted, marginTop: 2 }}>{Object.keys(data.orgs).join(", ")}</div>
@@ -718,7 +737,7 @@ function GlobeTab({ donations }) {
                   onMouseEnter={e => e.currentTarget.style.background = "rgba(14,165,233,0.04)"}
                   onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
                   <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#0ea5e9", flexShrink: 0 }} />
+                    <div style={{ width: 12, height: 12, borderRadius: "50%", background: LIGHT_COLORS[pt.name] || "#22d3ee", flexShrink: 0 }} />
                     <div>
                       <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{pt.name}</div>
                       <div style={{ fontSize: 13, color: C.textMuted, marginTop: 2 }}>{pt.label}</div>
