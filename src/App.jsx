@@ -75,9 +75,9 @@ function getOrgColor(name) {
 
 const ORG_IMAGES = {
   "Save the Children": "https://plus.unsplash.com/premium_photo-1770394034525-2aa9baaabd5b?w=800&h=500&fit=crop&q=80",
-  "Doctors Without Borders": "https://www.doctorswithoutborders.org/sites/default/files/styles/crop_top_level_hero_mobile_375_221/public/image_base_media/2018/06/MSF141690.jpg",
-  "Médecins Sans Frontières": "https://www.doctorswithoutborders.org/sites/default/files/styles/crop_top_level_hero_mobile_375_221/public/image_base_media/2018/06/MSF141690.jpg",
-  "Médecins sans Frontières": "https://www.doctorswithoutborders.org/sites/default/files/styles/crop_top_level_hero_mobile_375_221/public/image_base_media/2018/06/MSF141690.jpg",
+  "Doctors Without Borders": "https://www.doctorswithoutborders.org/sites/default/files/styles/media_besides_text_666_520/public/MSF163911%28High%29_0.jpg",
+  "Médecins Sans Frontières": "https://www.doctorswithoutborders.org/sites/default/files/styles/collection_block_desktop_666_519/public/image_base_media/2026/02/MSF358702.jpg",
+  "Médecins sans Frontières": "https://www.doctorswithoutborders.org/sites/default/files/styles/collection_block_desktop_666_519/public/image_base_media/2026/02/MSF358702.jpg",
   "GiveWell": "https://assets.evidenceaction.org/web/images/_1280xAUTO_crop_center-center_none/ea-doctor.jpg",
   "Sea Shepherd": "https://images.unsplash.com/photo-1610581950163-c37ae06c3a96?w=800&h=500&fit=crop&q=80",
   "Evidence Action": "https://assets.evidenceaction.org/web/images/_1280xAUTO_crop_center-center_none/ea-kids.jpg",
@@ -129,7 +129,7 @@ const ORG_IMAGE_POS = {
   "Reality SF": "center 30%",             // volunteers at food pantry
   "SFHS": "center 30%",                   // SFHS students smiling together
 };
-const HERO_IMAGE = "https://images.unsplash.com/photo-1722963220475-979db2dbf216?w=1200&h=600&fit=crop&q=80";
+const HERO_IMAGE = "https://www.doctorswithoutborders.org/sites/default/files/styles/homepage_stats_block_desktop_1440x689/public/homepage-stats-bg.jpg";
 
 // ─── GLOBE DATA ──────────────────────────────────────────────
 
@@ -432,7 +432,7 @@ function parseSpreadsheetData(rows, userEmail) {
 
 // ─── STYLES ───────────────────────────────────────────────────
 
-const FONTS_URL = "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap";
+const FONTS_URL = "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap";
 const GLOBAL_CSS = `
   @keyframes fadeSlideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
   @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
@@ -441,28 +441,30 @@ const GLOBAL_CSS = `
   @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.7; } }
   @keyframes shimmer { 0% { background-position:-200% 0; } 100% { background-position:200% 0; } }
   * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#FBF8F3; color:#2D1F14; -webkit-font-smoothing:antialiased; }
+  body { font-family:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#FAF7F0; color:#222520; -webkit-font-smoothing:antialiased; }
   ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:rgba(120,80,40,0.15); border-radius:3px; }
-  ::selection { background:rgba(13,148,136,0.15); }
+  ::-webkit-scrollbar-thumb { background:rgba(34,37,32,0.15); border-radius:3px; }
+  ::selection { background:rgba(255,202,10,0.25); }
   img { -webkit-user-drag:none; }
 `;
 
 const C = {
-  bg: "#FBF8F3",
+  bg: "#FAF7F0",
   card: "#ffffff",
-  cardBorder: "rgba(180,140,100,0.12)",
-  cardShadow: "0 2px 8px rgba(180,120,60,0.06), 0 1px 3px rgba(180,120,60,0.04)",
-  cardHover: "0 8px 28px rgba(180,120,60,0.12)",
-  text: "#2D1F14",
-  textSoft: "#7C6B5E",
-  textMuted: "#A89888",
-  accent: "#0d9488",
-  accentLight: "#ccfbf1",
-  accentSoft: "rgba(13,148,136,0.06)",
+  cardBorder: "rgba(34,37,32,0.08)",
+  cardShadow: "0 2px 8px rgba(34,37,32,0.06), 0 1px 3px rgba(34,37,32,0.04)",
+  cardHover: "0 8px 28px rgba(34,37,32,0.1)",
+  text: "#222520",
+  textSoft: "#555850",
+  textMuted: "#8A8D85",
+  accent: "#FFCA0A",
+  accentDark: "#E0A800",
+  accentLight: "#FFF8E0",
+  accentSoft: "rgba(255,202,10,0.08)",
   warm: "#E07A30",
   warmLight: "#FFF4E8",
-  divider: "rgba(180,140,100,0.1)",
+  divider: "rgba(34,37,32,0.08)",
+  navy: "#003366",
 };
 
 const glass = {
@@ -522,7 +524,7 @@ function DonutChart({ data, size = 220 }) {
           <div style={{ fontSize: size < 180 ? 11 : 13, color: slices[hovered].color, fontWeight: 600 }}>{(slices[hovered].fraction * 100).toFixed(1)}%</div>
         </>) : (<>
           <div style={{ fontSize: size < 180 ? 10 : 12, color: C.textMuted, letterSpacing: ".08em", textTransform: "uppercase" }}>Total</div>
-          <div style={{ fontSize: size < 180 ? 16 : 26, fontWeight: 700, color: C.accent }}>{fmt(total)}</div>
+          <div style={{ fontSize: size < 180 ? 16 : 26, fontWeight: 700, color: C.navy }}>{fmt(total)}</div>
         </>)}
       </div>
     </div>
@@ -642,7 +644,7 @@ function GlobeTab({ donations }) {
     <div style={{ animation: "fadeSlideUp .4s ease" }}>
       <div style={{ ...glass, padding: "28px 32px", marginBottom: 18, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <h3 style={{ fontSize: 22, fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: C.text, margin: 0 }}>Global Impact</h3>
+          <h3 style={{ fontSize: 22, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 600, color: C.text, margin: 0 }}>Global Impact</h3>
           <p style={{ fontSize: 15, color: C.textSoft, fontWeight: 400, marginTop: 5 }}>
             Your donations reach {countryCount} {countryCount === 1 ? "country" : "countries"}{oceanPointsData.length > 0 ? " and the world's oceans" : ""}
           </p>
@@ -678,7 +680,7 @@ function GlobeTab({ donations }) {
             polygonStrokeColor={() => "rgba(255,255,255,0.18)"}
             polygonLabel={d => {
               const name = d.properties.name || "Unknown";
-              return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:10px;padding:8px 14px;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-family:'Inter',sans-serif;"><div style="font-size:14px;color:#2D1F14;font-weight:500;">${name}</div></div>`;
+              return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(34,37,32,0.12);border-radius:10px;padding:8px 14px;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-family:'Montserrat',sans-serif;"><div style="font-size:14px;color:#222520;font-weight:500;">${name}</div></div>`;
             }}
             onPolygonClick={d => { const code = getAlpha3(d); const c = code && COUNTRY_CENTROIDS[code]; const data = code && countryData[code]; if (c) focusPoint(c.lat, c.lng, data ? { name: d.properties.name || code, orgs: data.orgs, total: data.total, color: LIGHT_COLORS[code] || "#fbbf24", isOcean: false } : null); }}
             onPolygonHover={() => {}} polygonsTransitionDuration={300}
@@ -694,7 +696,7 @@ function GlobeTab({ donations }) {
             arcDashAnimateTime={1500}
             arcAltitudeAutoScale={0.4}
             onArcClick={d => focusPoint(d.endLat, d.endLng, { name: d.name, orgs: d.orgs, total: d.total, color: d.color, isOcean: d.isOcean })}
-            arcLabel={d => `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:10px;padding:8px 14px;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-family:'Inter',sans-serif;"><div style="font-size:14px;color:#2D1F14;font-weight:500;">${d.name}</div></div>`}
+            arcLabel={d => `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(34,37,32,0.12);border-radius:10px;padding:8px 14px;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-family:'Montserrat',sans-serif;"><div style="font-size:14px;color:#222520;font-weight:500;">${d.name}</div></div>`}
             ringsData={allDestinations}
             ringLat={d => d.lat}
             ringLng={d => d.lng}
@@ -718,24 +720,24 @@ function GlobeTab({ donations }) {
           />
         )}
         {selectedPoint && (
-          <div style={{ position: "absolute", top: 20, right: 20, zIndex: 10, background: "rgba(255,255,255,0.95)", backdropFilter: "blur(16px)", border: "1px solid rgba(180,140,100,0.12)", borderRadius: 16, padding: "20px 24px", minWidth: 240, maxWidth: 320, boxShadow: "0 12px 32px rgba(0,0,0,0.2)", fontFamily: "'Inter',sans-serif", animation: "fadeSlideUp .3s ease" }}>
+          <div style={{ position: "absolute", top: 20, right: 20, zIndex: 10, background: "rgba(255,255,255,0.95)", backdropFilter: "blur(16px)", border: "1px solid rgba(34,37,32,0.12)", borderRadius: 16, padding: "20px 24px", minWidth: 240, maxWidth: 320, boxShadow: "0 12px 32px rgba(0,0,0,0.2)", fontFamily: "'Montserrat',sans-serif", animation: "fadeSlideUp .3s ease" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
               <div>
                 <div style={{ fontSize: 12, color: selectedPoint.color, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 500, marginBottom: 4 }}>{selectedPoint.isOcean ? "Ocean Conservation" : "Country"}</div>
-                <div style={{ fontSize: 20, fontWeight: 600, color: "#2D1F14", fontFamily: "'DM Sans',sans-serif" }}>{selectedPoint.name}</div>
+                <div style={{ fontSize: 20, fontWeight: 600, color: "#222520", fontFamily: "'Playfair Display',Georgia,serif" }}>{selectedPoint.name}</div>
               </div>
-              <button onClick={() => setSelectedPoint(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: "2px 6px", fontSize: 18, color: "#A89888", lineHeight: 1 }}>&times;</button>
+              <button onClick={() => setSelectedPoint(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: "2px 6px", fontSize: 18, color: "#8A8D85", lineHeight: 1 }}>&times;</button>
             </div>
             <div style={{ marginBottom: 14 }}>
               {Object.entries(selectedPoint.orgs).sort((a, b) => b[1] - a[1]).map(([org, amt]) => (
-                <div key={org} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, padding: "7px 0", borderBottom: "1px solid rgba(180,140,100,0.08)" }}>
-                  <span style={{ fontSize: 14, color: "#7C6B5E" }}>{org}</span>
-                  <span style={{ fontSize: 14, color: "#2D1F14", fontWeight: 600, whiteSpace: "nowrap" }}>{fmt(amt)}</span>
+                <div key={org} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, padding: "7px 0", borderBottom: "1px solid rgba(34,37,32,0.08)" }}>
+                  <span style={{ fontSize: 14, color: "#555850" }}>{org}</span>
+                  <span style={{ fontSize: 14, color: "#222520", fontWeight: 600, whiteSpace: "nowrap" }}>{fmt(amt)}</span>
                 </div>
               ))}
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12, borderTop: "1px solid rgba(180,140,100,0.1)" }}>
-              <span style={{ fontSize: 12, color: "#A89888", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 500 }}>Total</span>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12, borderTop: "1px solid rgba(34,37,32,0.1)" }}>
+              <span style={{ fontSize: 12, color: "#8A8D85", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 500 }}>Total</span>
               <span style={{ fontSize: 20, fontWeight: 700, color: selectedPoint.color }}>{fmt(selectedPoint.total)}</span>
             </div>
           </div>
@@ -809,21 +811,21 @@ function LoginScreen({ onLogin }) {
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#FBF8F3", position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#FAF7F0", position: "relative", overflow: "hidden" }}>
       {/* Organic blobs */}
-      <div style={{ position: "fixed", top: -120, right: -80, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(13,148,136,0.08) 0%, transparent 70%)", filter: "blur(60px)", animation: "float 12s ease-in-out infinite", pointerEvents: "none" }} />
-      <div style={{ position: "fixed", bottom: -100, left: -60, width: 350, height: 350, borderRadius: "50%", background: "radial-gradient(circle, rgba(224,122,48,0.06) 0%, transparent 70%)", filter: "blur(60px)", animation: "float 15s ease-in-out infinite 2s", pointerEvents: "none" }} />
+      <div style={{ position: "fixed", top: -120, right: -80, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,202,10,0.1) 0%, transparent 70%)", filter: "blur(60px)", animation: "float 12s ease-in-out infinite", pointerEvents: "none" }} />
+      <div style={{ position: "fixed", bottom: -100, left: -60, width: 350, height: 350, borderRadius: "50%", background: "radial-gradient(circle, rgba(0,51,102,0.06) 0%, transparent 70%)", filter: "blur(60px)", animation: "float 15s ease-in-out infinite 2s", pointerEvents: "none" }} />
 
       <div style={{ width: 460, textAlign: "center", animation: "fadeSlideUp .6s ease", zIndex: 1 }}>
-        <div style={{ width: 64, height: 64, borderRadius: 18, background: "linear-gradient(135deg, #0d9488, #0284c7)", margin: "0 auto 32px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 24px rgba(13,148,136,0.3)" }}>
+        <div style={{ width: 64, height: 64, borderRadius: 18, background: "linear-gradient(135deg, #003366, #005599)", margin: "0 auto 32px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 24px rgba(0,51,102,0.3)" }}>
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
         </div>
-        <h1 style={{ fontSize: 38, fontFamily: "'DM Sans',sans-serif", fontWeight: 700, color: C.text, margin: "0 0 10px", letterSpacing: "-0.03em" }}>GiveTrack</h1>
+        <h1 style={{ fontSize: 38, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700, color: C.text, margin: "0 0 10px", letterSpacing: "-0.03em" }}>GiveTrack</h1>
         <p style={{ color: C.textSoft, fontSize: 17, margin: "0 0 48px", fontWeight: 400 }}>Track the impact of your generosity</p>
 
-        <div style={{ ...glass, padding: "48px 52px", boxShadow: "0 8px 40px rgba(180,120,60,0.08)" }}>
+        <div style={{ ...glass, padding: "48px 52px", boxShadow: "0 8px 40px rgba(34,37,32,0.08)" }}>
           <p style={{ color: C.textSoft, fontSize: 16, marginBottom: 32, fontWeight: 400, lineHeight: 1.6 }}>Sign in with your company Google account to view your charitable giving.</p>
           <div id="google-signin-btn" style={{ display: "flex", justifyContent: "center" }}></div>
           {error && <div style={{ color: "#dc2626", fontSize: 15, marginTop: 18, fontWeight: 500 }}>{error}</div>}
@@ -974,19 +976,19 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
   return (
     <div style={{ minHeight: "100vh", background: C.bg, position: "relative", overflow: "hidden" }}>
       {/* Organic background blobs */}
-      <div style={{ position: "fixed", top: 80, right: -100, width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(13,148,136,0.05) 0%, transparent 70%)", filter: "blur(80px)", animation: "float 18s ease-in-out infinite", pointerEvents: "none", zIndex: 0 }} />
-      <div style={{ position: "fixed", top: "50%", left: -120, width: 450, height: 450, borderRadius: "50%", background: "radial-gradient(circle, rgba(224,122,48,0.04) 0%, transparent 70%)", filter: "blur(80px)", animation: "float 22s ease-in-out infinite 3s", pointerEvents: "none", zIndex: 0 }} />
-      <div style={{ position: "fixed", bottom: -80, right: "30%", width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(124,58,237,0.03) 0%, transparent 70%)", filter: "blur(80px)", animation: "float 20s ease-in-out infinite 6s", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", top: 80, right: -100, width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,202,10,0.07) 0%, transparent 70%)", filter: "blur(80px)", animation: "float 18s ease-in-out infinite", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", top: "50%", left: -120, width: 450, height: 450, borderRadius: "50%", background: "radial-gradient(circle, rgba(0,51,102,0.04) 0%, transparent 70%)", filter: "blur(80px)", animation: "float 22s ease-in-out infinite 3s", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", bottom: -80, right: "30%", width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,202,10,0.04) 0%, transparent 70%)", filter: "blur(80px)", animation: "float 20s ease-in-out infinite 6s", pointerEvents: "none", zIndex: 0 }} />
 
       {/* Header */}
-      <header style={{ padding: "18px 36px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.divider}`, background: "rgba(251,248,243,0.8)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 1px 3px rgba(180,120,60,0.04)" }}>
+      <header style={{ padding: "18px 36px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.divider}`, background: "rgba(250,247,240,0.8)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 1px 3px rgba(34,37,32,0.04)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #0d9488, #0284c7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #003366, #005599)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
           </div>
-          <span style={{ fontSize: 19, fontFamily: "'DM Sans',sans-serif", fontWeight: 700, color: C.text, letterSpacing: "-0.01em" }}>GiveTrack</span>
+          <span style={{ fontSize: 19, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700, color: C.text, letterSpacing: "-0.01em" }}>GiveTrack</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
           <div style={{ textAlign: "right" }}>
@@ -995,7 +997,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
           </div>
           {user.picture && <img src={user.picture} alt="" style={{ width: 38, height: 38, borderRadius: "50%", border: `2px solid ${C.divider}` }} />}
           <button onClick={onLogout} style={{ padding: "8px 18px", background: "transparent", border: `1px solid ${C.cardBorder}`, borderRadius: 10, color: C.textSoft, fontSize: 14, cursor: "pointer", transition: "all .15s", fontWeight: 500 }}
-            onMouseEnter={e => { e.target.style.borderColor = "rgba(180,140,100,0.25)"; e.target.style.color = C.text; e.target.style.background = "rgba(180,140,100,0.04)"; }}
+            onMouseEnter={e => { e.target.style.borderColor = "rgba(34,37,32,0.25)"; e.target.style.color = C.text; e.target.style.background = "rgba(34,37,32,0.04)"; }}
             onMouseLeave={e => { e.target.style.borderColor = C.cardBorder; e.target.style.color = C.textSoft; e.target.style.background = "transparent"; }}>Sign out</button>
         </div>
       </header>
@@ -1006,7 +1008,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
         {donations.length === 0 && !dataError ? (
           <div style={{ ...glass, padding: "64px 36px", textAlign: "center", animation: "fadeSlideUp .4s ease" }}>
             <div style={{ width: 56, height: 56, borderRadius: 16, background: C.accentLight, margin: "0 auto 24px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={C.navy} strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             </div>
             <h3 style={{ fontSize: 20, fontWeight: 600, color: C.text, marginBottom: 10 }}>No donations found</h3>
             <p style={{ color: C.textSoft, fontSize: 16, maxWidth: 400, margin: "0 auto", lineHeight: 1.6 }}>We couldn't find any records linked to {user.email}. Please contact your administrator.</p>
@@ -1034,10 +1036,10 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
             <div style={{ borderRadius: 24, overflow: "hidden", position: "relative", height: 280, marginBottom: 20, animation: "fadeSlideUp .5s ease" }}>
               <img src={HERO_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                 onError={e => { e.target.style.display = "none"; }} />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(13,148,136,0.85) 0%, rgba(2,132,199,0.75) 100%)" }} />
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(0,51,102,0.88) 0%, rgba(0,85,153,0.78) 100%)" }} />
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "40px 48px" }}>
                 <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 10 }}>Total Donated</div>
-                <div style={{ fontSize: 60, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.25), 0 0 80px rgba(255,255,255,0.15)" }}>
+                <div style={{ fontSize: 60, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.25), 0 0 80px rgba(255,255,255,0.15)" }}>
                   <AnimatedNumber value={totalDonated} currency={primaryCurrency} />
                 </div>
                 <div style={{ fontSize: 17, color: "rgba(255,255,255,0.7)", marginTop: 14, fontWeight: 400 }}>
@@ -1056,11 +1058,11 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                 <div key={i} style={{ ...glass, padding: "26px 28px", animation: `fadeSlideUp .4s ease ${i*.06}s both`, transition: "box-shadow .2s, transform .2s", cursor: "default" }}
                   onMouseEnter={e => { e.currentTarget.style.boxShadow = C.cardHover; e.currentTarget.style.transform = "translateY(-3px)"; }}
                   onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; e.currentTarget.style.transform = "translateY(0)"; }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: C.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16, color: C.accent }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: C.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16, color: C.navy }}>
                     {card.icon}
                   </div>
                   <div style={{ fontSize: 13, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 10, fontWeight: 500 }}>{card.label}</div>
-                  <div style={{ fontSize: 34, fontWeight: 700, color: C.text, marginBottom: 6, lineHeight: 1, fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.02em" }}>
+                  <div style={{ fontSize: 34, fontWeight: 700, color: C.text, marginBottom: 6, lineHeight: 1, fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.02em" }}>
                     {card.isCount ? card.value : <AnimatedNumber value={card.value} currency={primaryCurrency} />}
                   </div>
                   <div style={{ fontSize: 14, color: C.textSoft, fontWeight: 400 }}>{card.sub}</div>
@@ -1072,7 +1074,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
             <div style={{ display: "grid", gridTemplateColumns: months.length > 1 ? "1.5fr 1fr" : "1fr", gap: 18 }}>
               {months.length > 1 && (
                 <div style={{ ...glass, padding: "28px 32px", animation: "fadeSlideUp .4s ease .15s both" }}>
-                  <h3 style={{ fontSize: 17, fontWeight: 600, color: C.text, margin: "0 0 24px", fontFamily: "'DM Sans',sans-serif" }}>Monthly overview</h3>
+                  <h3 style={{ fontSize: 17, fontWeight: 600, color: C.text, margin: "0 0 24px", fontFamily: "'Playfair Display',Georgia,serif" }}>Monthly overview</h3>
                   <BarChart data={monthlyData} />
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px 18px", marginTop: 16, padding: "16px 0 0", borderTop: `1px solid ${C.divider}` }}>
                     {Object.entries(orgTotals).sort((a, b) => b[1] - a[1]).map(([n]) => (
@@ -1085,7 +1087,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                 </div>
               )}
               <div style={{ ...glass, padding: "28px 32px", display: "flex", flexDirection: "column", alignItems: "center", animation: "fadeSlideUp .4s ease .2s both" }}>
-                <h3 style={{ fontSize: 17, fontWeight: 600, color: C.text, margin: "0 0 24px", alignSelf: "flex-start", fontFamily: "'DM Sans',sans-serif" }}>Allocation breakdown</h3>
+                <h3 style={{ fontSize: 17, fontWeight: 600, color: C.text, margin: "0 0 24px", alignSelf: "flex-start", fontFamily: "'Playfair Display',Georgia,serif" }}>Allocation breakdown</h3>
                 <DonutChart data={donutData} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 24, width: "100%" }}>
                   {donutData.slice(0, 8).map((d, i) => (
@@ -1109,12 +1111,12 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
 
             {/* Top cause areas strip */}
             <div style={{ ...glass, marginTop: 18, padding: "24px 32px", animation: "fadeSlideUp .4s ease .25s both" }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: C.accent, textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 16 }}>Your Cause Areas</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: C.navy, textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 16 }}>Your Cause Areas</div>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                 {Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]).map(([cat, amt]) => (
-                  <div key={cat} style={{ padding: "10px 18px", borderRadius: 14, background: C.accentSoft, border: `1px solid rgba(13,148,136,0.1)`, display: "flex", alignItems: "center", gap: 10 }}>
+                  <div key={cat} style={{ padding: "10px 18px", borderRadius: 14, background: C.accentSoft, border: `1px solid rgba(255,202,10,0.2)`, display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{cat}</span>
-                    <span style={{ fontSize: 13, color: C.accent, fontWeight: 600 }}>{fmt(amt)}</span>
+                    <span style={{ fontSize: 13, color: C.navy, fontWeight: 600 }}>{fmt(amt)}</span>
                   </div>
                 ))}
               </div>
@@ -1153,7 +1155,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                         )}
                         {/* Name on photo */}
                         <div style={{ position: "absolute", bottom: 14, left: 18, right: 18 }}>
-                          <div style={{ fontSize: 18, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans',sans-serif", textShadow: "0 1px 4px rgba(0,0,0,0.3)" }}>{name}</div>
+                          <div style={{ fontSize: 18, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", textShadow: "0 1px 4px rgba(0,0,0,0.3)" }}>{name}</div>
                         </div>
                       </div>
 
@@ -1163,10 +1165,10 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                           <div>
                             <span style={{ fontSize: 13, color: C.textMuted, fontWeight: 500 }}>{od.length} contribution{od.length !== 1 ? "s" : ""}</span>
                             {url && (
-                              <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ marginLeft: 12, fontSize: 13, color: C.accent, textDecoration: "none", fontWeight: 500 }}>Visit site</a>
+                              <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ marginLeft: 12, fontSize: 13, color: C.navy, textDecoration: "none", fontWeight: 500 }}>Visit site</a>
                             )}
                           </div>
-                          <div style={{ fontSize: 26, fontWeight: 700, color, fontFamily: "'DM Sans',sans-serif" }}>{fmt(total)}</div>
+                          <div style={{ fontSize: 26, fontWeight: 700, color, fontFamily: "'Playfair Display',Georgia,serif" }}>{fmt(total)}</div>
                         </div>
 
                         {/* Expand arrow */}
@@ -1194,7 +1196,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                             {od.length > 0 && (
                               <div style={{ marginTop: 12, display: "flex", gap: 14, flexWrap: "wrap" }}>
                                 {[...new Set(od.map(d => d.cycle))].map(c => (
-                                  <span key={c} style={{ fontSize: 12, color: C.textMuted, background: "rgba(180,140,100,0.06)", padding: "4px 10px", borderRadius: 8 }}>{c}</span>
+                                  <span key={c} style={{ fontSize: 12, color: C.textMuted, background: "rgba(34,37,32,0.06)", padding: "4px 10px", borderRadius: 8 }}>{c}</span>
                                 ))}
                               </div>
                             )}
@@ -1213,7 +1215,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
             <div style={{ animation: "fadeSlideUp .3s ease" }}>
               <div style={{ ...glass, padding: "22px 32px", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: C.accent, textTransform: "uppercase", letterSpacing: ".06em" }}>Allocation Summary</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: C.navy, textTransform: "uppercase", letterSpacing: ".06em" }}>Allocation Summary</div>
                   <div style={{ fontSize: 16, color: C.textSoft, marginTop: 5 }}>
                     You've allocated <strong style={{ color: C.text }}>{fmt(totalDonated, primaryCurrency)}</strong> across <strong style={{ color: C.text }}>{months.length} month{months.length !== 1 ? "s" : ""}</strong>
                   </div>
@@ -1227,10 +1229,10 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                 <div key={mb.month} style={{ ...glass, marginBottom: 22, overflow: "hidden", animation: `fadeSlideUp .4s ease ${ci*.06}s both` }}>
                   <div style={{ padding: "22px 32px", borderBottom: `1px solid ${C.divider}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
-                      <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, fontFamily: "'DM Sans',sans-serif", margin: 0 }}>{mb.month}</h3>
+                      <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: 0 }}>{mb.month}</h3>
                       <span style={{ fontSize: 14, color: C.textSoft, marginTop: 4, display: "block" }}>{mb.donationCount} transaction{mb.donationCount !== 1 ? "s" : ""}</span>
                     </div>
-                    <div style={{ fontSize: 28, fontWeight: 700, color: C.accent, fontFamily: "'DM Sans',sans-serif" }}>{fmt(mb.total, primaryCurrency)}</div>
+                    <div style={{ fontSize: 28, fontWeight: 700, color: C.navy, fontFamily: "'Playfair Display',Georgia,serif" }}>{fmt(mb.total, primaryCurrency)}</div>
                   </div>
 
                   <div style={{ padding: "26px 32px", display: "flex", gap: 36, alignItems: "flex-start" }}>
@@ -1263,10 +1265,10 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
           {activeTab === "team" && (
             <div style={{ animation: "fadeSlideUp .3s ease" }}>
               {/* Team hero */}
-              <div style={{ borderRadius: 24, overflow: "hidden", position: "relative", height: 240, marginBottom: 22, background: "linear-gradient(135deg, rgba(13,148,136,1) 0%, rgba(124,58,237,0.85) 100%)" }}>
+              <div style={{ borderRadius: 24, overflow: "hidden", position: "relative", height: 240, marginBottom: 22, background: "linear-gradient(135deg, rgba(0,51,102,1) 0%, rgba(0,85,153,0.9) 100%)" }}>
                 <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "36px 48px" }}>
                   <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 8 }}>Isara Team Impact</div>
-                  <div style={{ fontSize: 54, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans',sans-serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.25), 0 0 80px rgba(255,255,255,0.15)" }}>
+                  <div style={{ fontSize: 54, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.25), 0 0 80px rgba(255,255,255,0.15)" }}>
                     {fmt(teamData.teamTotal)}
                   </div>
                   <div style={{ fontSize: 17, color: "rgba(255,255,255,0.7)", marginTop: 12 }}>
@@ -1283,22 +1285,22 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                   { label: "Cause Areas", value: teamData.orgsByCategory.length, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> },
                 ].map((stat, i) => (
                   <div key={i} style={{ ...glass, padding: "24px 28px", animation: `fadeSlideUp .4s ease ${i*.06}s both` }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 12, background: C.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14, color: C.accent }}>{stat.icon}</div>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, background: C.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14, color: C.navy }}>{stat.icon}</div>
                     <div style={{ fontSize: 13, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 8, fontWeight: 500 }}>{stat.label}</div>
-                    <div style={{ fontSize: 32, fontWeight: 700, color: C.text, fontFamily: "'DM Sans',sans-serif", lineHeight: 1 }}>{stat.value}</div>
+                    <div style={{ fontSize: 32, fontWeight: 700, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", lineHeight: 1 }}>{stat.value}</div>
                   </div>
                 ))}
               </div>
 
               {/* Organizations we support — grouped by category */}
               <div style={{ ...glass, padding: "32px 36px", animation: "fadeSlideUp .4s ease .1s both" }}>
-                <h3 style={{ fontSize: 20, fontWeight: 600, color: C.text, margin: "0 0 8px", fontFamily: "'DM Sans',sans-serif" }}>Organizations We Support</h3>
+                <h3 style={{ fontSize: 20, fontWeight: 600, color: C.text, margin: "0 0 8px", fontFamily: "'Playfair Display',Georgia,serif" }}>Organizations We Support</h3>
                 <p style={{ fontSize: 15, color: C.textSoft, margin: "0 0 28px" }}>Our team collectively supports these organizations across {teamData.orgsByCategory.length} cause areas.</p>
 
                 {teamData.orgsByCategory.map(([category, orgs], ci) => (
                   <div key={category} style={{ marginBottom: ci < teamData.orgsByCategory.length - 1 ? 28 : 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: C.accent, textTransform: "uppercase", letterSpacing: ".08em" }}>{category}</div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: C.navy, textTransform: "uppercase", letterSpacing: ".08em" }}>{category}</div>
                       <div style={{ flex: 1, height: 1, background: C.divider }} />
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
@@ -1309,7 +1311,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                         const color = getOrgColor(orgName);
                         return (
                           <div key={orgName} style={{ display: "flex", gap: 14, padding: "16px 18px", borderRadius: 14, border: `1px solid ${C.divider}`, transition: "all .2s", background: "rgba(255,255,255,0.4)" }}
-                            onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(13,148,136,0.2)"; e.currentTarget.style.background = C.accentSoft; }}
+                            onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,202,10,0.3)"; e.currentTarget.style.background = C.accentSoft; }}
                             onMouseLeave={e => { e.currentTarget.style.borderColor = C.divider; e.currentTarget.style.background = "rgba(255,255,255,0.4)"; }}>
                             {/* Org thumbnail */}
                             <div style={{ width: 52, height: 52, borderRadius: 12, overflow: "hidden", flexShrink: 0, background: `linear-gradient(135deg, ${color}22, ${color}44)` }}>
@@ -1317,7 +1319,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                                 <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: ORG_IMAGE_POS[orgName] || "center center" }}
                                   onError={() => setImgErrors(prev => ({ ...prev, [orgName]: true }))} />
                               ) : (
-                                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700, color, fontFamily: "'DM Sans',sans-serif" }}>
+                                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700, color, fontFamily: "'Playfair Display',Georgia,serif" }}>
                                   {orgName.charAt(0)}
                                 </div>
                               )}
@@ -1327,7 +1329,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                               <div style={{ fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 4 }}>{orgName}</div>
                               <div style={{ fontSize: 13, color: C.textSoft, lineHeight: 1.5, marginBottom: 6 }}>{desc}</div>
                               {website && (
-                                <a href={website} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: C.accent, textDecoration: "none", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 4 }}
+                                <a href={website} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: C.navy, textDecoration: "none", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 4 }}
                                   onClick={e => e.stopPropagation()}>
                                   Visit website
                                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
