@@ -496,7 +496,11 @@ const CYCLE_MAP = {
 };
 
 // All known org names for the dropdown
-const ALL_KNOWN_ORGS = Object.keys(ORG_WEBSITES).sort();
+// All orgs: from ORG_WEBSITES + every org anyone has ever donated to in DEMO_DATA
+const ALL_KNOWN_ORGS = [...new Set([
+  ...Object.keys(ORG_WEBSITES),
+  ...Object.values(DEMO_DATA).flatMap(dons => dons.map(d => d.orgName)),
+])].sort();
 
 function seedFromDemoData() {
   if (localStorage.getItem("givetrack_pay_cycles")) return; // already seeded
@@ -824,49 +828,55 @@ function DonateTab({ userEmail }) {
           const amt = (alloc.percentage / 100) * budget.cycleAmount;
           return (
             <div key={idx} style={{ padding: "18px 0", borderBottom: idx < allocations.length - 1 ? `1px solid ${C.divider}` : "none", animation: `fadeSlideUp .3s ease ${idx * 0.03}s both` }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-                <div style={{ flex: 1 }}>
-                  <select
-                    value={alloc.orgName}
-                    onChange={e => {
-                      const name = e.target.value;
-                      const url = ORG_WEBSITES[name] || "";
-                      updateRow(idx, "orgName", name);
-                      updateRow(idx, "paidTo", url);
-                    }}
+              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
+                <select
+                  value={alloc.orgName}
+                  onChange={e => {
+                    const name = e.target.value;
+                    const url = ORG_WEBSITES[name] || "";
+                    updateRow(idx, "orgName", name);
+                    updateRow(idx, "paidTo", url);
+                  }}
+                  disabled={isLocked}
+                  style={{ width: 320, padding: "10px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, background: "#fff", color: C.text, fontFamily: "'Montserrat',sans-serif", cursor: isLocked ? "not-allowed" : "pointer" }}>
+                  <option value="">Select an organization...</option>
+                  {ALL_KNOWN_ORGS.map(name => (
+                    <option key={name} value={name} disabled={selectedOrgs.includes(name) && alloc.orgName !== name}>{name}</option>
+                  ))}
+                  <option value="__other">Other (enter name or URL)</option>
+                </select>
+                {alloc.orgName === "__other" && (
+                  <input
+                    type="text" placeholder="Enter org name or URL" value={alloc.paidTo}
+                    onChange={e => updateRow(idx, "paidTo", e.target.value)}
                     disabled={isLocked}
-                    style={{ width: "100%", padding: "10px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, background: "#fff", color: C.text, fontFamily: "'Montserrat',sans-serif", cursor: isLocked ? "not-allowed" : "pointer" }}>
-                    <option value="">Select an organization...</option>
-                    {ALL_KNOWN_ORGS.map(name => (
-                      <option key={name} value={name} disabled={selectedOrgs.includes(name) && alloc.orgName !== name}>{name}</option>
-                    ))}
-                    <option value="__other">Other (enter URL)</option>
-                  </select>
-                  {alloc.orgName === "__other" && (
-                    <input
-                      type="text" placeholder="Enter org name or URL" value={alloc.paidTo}
-                      onChange={e => updateRow(idx, "paidTo", e.target.value)}
-                      disabled={isLocked}
-                      style={{ width: "100%", padding: "10px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, marginTop: 8, fontFamily: "'Montserrat',sans-serif" }} />
-                  )}
-                </div>
+                    style={{ width: 260, padding: "10px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
+                )}
+                <span style={{ fontSize: 15, fontWeight: 600, color: C.navy, minWidth: 90, textAlign: "right", marginLeft: "auto" }}>{fmt(amt, budget.currency)}</span>
                 {allocations.length > 1 && !isLocked && (
                   <button onClick={() => removeRow(idx)} style={{ background: "none", border: "none", color: C.textMuted, cursor: "pointer", fontSize: 20, padding: "4px 8px", lineHeight: 1 }}>&times;</button>
                 )}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                <div style={{ flex: 1, position: "relative" }}>
+                  <input
+                    type="range" min="0" max="100" step="5" list={`ticks-${idx}`}
+                    value={alloc.percentage} onChange={e => updateRow(idx, "percentage", parseFloat(e.target.value))}
+                    disabled={isLocked}
+                    style={{ width: "100%", accentColor: C.accent, cursor: isLocked ? "not-allowed" : "pointer" }} />
+                  <datalist id={`ticks-${idx}`}>
+                    {[0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100].map(v => <option key={v} value={v} />)}
+                  </datalist>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2, padding: "0 2px" }}>
+                    {[0,25,50,75,100].map(v => <span key={v} style={{ fontSize: 10, color: C.textMuted }}>{v}%</span>)}
+                  </div>
+                </div>
                 <input
-                  type="range" min="0" max="100" step="0.5"
-                  value={alloc.percentage} onChange={e => updateRow(idx, "percentage", parseFloat(e.target.value))}
-                  disabled={isLocked}
-                  style={{ flex: 1, accentColor: C.accent, cursor: isLocked ? "not-allowed" : "pointer" }} />
-                <input
-                  type="number" min="0" max="100" step="0.5"
+                  type="number" min="0" max="100" step="5"
                   value={alloc.percentage} onChange={e => updateRow(idx, "percentage", Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)))}
                   disabled={isLocked}
                   style={{ width: 64, padding: "6px 10px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, textAlign: "center", fontFamily: "'Montserrat',sans-serif" }} />
                 <span style={{ fontSize: 13, color: C.textMuted, width: 16 }}>%</span>
-                <span style={{ fontSize: 15, fontWeight: 600, color: C.navy, minWidth: 90, textAlign: "right" }}>{fmt(amt, budget.currency)}</span>
               </div>
             </div>
           );
@@ -1017,7 +1027,17 @@ function AdminTracker({ selectedCycleId }) {
     reader.readAsDataURL(file);
   };
 
-  let lastEmail = "";
+  // Group rows by employee for subtotals
+  const employeeGroups = [];
+  let currentGroup = null;
+  rows.forEach(row => {
+    if (!currentGroup || currentGroup.email !== row.email) {
+      currentGroup = { email: row.email, name: row.name, currency: row.currency, rows: [] };
+      employeeGroups.push(currentGroup);
+    }
+    currentGroup.rows.push(row);
+  });
+
   return (
     <div>
       {viewReceipt && <ReceiptModal src={viewReceipt.src} fileName={viewReceipt.name} onClose={() => setViewReceipt(null)} />}
@@ -1032,12 +1052,15 @@ function AdminTracker({ selectedCycleId }) {
         {rows.length === 0 && (
           <div style={{ padding: "40px 20px", textAlign: "center", color: C.textMuted, fontSize: 15 }}>No submissions for this cycle yet.</div>
         )}
-        {rows.map((row, i) => {
-          const showName = row.email !== lastEmail;
-          lastEmail = row.email;
-          return (
-            <div key={`${row.email}-${row.orgName}`} style={{ display: "grid", gridTemplateColumns: "160px 1fr 100px 50px 110px 90px", padding: "12px 20px", borderBottom: `1px solid ${C.divider}`, alignItems: "center", background: showName && i > 0 ? "rgba(34,37,32,0.015)" : "transparent" }}>
-              <div style={{ fontSize: 14, fontWeight: showName ? 600 : 400, color: showName ? C.text : "transparent" }}>{showName ? row.name : row.name}</div>
+        {employeeGroups.map((group, gi) => {
+          const groupTotal = group.rows.reduce((s, r) => s + r.amount, 0);
+          return group.rows.map((row, ri) => {
+            const showName = ri === 0;
+            const isLastInGroup = ri === group.rows.length - 1;
+            return (
+              <div key={`${row.email}-${row.orgName}`}>
+                <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 100px 50px 110px 90px", padding: "12px 20px", borderBottom: isLastInGroup ? "none" : `1px solid ${C.divider}`, alignItems: "center", background: gi % 2 === 1 ? "rgba(34,37,32,0.015)" : "transparent" }}>
+              <div style={{ fontSize: 14, fontWeight: showName ? 600 : 400, color: showName ? C.text : "transparent" }}>{row.name}</div>
               <div style={{ fontSize: 14, color: C.textSoft }}>{row.orgName}</div>
               <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{fmt(row.amount, row.currency)}</div>
               <div>
@@ -1064,8 +1087,19 @@ function AdminTracker({ selectedCycleId }) {
                   </label>
                 )}
               </div>
-            </div>
-          );
+                </div>
+                {/* Subtotal row after last item in group */}
+                {isLastInGroup && (
+                  <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 100px 50px 110px 90px", padding: "8px 20px", borderBottom: `2px solid ${C.divider}`, alignItems: "center", background: gi % 2 === 1 ? "rgba(34,37,32,0.03)" : "rgba(34,37,32,0.02)" }}>
+                    <div />
+                    <div style={{ fontSize: 13, fontWeight: 600, color: C.textMuted, textAlign: "right", paddingRight: 12 }}>Subtotal</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: C.navy }}>{fmt(groupTotal, group.currency)}</div>
+                    <div /><div /><div />
+                  </div>
+                )}
+              </div>
+            );
+          });
         })}
         {/* Summary */}
         <div style={{ padding: "16px 20px", borderTop: `1px solid ${C.divider}`, display: "flex", justifyContent: "space-between", background: "rgba(34,37,32,0.02)" }}>
