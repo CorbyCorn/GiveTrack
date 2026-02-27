@@ -129,7 +129,7 @@ const ORG_IMAGE_POS = {
   "Reality SF": "center 30%",             // volunteers at food pantry
   "SFHS": "center 30%",                   // SFHS students smiling together
 };
-const HERO_IMAGE = "/hero.jpg";
+const HERO_IMAGE = "/banner.jpg";
 
 // ─── GLOBE DATA ──────────────────────────────────────────────
 
@@ -1005,7 +1005,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
       {donations.length > 0 && activeTab === "overview" && (<>
         {/* FULL-BLEED HERO */}
         <div style={{ position: "relative", height: 620, overflow: "hidden", animation: "fadeSlideUp .5s ease" }}>
-          <img src={HERO_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 55%", display: "block", filter: "saturate(1.15) contrast(1.1) sepia(0.25) brightness(1.05)" }}
+          <img src={HERO_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 60%", display: "block", filter: "saturate(1.15) contrast(1.1) sepia(0.25) brightness(1.05)" }}
             onError={e => { e.target.style.display = "none"; }} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(220,160,60,0.18) 0%, rgba(200,100,50,0.12) 50%, rgba(180,140,80,0.15) 100%)", mixBlendMode: "multiply" }} />
           <div style={{ position: "absolute", inset: 0, background: "rgba(255,240,200,0.08)", mixBlendMode: "screen" }} />
