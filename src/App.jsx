@@ -562,6 +562,7 @@ function GlobeTab({ donations }) {
   const [globeReady, setGlobeReady] = useState(false);
   const [fetchError, setFetchError] = useState(false);
   const [containerWidth, setContainerWidth] = useState(800);
+  const [selectedPoint, setSelectedPoint] = useState(null);
 
   const countryData = useMemo(() => aggregateDonationsByCountry(donations), [donations]);
   const maxDonation = useMemo(() => Math.max(...Object.values(countryData).map(d => d.total), 1), [countryData]);
@@ -625,12 +626,13 @@ function GlobeTab({ donations }) {
   }, [globeReady]);
 
   const pauseRef = useRef(null);
-  const focusPoint = (lat, lng) => {
+  const focusPoint = (lat, lng, data) => {
     if (!globeRef.current) return;
     const controls = globeRef.current.controls();
     controls.autoRotate = false;
     clearTimeout(pauseRef.current);
     globeRef.current.pointOfView({ lat, lng, altitude: 0.9 }, 800);
+    if (data) setSelectedPoint(data);
     pauseRef.current = setTimeout(() => { controls.autoRotate = true; }, 10000);
   };
 
@@ -675,14 +677,10 @@ function GlobeTab({ donations }) {
             polygonSideColor={() => "rgba(0,0,0,0)"}
             polygonStrokeColor={() => "rgba(255,255,255,0.18)"}
             polygonLabel={d => {
-              const code = getAlpha3(d); const name = d.properties.name || "Unknown"; const data = code && countryData[code];
-              if (!data) return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:14px;padding:12px 18px;box-shadow:0 8px 24px rgba(0,0,0,0.12);font-family:'Inter',sans-serif;"><div style="font-size:15px;color:#2D1F14;font-weight:500;">${name}</div><div style="font-size:13px;color:#A89888;margin-top:3px;">No donations</div></div>`;
-              const orgLines = Object.entries(data.orgs).sort((a, b) => b[1] - a[1]).map(([org, amt]) =>
-                `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:7px 0;border-bottom:1px solid rgba(180,140,100,0.08);"><span style="font-size:14px;color:#7C6B5E;">${org}</span><span style="font-size:14px;color:#2D1F14;font-weight:600;white-space:nowrap;">${fmt(amt)}</span></div>`
-              ).join("");
-              return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:16px;padding:20px 24px;min-width:240px;max-width:340px;box-shadow:0 12px 32px rgba(0,0,0,0.15);font-family:'Inter',sans-serif;"><div style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;font-weight:500;">Country</div><div style="font-size:20px;font-weight:600;color:#2D1F14;margin-bottom:16px;font-family:'DM Sans',sans-serif;">${name}</div><div style="margin-bottom:16px;">${orgLines}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(180,140,100,0.1);"><span style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Total</span><span style="font-size:20px;font-weight:700;color:#0d9488;">${fmt(data.total)}</span></div></div>`;
+              const name = d.properties.name || "Unknown";
+              return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:10px;padding:8px 14px;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-family:'Inter',sans-serif;"><div style="font-size:14px;color:#2D1F14;font-weight:500;">${name}</div></div>`;
             }}
-            onPolygonClick={d => { const code = getAlpha3(d); const c = code && COUNTRY_CENTROIDS[code]; if (c) focusPoint(c.lat, c.lng); }}
+            onPolygonClick={d => { const code = getAlpha3(d); const c = code && COUNTRY_CENTROIDS[code]; const data = code && countryData[code]; if (c) focusPoint(c.lat, c.lng, data ? { name: d.properties.name || code, orgs: data.orgs, total: data.total, color: LIGHT_COLORS[code] || "#fbbf24", isOcean: false } : null); }}
             onPolygonHover={() => {}} polygonsTransitionDuration={300}
             arcsData={arcsData}
             arcStartLat={d => d.startLat}
@@ -695,15 +693,8 @@ function GlobeTab({ donations }) {
             arcDashGap={0.15}
             arcDashAnimateTime={1500}
             arcAltitudeAutoScale={0.4}
-            onArcClick={d => focusPoint(d.endLat, d.endLng)}
-            arcLabel={d => {
-              const orgLines = Object.entries(d.orgs).sort((a, b) => b[1] - a[1]).map(([org, amt]) =>
-                `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:7px 0;border-bottom:1px solid rgba(180,140,100,0.08);"><span style="font-size:14px;color:#7C6B5E;">${org}</span><span style="font-size:14px;color:#2D1F14;font-weight:600;white-space:nowrap;">${fmt(amt)}</span></div>`
-              ).join("");
-              const accent = d.color;
-              const typeLabel = d.isOcean ? "Ocean Conservation" : "Country";
-              return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:16px;padding:20px 24px;min-width:240px;max-width:340px;box-shadow:0 12px 32px rgba(0,0,0,0.15);font-family:'Inter',sans-serif;"><div style="font-size:12px;color:${accent};text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;font-weight:500;">${typeLabel}</div><div style="font-size:20px;font-weight:600;color:#2D1F14;margin-bottom:16px;font-family:'DM Sans',sans-serif;">${d.name}</div><div style="margin-bottom:16px;">${orgLines}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(180,140,100,0.1);"><span style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Total</span><span style="font-size:20px;font-weight:700;color:${accent};">${fmt(d.total)}</span></div></div>`;
-            }}
+            onArcClick={d => focusPoint(d.endLat, d.endLng, { name: d.name, orgs: d.orgs, total: d.total, color: d.color, isOcean: d.isOcean })}
+            arcLabel={d => `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:10px;padding:8px 14px;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-family:'Inter',sans-serif;"><div style="font-size:14px;color:#2D1F14;font-weight:500;">${d.name}</div></div>`}
             ringsData={allDestinations}
             ringLat={d => d.lat}
             ringLng={d => d.lng}
@@ -722,9 +713,32 @@ function GlobeTab({ donations }) {
             pointAltitude={0.008}
             pointRadius={0.35}
             pointColor={d => d.color}
-            onPointClick={d => focusPoint(d.lat, d.lng)}
-            onRingClick={d => focusPoint(d.lat, d.lng)}
+            onPointClick={d => focusPoint(d.lat, d.lng, { name: d.name, orgs: d.orgs, total: d.total, color: d.color, isOcean: d.isOcean })}
+            onRingClick={d => focusPoint(d.lat, d.lng, { name: d.name, orgs: d.orgs, total: d.total, color: d.color, isOcean: d.isOcean })}
           />
+        )}
+        {selectedPoint && (
+          <div style={{ position: "absolute", top: 20, right: 20, zIndex: 10, background: "rgba(255,255,255,0.95)", backdropFilter: "blur(16px)", border: "1px solid rgba(180,140,100,0.12)", borderRadius: 16, padding: "20px 24px", minWidth: 240, maxWidth: 320, boxShadow: "0 12px 32px rgba(0,0,0,0.2)", fontFamily: "'Inter',sans-serif", animation: "fadeSlideUp .3s ease" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+              <div>
+                <div style={{ fontSize: 12, color: selectedPoint.color, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 500, marginBottom: 4 }}>{selectedPoint.isOcean ? "Ocean Conservation" : "Country"}</div>
+                <div style={{ fontSize: 20, fontWeight: 600, color: "#2D1F14", fontFamily: "'DM Sans',sans-serif" }}>{selectedPoint.name}</div>
+              </div>
+              <button onClick={() => setSelectedPoint(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: "2px 6px", fontSize: 18, color: "#A89888", lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ marginBottom: 14 }}>
+              {Object.entries(selectedPoint.orgs).sort((a, b) => b[1] - a[1]).map(([org, amt]) => (
+                <div key={org} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, padding: "7px 0", borderBottom: "1px solid rgba(180,140,100,0.08)" }}>
+                  <span style={{ fontSize: 14, color: "#7C6B5E" }}>{org}</span>
+                  <span style={{ fontSize: 14, color: "#2D1F14", fontWeight: 600, whiteSpace: "nowrap" }}>{fmt(amt)}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12, borderTop: "1px solid rgba(180,140,100,0.1)" }}>
+              <span style={{ fontSize: 12, color: "#A89888", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 500 }}>Total</span>
+              <span style={{ fontSize: 20, fontWeight: 700, color: selectedPoint.color }}>{fmt(selectedPoint.total)}</span>
+            </div>
+          </div>
         )}
       </div>
 
