@@ -1339,11 +1339,9 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
         </>)}
       </div>
 
-      {/* Photo divider */}
-      <div style={{ position: "relative", height: 360, overflow: "hidden" }}>
-        <img src="/hero.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 55%", display: "block", filter: "saturate(1.15) contrast(1.1) sepia(0.25) brightness(1.05)" }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(220,160,60,0.18) 0%, rgba(200,100,50,0.12) 50%, rgba(180,140,80,0.15) 100%)", mixBlendMode: "multiply" }} />
-        <div style={{ position: "absolute", inset: 0, opacity: 0.07, backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")", backgroundSize: "128px 128px", pointerEvents: "none" }} />
+      {/* Photo */}
+      <div style={{ display: "flex", justifyContent: "center", padding: "20px 0 40px" }}>
+        <img src="/hero.jpg" alt="" style={{ maxWidth: 480, width: "100%", borderRadius: 8, display: "block", filter: "saturate(1.15) contrast(1.1) sepia(0.25) brightness(1.05)" }} />
       </div>
 
       {/* Footer */}
