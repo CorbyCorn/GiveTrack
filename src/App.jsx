@@ -624,6 +624,15 @@ function GlobeTab({ donations }) {
     return () => { controls.removeEventListener("start", pause); clearTimeout(timeout); };
   }, [globeReady]);
 
+  const pauseRef = useRef(null);
+  const focusPoint = (lat, lng) => {
+    if (!globeRef.current) return;
+    const controls = globeRef.current.controls();
+    controls.autoRotate = false;
+    clearTimeout(pauseRef.current);
+    globeRef.current.pointOfView({ lat, lng, altitude: 2.2 }, 800);
+    pauseRef.current = setTimeout(() => { controls.autoRotate = true; }, 10000);
+  };
 
   const getAlpha3 = (feat) => ISO_NUM_TO_ALPHA3[String(feat.id)] || null;
 
@@ -673,6 +682,7 @@ function GlobeTab({ donations }) {
               ).join("");
               return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(180,140,100,0.12);border-radius:16px;padding:20px 24px;min-width:240px;max-width:340px;box-shadow:0 12px 32px rgba(0,0,0,0.15);font-family:'Inter',sans-serif;"><div style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;font-weight:500;">Country</div><div style="font-size:20px;font-weight:600;color:#2D1F14;margin-bottom:16px;font-family:'DM Sans',sans-serif;">${name}</div><div style="margin-bottom:16px;">${orgLines}</div><div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(180,140,100,0.1);"><span style="font-size:12px;color:#A89888;text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Total</span><span style="font-size:20px;font-weight:700;color:#0d9488;">${fmt(data.total)}</span></div></div>`;
             }}
+            onPolygonClick={d => { const code = getAlpha3(d); const c = code && COUNTRY_CENTROIDS[code]; if (c) focusPoint(c.lat, c.lng); }}
             onPolygonHover={() => {}} polygonsTransitionDuration={300}
             arcsData={arcsData}
             arcStartLat={d => d.startLat}
@@ -685,6 +695,7 @@ function GlobeTab({ donations }) {
             arcDashGap={0.15}
             arcDashAnimateTime={1500}
             arcAltitudeAutoScale={0.4}
+            onArcClick={d => focusPoint(d.endLat, d.endLng)}
             arcLabel={d => {
               const orgLines = Object.entries(d.orgs).sort((a, b) => b[1] - a[1]).map(([org, amt]) =>
                 `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:7px 0;border-bottom:1px solid rgba(180,140,100,0.08);"><span style="font-size:14px;color:#7C6B5E;">${org}</span><span style="font-size:14px;color:#2D1F14;font-weight:600;white-space:nowrap;">${fmt(amt)}</span></div>`
@@ -711,6 +722,8 @@ function GlobeTab({ donations }) {
             pointAltitude={0.008}
             pointRadius={0.35}
             pointColor={d => d.color}
+            onPointClick={d => focusPoint(d.lat, d.lng)}
+            onRingClick={d => focusPoint(d.lat, d.lng)}
           />
         )}
       </div>
