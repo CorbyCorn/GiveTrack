@@ -129,7 +129,7 @@ const ORG_IMAGE_POS = {
   "Reality SF": "center 30%",             // volunteers at food pantry
   "SFHS": "center 30%",                   // SFHS students smiling together
 };
-const HERO_IMAGE = "https://www.doctorswithoutborders.org/sites/default/files/styles/homepage_stats_block_desktop_1440x689/public/homepage-stats-bg.jpg";
+const HERO_IMAGE = "https://images.unsplash.com/photo-1722963220475-979db2dbf216?w=1200&h=600&fit=crop&q=80";
 
 // ─── GLOBE DATA ──────────────────────────────────────────────
 
