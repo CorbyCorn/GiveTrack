@@ -2,10 +2,6 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import Globe from "react-globe.gl";
 import { scaleSqrt } from "d3-scale";
 import * as topojson from "topojson-client";
-import { Vector2 } from "three";
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
-import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 
 /*
  * GiveTrack — Employee Charitable Giving Dashboard
@@ -628,35 +624,6 @@ function GlobeTab({ donations }) {
     return () => { controls.removeEventListener("start", pause); clearTimeout(timeout); };
   }, [globeReady]);
 
-  // Bloom post-processing — makes arcs and rings emit a glow
-  useEffect(() => {
-    if (!globeRef.current || !globeReady) return;
-    const renderer = globeRef.current.renderer();
-    const scene = globeRef.current.scene();
-    const camera = globeRef.current.camera();
-    if (!renderer || !scene || !camera) return;
-
-    const composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    const bloom = new UnrealBloomPass(
-      new Vector2(containerWidth, 520),
-      1.0,   // strength — intensity of the glow
-      0.6,   // radius — how far the glow spreads
-      0.15   // threshold — brightness cutoff (low = more things glow)
-    );
-    composer.addPass(bloom);
-
-    const originalRender = renderer.render.bind(renderer);
-    renderer.render = function (s, c) {
-      if (s === scene && c === camera) {
-        composer.render();
-      } else {
-        originalRender(s, c);
-      }
-    };
-
-    return () => { renderer.render = originalRender; };
-  }, [globeReady, containerWidth]);
 
   const getAlpha3 = (feat) => ISO_NUM_TO_ALPHA3[String(feat.id)] || null;
 
