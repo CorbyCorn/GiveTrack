@@ -1030,8 +1030,8 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
             { label: "Months active", value: months.length, isCount: true },
           ].map((stat, i) => (
             <div key={i} style={{ textAlign: "center", flex: 1 }}>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", textTransform: "uppercase", letterSpacing: ".12em", fontWeight: 500, marginBottom: 10 }}>{stat.label}</div>
-              <div style={{ fontSize: 32, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.02em" }}>
+              <div style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", textTransform: "uppercase", letterSpacing: ".12em", fontWeight: 500, marginBottom: 12 }}>{stat.label}</div>
+              <div style={{ fontSize: 42, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.02em" }}>
                 {stat.isCount ? stat.value : <AnimatedNumber value={stat.value} currency={primaryCurrency} />}
               </div>
             </div>
