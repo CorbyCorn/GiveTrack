@@ -881,7 +881,7 @@ export default function App() {
 // ─── DASHBOARD ────────────────────────────────────────────────
 
 function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataError }) {
-  const [expandedOrg, setExpandedOrg] = useState(null);
+  const [expandedOrgs, setExpandedOrgs] = useState(new Set());
   const [imgErrors, setImgErrors] = useState({});
   const [fetchedImages, setFetchedImages] = useState({});
 
@@ -1133,13 +1133,13 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                   const color = getOrgColor(name);
                   const category = ORG_CATEGORIES[name];
                   const img = ORG_IMAGES[name] || fetchedImages[name];
-                  const isExpanded = expandedOrg === name;
+                  const isExpanded = expandedOrgs.has(name);
                   const byMonth = {};
                   od.forEach(d => { byMonth[d.month] = (byMonth[d.month] || 0) + d.allocatedAmount; });
 
                   return (
                     <div key={name} style={{ ...glass, overflow: "hidden", animation: `fadeSlideUp .4s ease ${i*.04}s both`, transition: "box-shadow .3s, transform .3s", cursor: "pointer" }}
-                      onClick={() => setExpandedOrg(isExpanded ? null : name)}
+                      onClick={() => setExpandedOrgs(prev => { const next = new Set(prev); if (next.has(name)) next.delete(name); else next.add(name); return next; })}
                       onMouseEnter={e => { e.currentTarget.style.boxShadow = C.cardHover; e.currentTarget.style.transform = "translateY(-3px)"; }}
                       onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; e.currentTarget.style.transform = "translateY(0)"; }}>
                       {/* Photo banner */}
