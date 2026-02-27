@@ -294,6 +294,7 @@ const ORG_WEBSITES = {
 
 const DEMO_DATA = {
   "courtney@isara.io": [
+    // — Courtney's original donations —
     { orgName: "Save the Children", paidTo: "https://support.savethechildren.org/site/Ecommerce", allocatedAmount: 320, month: "Jan 2026", currency: "$", paidDate: "15-Jan-26", cycle: "Jan-15 Payroll Cycle", percentage: 15 },
     { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 280, month: "Jan 2026", currency: "$", paidDate: "15-Jan-26", cycle: "Jan-15 Payroll Cycle", percentage: 13 },
     { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 200, month: "Jan 2026", currency: "$", paidDate: "15-Jan-26", cycle: "Jan-15 Payroll Cycle", percentage: 10 },
@@ -330,6 +331,59 @@ const DEMO_DATA = {
     { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 90, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 4 },
     { orgName: "Malaria Consortium", paidTo: "Malaria Consortium", allocatedAmount: 85, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 4 },
     { orgName: "The Washing Machine Project", paidTo: "https://www.thewashingmachineproject.org/our-impact", allocatedAmount: 75, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 3 },
+    // — Edward's donations —
+    { orgName: "Give To IV", paidTo: "https://givetoiv.org/justinlee", allocatedAmount: 285, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 30 },
+    { orgName: "Open Door Legal", paidTo: "https://opendoorlegal.org/", allocatedAmount: 190, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 20 },
+    { orgName: "Wholesome Wave", paidTo: "https://www.wholesomewave.org/", allocatedAmount: 95, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 10 },
+    { orgName: "The Washing Machine Project", paidTo: "https://www.thewashingmachineproject.org/our-impact", allocatedAmount: 95, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 10 },
+    { orgName: "Radiance SF", paidTo: "https://www.radiancesf.org/", allocatedAmount: 142.50, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 15 },
+    { orgName: "Reality SF", paidTo: "https://realitysf.com/", allocatedAmount: 142.50, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 15 },
+    { orgName: "Give To IV", paidTo: "https://givetoiv.org/justinlee", allocatedAmount: 285, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
+    { orgName: "Open Door Legal", paidTo: "https://opendoorlegal.org/", allocatedAmount: 190, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
+    { orgName: "Wholesome Wave", paidTo: "https://www.wholesomewave.org/", allocatedAmount: 95, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 10 },
+    { orgName: "The Washing Machine Project", paidTo: "https://www.thewashingmachineproject.org/our-impact", allocatedAmount: 95, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 10 },
+    { orgName: "Radiance SF", paidTo: "https://www.radiancesf.org/", allocatedAmount: 142.50, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 15 },
+    { orgName: "Reality SF", paidTo: "https://realitysf.com/", allocatedAmount: 142.50, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 15 },
+    // — Amy's donations —
+    { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 125, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 125, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
+    // — Ben's donations —
+    { orgName: "NCCHC Foundation", paidTo: "https://ncchcfoundation.org/", allocatedAmount: 435, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "NCCHC Foundation", paidTo: "https://ncchcfoundation.org/", allocatedAmount: 435, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
+    // — Bernie's donations —
+    { orgName: "Action Against Hunger", paidTo: "Action Against Hunger", allocatedAmount: 947, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 40 },
+    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 2367.50, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "Action Against Hunger", paidTo: "Action Against Hunger", allocatedAmount: 947, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
+    { orgName: "Médecins Sans Frontières", paidTo: "Médecins Sans Frontières", allocatedAmount: 947, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
+    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 473.50, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
+    // — Ed's donations —
+    { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 94, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 94, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
+    // — Peter's donations —
+    { orgName: "SFHS", paidTo: "https://www.sfhs.com/make-a-gift", allocatedAmount: 10666.67, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "SFHS", paidTo: "https://www.sfhs.com/make-a-gift", allocatedAmount: 10666.67, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
+    // — Jerry's donations —
+    { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 3208.33, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 3208.33, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
+    // — Rowan's donations —
+    { orgName: "Asylum Access", paidTo: "https://www.asylumaccess.org/", allocatedAmount: 1924.83, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "Clean Ocean Action", paidTo: "Clean Ocean Action", allocatedAmount: 577.45, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
+    { orgName: "Middle East Children's Alliance", paidTo: "Middle East Children's Alliance", allocatedAmount: 769.93, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
+    { orgName: "Room to Read", paidTo: "Room to Read", allocatedAmount: 577.45, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
+    // — Sam's donations —
+    { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 1400, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 1400, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
+    // — Artur's donations —
+    { orgName: "Malaria Consortium", paidTo: "Malaria Consortium", allocatedAmount: 1039.58, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
+    { orgName: "En Ptahy Vidchui", paidTo: "https://en.ptahy.vidchui.org/", allocatedAmount: 1039.58, month: "Feb 2026", currency: "$", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
+    { orgName: "Malaria Consortium", paidTo: "Malaria Consortium", allocatedAmount: 1039.58, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 50 },
+    { orgName: "En Ptahy Vidchui", paidTo: "https://en.ptahy.vidchui.org/", allocatedAmount: 1039.58, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 50 },
+    // — Lily's donations —
+    { orgName: "Oceana", paidTo: "Oceana", allocatedAmount: 689.58, month: "Feb 2026", currency: "$", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
+    { orgName: "WWF", paidTo: "WWF", allocatedAmount: 689.58, month: "Feb 2026", currency: "$", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
+    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 551.67, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
+    { orgName: "Médecins sans Frontières", paidTo: "Médecins sans Frontières", allocatedAmount: 551.67, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
+    { orgName: "Action Against Hunger", paidTo: "Action Against Hunger", allocatedAmount: 275.83, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
   ],
   "edward@isara.io": [
     { orgName: "Give To IV", paidTo: "https://givetoiv.org/justinlee", allocatedAmount: 285, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 30 },
