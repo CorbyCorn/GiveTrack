@@ -630,7 +630,7 @@ function GlobeTab({ donations }) {
     const controls = globeRef.current.controls();
     controls.autoRotate = false;
     clearTimeout(pauseRef.current);
-    globeRef.current.pointOfView({ lat, lng, altitude: 2.2 }, 800);
+    globeRef.current.pointOfView({ lat, lng, altitude: 1.1 }, 800);
     pauseRef.current = setTimeout(() => { controls.autoRotate = true; }, 10000);
   };
 
