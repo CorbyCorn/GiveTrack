@@ -981,6 +981,27 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
         </div>
       </header>
 
+      {/* STICKY TAB BAR — full width, below header */}
+      {donations.length > 0 && (
+        <nav style={{ position: "sticky", top: 67, zIndex: 99, background: C.bg, borderBottom: `1px solid ${C.divider}` }}>
+          <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px", display: "flex", gap: 0, overflowX: "auto" }}>
+            {tabs.map(t => (
+              <button key={t.id} onClick={() => { setActiveTab(t.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
+                padding: "14px 28px", background: "transparent", border: "none",
+                borderBottom: activeTab === t.id ? `2px solid ${C.text}` : "2px solid transparent",
+                color: activeTab === t.id ? C.text : C.textMuted, fontSize: 13, fontWeight: activeTab === t.id ? 600 : 400,
+                cursor: "pointer", transition: "all .2s", marginBottom: -1, display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap",
+                letterSpacing: ".06em", textTransform: "uppercase",
+              }}
+                onMouseEnter={e => { if (activeTab !== t.id) e.target.style.color = C.textSoft; }}
+                onMouseLeave={e => { if (activeTab !== t.id) e.target.style.color = C.textMuted; }}>
+                {t.icon}{t.label}
+              </button>
+            ))}
+          </div>
+        </nav>
+      )}
+
       {donations.length > 0 && activeTab === "overview" && (<>
         {/* FULL-BLEED HERO */}
         <div style={{ position: "relative", height: 620, overflow: "hidden", animation: "fadeSlideUp .5s ease" }}>
@@ -1018,7 +1039,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
         </div>
       </>)}
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: donations.length > 0 && activeTab === "overview" ? "72px 32px 100px" : "60px 32px 100px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: donations.length > 0 && activeTab === "overview" ? "72px 32px 100px" : "48px 32px 100px" }}>
         {dataError && <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "16px 20px", marginBottom: 28, color: "#dc2626", fontSize: 15, fontWeight: 500 }}>{dataError}</div>}
 
         {donations.length === 0 && !dataError ? (
@@ -1027,23 +1048,6 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
             <p style={{ color: C.textSoft, fontSize: 16, maxWidth: 400, margin: "0 auto", lineHeight: 1.7 }}>We couldn't find any records linked to {user.email}. Please contact your administrator.</p>
           </div>
         ) : donations.length > 0 && (<>
-          {/* Tabs */}
-          <div style={{ display: "flex", gap: 0, marginBottom: activeTab === "overview" ? 0 : 56, borderBottom: activeTab === "overview" ? "none" : `1px solid ${C.divider}`, overflowX: "auto" }}>
-            {tabs.map(t => (
-              <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
-                padding: "14px 28px", background: "transparent", border: "none",
-                borderBottom: activeTab === t.id ? `2px solid ${C.text}` : "2px solid transparent",
-                color: activeTab === t.id ? C.text : C.textMuted, fontSize: 13, fontWeight: activeTab === t.id ? 600 : 400,
-                cursor: "pointer", transition: "all .2s", marginBottom: -1, display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap",
-                letterSpacing: ".06em", textTransform: "uppercase",
-              }}
-                onMouseEnter={e => { if (activeTab !== t.id) e.target.style.color = C.textSoft; }}
-                onMouseLeave={e => { if (activeTab !== t.id) e.target.style.color = C.textMuted; }}>
-                {t.icon}{t.label}
-              </button>
-            ))}
-          </div>
-
           {/* ═══════════════ OVERVIEW ═══════════════ */}
           {activeTab === "overview" && (<>
             {/* Section heading */}
