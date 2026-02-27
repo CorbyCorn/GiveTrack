@@ -129,7 +129,7 @@ const ORG_IMAGE_POS = {
   "Reality SF": "center 30%",             // volunteers at food pantry
   "SFHS": "center 30%",                   // SFHS students smiling together
 };
-const HERO_IMAGE = "https://images.unsplash.com/photo-1722963220475-979db2dbf216?w=1200&h=600&fit=crop&q=80";
+const HERO_IMAGE = "/hero.jpg";
 
 // ─── GLOBE DATA ──────────────────────────────────────────────
 
@@ -1033,11 +1033,11 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
           {/* ═══════════════ OVERVIEW ═══════════════ */}
           {activeTab === "overview" && (<>
             {/* Hero photo card — full width bento */}
-            <div style={{ borderRadius: 24, overflow: "hidden", position: "relative", height: 280, marginBottom: 20, animation: "fadeSlideUp .5s ease" }}>
-              <img src={HERO_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            <div style={{ borderRadius: 24, overflow: "hidden", position: "relative", height: 420, marginBottom: 20, animation: "fadeSlideUp .5s ease" }}>
+              <img src={HERO_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 60%", display: "block" }}
                 onError={e => { e.target.style.display = "none"; }} />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(0,51,102,0.88) 0%, rgba(0,85,153,0.78) 100%)" }} />
-              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "40px 48px" }}>
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,51,102,0.85) 0%, rgba(0,51,102,0.4) 40%, rgba(0,0,0,0.1) 100%)" }} />
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "40px 48px" }}>
                 <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 10 }}>Total Donated</div>
                 <div style={{ fontSize: 60, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.25), 0 0 80px rgba(255,255,255,0.15)" }}>
                   <AnimatedNumber value={totalDonated} currency={primaryCurrency} />
