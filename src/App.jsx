@@ -1255,7 +1255,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                 <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "36px 48px" }}>
                   <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 8 }}>Isara Team Impact</div>
                   <div style={{ fontSize: 54, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.25), 0 0 80px rgba(255,255,255,0.15)" }}>
-                    {fmt(teamData.teamTotal)}
+                    <AnimatedNumber value={teamData.teamTotal} />
                   </div>
                   <div style={{ fontSize: 17, color: "rgba(255,255,255,0.7)", marginTop: 12 }}>
                     {teamData.memberCount} team members supporting {teamData.orgCount} organizations
@@ -1337,6 +1337,13 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
             <GlobeTab donations={donations} />
           )}
         </>)}
+      </div>
+
+      {/* Photo divider */}
+      <div style={{ position: "relative", height: 360, overflow: "hidden" }}>
+        <img src="/hero.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 55%", display: "block", filter: "saturate(1.15) contrast(1.1) sepia(0.25) brightness(1.05)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(220,160,60,0.18) 0%, rgba(200,100,50,0.12) 50%, rgba(180,140,80,0.15) 100%)", mixBlendMode: "multiply" }} />
+        <div style={{ position: "absolute", inset: 0, opacity: 0.07, backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")", backgroundSize: "128px 128px", pointerEvents: "none" }} />
       </div>
 
       {/* Footer */}
