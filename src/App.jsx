@@ -1033,16 +1033,19 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
           {/* ═══════════════ OVERVIEW ═══════════════ */}
           {activeTab === "overview" && (<>
             {/* Hero photo card — full width bento */}
-            <div style={{ borderRadius: 24, overflow: "hidden", position: "relative", height: 420, marginBottom: 20, animation: "fadeSlideUp .5s ease" }}>
-              <img src={HERO_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 60%", display: "block" }}
+            <div style={{ borderRadius: 24, overflow: "hidden", position: "relative", height: 560, marginBottom: 20, animation: "fadeSlideUp .5s ease" }}>
+              <img src={HERO_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 55%", display: "block", filter: "saturate(0.85) contrast(1.05) sepia(0.15)" }}
                 onError={e => { e.target.style.display = "none"; }} />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,51,102,0.85) 0%, rgba(0,51,102,0.4) 40%, rgba(0,0,0,0.1) 100%)" }} />
+              {/* Warm retro tone overlay */}
+              <div style={{ position: "absolute", inset: 0, background: "rgba(180,140,80,0.08)", mixBlendMode: "multiply" }} />
+              {/* Film grain overlay */}
+              <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")", backgroundSize: "128px 128px", pointerEvents: "none" }} />
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "40px 48px" }}>
-                <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 10 }}>Total Donated</div>
-                <div style={{ fontSize: 60, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.25), 0 0 80px rgba(255,255,255,0.15)" }}>
+                <div style={{ fontSize: 14, color: "rgba(255,255,255,0.8)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 10 }}>Total Donated</div>
+                <div style={{ fontSize: 60, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 2px 12px rgba(0,0,0,0.5), 0 8px 32px rgba(0,0,0,0.3)" }}>
                   <AnimatedNumber value={totalDonated} currency={primaryCurrency} />
                 </div>
-                <div style={{ fontSize: 17, color: "rgba(255,255,255,0.7)", marginTop: 14, fontWeight: 400 }}>
+                <div style={{ fontSize: 17, color: "rgba(255,255,255,0.8)", marginTop: 14, fontWeight: 400, textShadow: "0 1px 6px rgba(0,0,0,0.4)" }}>
                   Welcome back, {user.name.split(" ")[0]} — across {cycles.length} payroll cycles
                 </div>
               </div>
