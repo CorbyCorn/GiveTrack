@@ -1341,7 +1341,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
 
       {/* Photo */}
       <div style={{ display: "flex", justifyContent: "center", padding: "20px 0 40px" }}>
-        <img src="/hero.jpg" alt="" style={{ maxWidth: 480, width: "100%", borderRadius: 8, display: "block", filter: "saturate(1.15) contrast(1.1) sepia(0.25) brightness(1.05)" }} />
+        <img src="/hero.jpg" alt="" style={{ maxWidth: 640, width: "100%", borderRadius: 0, display: "block", filter: "saturate(1.15) contrast(1.1) sepia(0.25) brightness(1.05)" }} />
       </div>
 
       {/* Footer */}
