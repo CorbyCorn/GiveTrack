@@ -1034,18 +1034,20 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
           {activeTab === "overview" && (<>
             {/* Hero photo card — full width bento */}
             <div style={{ borderRadius: 24, overflow: "hidden", position: "relative", height: 560, marginBottom: 20, animation: "fadeSlideUp .5s ease" }}>
-              <img src={HERO_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 55%", display: "block", filter: "saturate(0.85) contrast(1.05) sepia(0.15)" }}
+              <img src={HERO_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 55%", display: "block", filter: "saturate(1.15) contrast(1.1) sepia(0.25) brightness(1.05)" }}
                 onError={e => { e.target.style.display = "none"; }} />
               {/* Warm retro tone overlay */}
-              <div style={{ position: "absolute", inset: 0, background: "rgba(180,140,80,0.08)", mixBlendMode: "multiply" }} />
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(220,160,60,0.18) 0%, rgba(200,100,50,0.12) 50%, rgba(180,140,80,0.15) 100%)", mixBlendMode: "multiply" }} />
+              {/* Warm highlight lift */}
+              <div style={{ position: "absolute", inset: 0, background: "rgba(255,240,200,0.08)", mixBlendMode: "screen" }} />
               {/* Film grain overlay */}
-              <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")", backgroundSize: "128px 128px", pointerEvents: "none" }} />
-              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "40px 48px" }}>
-                <div style={{ fontSize: 14, color: "rgba(255,255,255,0.8)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 10 }}>Total Donated</div>
-                <div style={{ fontSize: 60, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 2px 12px rgba(0,0,0,0.5), 0 8px 32px rgba(0,0,0,0.3)" }}>
+              <div style={{ position: "absolute", inset: 0, opacity: 0.07, backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")", backgroundSize: "128px 128px", pointerEvents: "none" }} />
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "44px 52px" }}>
+                <div style={{ fontSize: 16, color: "#fff", textTransform: "uppercase", letterSpacing: ".12em", fontWeight: 700, marginBottom: 12, textShadow: "0 2px 8px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.3)" }}>Total Donated</div>
+                <div style={{ fontSize: 80, fontWeight: 900, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.02em", lineHeight: 1, textShadow: "0 3px 6px rgba(0,0,0,0.7), 0 6px 20px rgba(0,0,0,0.4), 0 12px 40px rgba(0,0,0,0.25)" }}>
                   <AnimatedNumber value={totalDonated} currency={primaryCurrency} />
                 </div>
-                <div style={{ fontSize: 17, color: "rgba(255,255,255,0.8)", marginTop: 14, fontWeight: 400, textShadow: "0 1px 6px rgba(0,0,0,0.4)" }}>
+                <div style={{ fontSize: 19, color: "#fff", marginTop: 16, fontWeight: 600, textShadow: "0 2px 8px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.3)" }}>
                   Welcome back, {user.name.split(" ")[0]} — across {cycles.length} payroll cycles
                 </div>
               </div>
