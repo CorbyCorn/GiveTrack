@@ -451,6 +451,132 @@ const DEMO_DATA = {
   ],
 };
 
+// ─── LOCAL STORAGE DATA LAYER ─────────────────────────────────
+
+const INITIAL_ADMINS = ["courtney@isara.io"];
+
+const EMPLOYEE_NAMES = {
+  "courtney@isara.io": "Courtney Leung", "edward@isara.io": "Edward Lee",
+  "amy@isara.io": "Amy Chen", "ben@isara.io": "Ben Park",
+  "bernie@isara.io": "Bernie Liu", "ed@isara.io": "Ed Torres",
+  "peter@isara.io": "Peter Wagner", "jerry@isara.io": "Jerry Kim",
+  "rowan@isara.io": "Rowan Patel", "sam@isara.io": "Sam Reeves",
+  "artur@isara.io": "Artur Kovalenko", "lily@isara.io": "Lily Whitfield",
+};
+
+function loadStorage(key, fallback) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch { return fallback; }
+}
+function saveStorage(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+}
+
+function loadAdmins() { return loadStorage("givetrack_admins", INITIAL_ADMINS); }
+function saveAdmins(list) { saveStorage("givetrack_admins", list); }
+function checkIsAdmin(email) { return loadAdmins().includes(email?.toLowerCase()); }
+
+function loadBudgets() { return loadStorage("givetrack_employee_budgets", {}); }
+function saveBudgets(b) { saveStorage("givetrack_employee_budgets", b); }
+
+function loadCycles() { return loadStorage("givetrack_pay_cycles", { currentCycleId: null, cycles: [] }); }
+function saveCycles(c) { saveStorage("givetrack_pay_cycles", c); }
+
+function loadSubmissions() { return loadStorage("givetrack_submissions", {}); }
+function saveSubmissions(s) { saveStorage("givetrack_submissions", s); }
+
+function loadTracker() { return loadStorage("givetrack_admin_tracker", {}); }
+function saveTracker(t) { saveStorage("givetrack_admin_tracker", t); }
+
+// Map cycle labels from DEMO_DATA to cycleIds
+const CYCLE_MAP = {
+  "Jan-15 Payroll Cycle": "2026-01-15",
+  "Jan-31 Payroll Cycle": "2026-01-31",
+  "Feb-15 Payroll Cycle": "2026-02-15",
+};
+
+// All known org names for the dropdown
+const ALL_KNOWN_ORGS = Object.keys(ORG_WEBSITES).sort();
+
+function seedFromDemoData() {
+  if (localStorage.getItem("givetrack_pay_cycles")) return; // already seeded
+
+  // 1. Seed admins
+  saveAdmins(INITIAL_ADMINS);
+
+  // 2. Derive employee budgets from individual DEMO_DATA entries (not courtney's merged data)
+  const budgets = {};
+  const individualEmails = Object.keys(DEMO_DATA).filter(e => e !== "courtney@isara.io");
+  individualEmails.forEach(email => {
+    const dons = DEMO_DATA[email];
+    // Get latest cycle's total
+    const latestCycle = dons.length > 0 ? dons[dons.length - 1].cycle : "";
+    const cycleDons = dons.filter(d => d.cycle === latestCycle);
+    const total = cycleDons.reduce((s, d) => s + d.allocatedAmount, 0);
+    budgets[email] = { name: EMPLOYEE_NAMES[email] || email.split("@")[0], cycleAmount: Math.round(total * 100) / 100, currency: dons[0]?.currency || "$" };
+  });
+  // Courtney's own budget — use her original data (the first 12 entries are Jan-15 cycle)
+  const courtneyJan15 = DEMO_DATA["courtney@isara.io"].filter(d => d.cycle === "Jan-15 Payroll Cycle" && d.allocatedAmount < 500);
+  const courtneyTotal = courtneyJan15.reduce((s, d) => s + d.allocatedAmount, 0);
+  budgets["courtney@isara.io"] = { name: "Courtney Leung", cycleAmount: Math.round(courtneyTotal * 100) / 100, currency: "$" };
+  saveBudgets(budgets);
+
+  // 3. Seed pay cycles
+  const cyclesData = {
+    currentCycleId: "2026-03-15",
+    cycles: [
+      { cycleId: "2026-01-15", label: "Jan-15 Payroll Cycle", deadline: "2026-01-10", payDate: "2026-01-15", status: "paid" },
+      { cycleId: "2026-01-31", label: "Jan-31 Payroll Cycle", deadline: "2026-01-26", payDate: "2026-01-31", status: "paid" },
+      { cycleId: "2026-02-15", label: "Feb-15 Payroll Cycle", deadline: "2026-02-10", payDate: "2026-02-15", status: "closed" },
+      { cycleId: "2026-03-15", label: "Mar-15 Payroll Cycle", deadline: "2026-03-10", payDate: "2026-03-15", status: "open" },
+    ],
+  };
+  saveCycles(cyclesData);
+
+  // 4. Seed admin tracker from individual DEMO_DATA (mark all past as paid)
+  const tracker = {};
+  individualEmails.forEach(email => {
+    DEMO_DATA[email].forEach(d => {
+      const cycleId = CYCLE_MAP[d.cycle];
+      if (!cycleId) return;
+      if (!tracker[cycleId]) tracker[cycleId] = {};
+      if (!tracker[cycleId][email]) tracker[cycleId][email] = {};
+      tracker[cycleId][email][d.orgName] = { paid: true, datePaid: d.paidDate, receiptData: null, receiptFileName: null, amount: d.allocatedAmount };
+    });
+  });
+  // Courtney's own entries
+  const courtneyOwn = DEMO_DATA["courtney@isara.io"].filter(d => d.allocatedAmount < 500);
+  courtneyOwn.forEach(d => {
+    const cycleId = CYCLE_MAP[d.cycle];
+    if (!cycleId) return;
+    if (!tracker[cycleId]) tracker[cycleId] = {};
+    if (!tracker[cycleId]["courtney@isara.io"]) tracker[cycleId]["courtney@isara.io"] = {};
+    tracker[cycleId]["courtney@isara.io"][d.orgName] = { paid: true, datePaid: d.paidDate, receiptData: null, receiptFileName: null, amount: d.allocatedAmount };
+  });
+  saveTracker(tracker);
+
+  // 5. Seed submissions for current open cycle (rollforward from Feb-15)
+  const subs = { "2026-03-15": {} };
+  individualEmails.forEach(email => {
+    const feb15 = DEMO_DATA[email].filter(d => d.cycle === "Feb-15 Payroll Cycle");
+    if (feb15.length > 0) {
+      subs["2026-03-15"][email] = {
+        submittedAt: null, rolledForward: true,
+        allocations: feb15.map(d => ({ orgName: d.orgName, paidTo: d.paidTo, percentage: d.percentage })),
+      };
+    }
+  });
+  // Courtney's rollforward
+  const courtneyFeb15 = courtneyOwn.filter(d => d.cycle === "Feb-15 Payroll Cycle");
+  if (courtneyFeb15.length > 0) {
+    subs["2026-03-15"]["courtney@isara.io"] = {
+      submittedAt: null, rolledForward: true,
+      allocations: courtneyFeb15.map(d => ({ orgName: d.orgName, paidTo: d.paidTo, percentage: d.percentage })),
+    };
+  }
+  saveSubmissions(subs);
+}
+
 // ─── PARSE LIVE DATA ──────────────────────────────────────────
 
 function parseSpreadsheetData(rows, userEmail) {
@@ -603,6 +729,513 @@ function BarChart({ data, height = 220 }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// ─── DONATE TAB ──────────────────────────────────────────────
+
+function DonateTab({ userEmail }) {
+  const cycles = loadCycles();
+  const currentCycle = cycles.cycles.find(c => c.cycleId === cycles.currentCycleId);
+  const budgets = loadBudgets();
+  const budget = budgets[userEmail] || { name: "", cycleAmount: 0, currency: "$" };
+  const allSubs = loadSubmissions();
+  const cycleSubs = allSubs[cycles.currentCycleId] || {};
+  const mySub = cycleSubs[userEmail] || { submittedAt: null, rolledForward: false, allocations: [] };
+
+  const [allocations, setAllocations] = useState(
+    mySub.allocations.length > 0 ? mySub.allocations.map(a => ({ ...a })) : [{ orgName: "", paidTo: "", percentage: 0 }]
+  );
+  const [showRollforward, setShowRollforward] = useState(mySub.rolledForward && !mySub.submittedAt);
+  const [saved, setSaved] = useState(false);
+  const [submitted, setSubmitted] = useState(!!mySub.submittedAt);
+
+  const isLocked = currentCycle && currentCycle.status === "closed";
+  const totalPct = allocations.reduce((s, a) => s + (a.percentage || 0), 0);
+  const totalAmt = (totalPct / 100) * budget.cycleAmount;
+  const sym = budget.currency === "£" ? "£" : "$";
+
+  const updateRow = (idx, field, value) => {
+    setAllocations(prev => prev.map((a, i) => i === idx ? { ...a, [field]: value } : a));
+    setSaved(false); setSubmitted(false);
+  };
+  const removeRow = (idx) => {
+    setAllocations(prev => prev.filter((_, i) => i !== idx));
+    setSaved(false); setSubmitted(false);
+  };
+  const addRow = () => {
+    setAllocations(prev => [...prev, { orgName: "", paidTo: "", percentage: 0 }]);
+  };
+
+  const saveAllocations = (isSubmit) => {
+    const subs = loadSubmissions();
+    if (!subs[cycles.currentCycleId]) subs[cycles.currentCycleId] = {};
+    subs[cycles.currentCycleId][userEmail] = {
+      submittedAt: isSubmit ? new Date().toISOString() : null,
+      rolledForward: false,
+      allocations: allocations.filter(a => a.percentage > 0).map(a => ({ orgName: a.orgName, paidTo: a.paidTo, percentage: a.percentage })),
+    };
+    saveSubmissions(subs);
+    if (isSubmit) setSubmitted(true); else setSaved(true);
+    setShowRollforward(false);
+  };
+
+  const selectedOrgs = allocations.map(a => a.orgName).filter(Boolean);
+
+  return (
+    <div style={{ animation: "fadeSlideUp .3s ease" }}>
+      {/* Cycle info */}
+      <div style={{ ...glass, padding: "28px 36px", marginBottom: 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: 0 }}>
+              {currentCycle?.label || "Current Cycle"}
+            </h3>
+            <div style={{ fontSize: 14, color: C.textSoft, marginTop: 6 }}>
+              Deadline: <strong style={{ color: C.text }}>{currentCycle?.deadline ? new Date(currentCycle.deadline + "T23:59:59").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "—"}</strong>
+            </div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: 12, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 500 }}>Your Budget</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: C.navy, fontFamily: "'Playfair Display',Georgia,serif" }}>{sym}{budget.cycleAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</div>
+          </div>
+        </div>
+        {isLocked && (
+          <div style={{ marginTop: 16, padding: "12px 16px", background: "rgba(34,37,32,0.06)", borderRadius: 4, display: "flex", alignItems: "center", gap: 10 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.textMuted} strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span style={{ fontSize: 14, color: C.textSoft }}>This cycle's deadline has passed. Your allocations are locked.</span>
+          </div>
+        )}
+      </div>
+
+      {/* Rollforward notice */}
+      {showRollforward && (
+        <div style={{ background: C.accentLight, border: `1px solid ${C.accent}`, borderRadius: 4, padding: "14px 20px", marginBottom: 24, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 14, color: C.text }}>These allocations were carried forward from your last cycle. Review and adjust, or they'll be used as-is by the deadline.</span>
+          <button onClick={() => setShowRollforward(false)} style={{ background: "none", border: "none", color: C.textMuted, cursor: "pointer", fontSize: 18, padding: "0 4px" }}>&times;</button>
+        </div>
+      )}
+
+      {/* Allocation rows */}
+      <div style={{ ...glass, padding: "28px 36px", marginBottom: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 600, color: C.text, margin: "0 0 24px", textTransform: "uppercase", letterSpacing: ".06em" }}>Your Allocations</h3>
+        {allocations.map((alloc, idx) => {
+          const amt = (alloc.percentage / 100) * budget.cycleAmount;
+          return (
+            <div key={idx} style={{ padding: "18px 0", borderBottom: idx < allocations.length - 1 ? `1px solid ${C.divider}` : "none", animation: `fadeSlideUp .3s ease ${idx * 0.03}s both` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
+                <div style={{ flex: 1 }}>
+                  <select
+                    value={alloc.orgName}
+                    onChange={e => {
+                      const name = e.target.value;
+                      const url = ORG_WEBSITES[name] || "";
+                      updateRow(idx, "orgName", name);
+                      updateRow(idx, "paidTo", url);
+                    }}
+                    disabled={isLocked}
+                    style={{ width: "100%", padding: "10px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, background: "#fff", color: C.text, fontFamily: "'Montserrat',sans-serif", cursor: isLocked ? "not-allowed" : "pointer" }}>
+                    <option value="">Select an organization...</option>
+                    {ALL_KNOWN_ORGS.map(name => (
+                      <option key={name} value={name} disabled={selectedOrgs.includes(name) && alloc.orgName !== name}>{name}</option>
+                    ))}
+                    <option value="__other">Other (enter URL)</option>
+                  </select>
+                  {alloc.orgName === "__other" && (
+                    <input
+                      type="text" placeholder="Enter org name or URL" value={alloc.paidTo}
+                      onChange={e => updateRow(idx, "paidTo", e.target.value)}
+                      disabled={isLocked}
+                      style={{ width: "100%", padding: "10px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, marginTop: 8, fontFamily: "'Montserrat',sans-serif" }} />
+                  )}
+                </div>
+                {allocations.length > 1 && !isLocked && (
+                  <button onClick={() => removeRow(idx)} style={{ background: "none", border: "none", color: C.textMuted, cursor: "pointer", fontSize: 20, padding: "4px 8px", lineHeight: 1 }}>&times;</button>
+                )}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                <input
+                  type="range" min="0" max="100" step="0.5"
+                  value={alloc.percentage} onChange={e => updateRow(idx, "percentage", parseFloat(e.target.value))}
+                  disabled={isLocked}
+                  style={{ flex: 1, accentColor: C.accent, cursor: isLocked ? "not-allowed" : "pointer" }} />
+                <input
+                  type="number" min="0" max="100" step="0.5"
+                  value={alloc.percentage} onChange={e => updateRow(idx, "percentage", Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)))}
+                  disabled={isLocked}
+                  style={{ width: 64, padding: "6px 10px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, textAlign: "center", fontFamily: "'Montserrat',sans-serif" }} />
+                <span style={{ fontSize: 13, color: C.textMuted, width: 16 }}>%</span>
+                <span style={{ fontSize: 15, fontWeight: 600, color: C.navy, minWidth: 90, textAlign: "right" }}>{fmt(amt, budget.currency)}</span>
+              </div>
+            </div>
+          );
+        })}
+        {!isLocked && (
+          <button onClick={addRow} style={{ marginTop: 18, padding: "10px 20px", background: "transparent", border: `1px dashed ${C.cardBorder}`, borderRadius: 4, color: C.textSoft, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, width: "100%", justifyContent: "center", fontWeight: 500, transition: "all .15s" }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = C.accent; e.currentTarget.style.color = C.text; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = C.cardBorder; e.currentTarget.style.color = C.textSoft; }}>
+            <span style={{ fontSize: 18, lineHeight: 1 }}>+</span> Add Organization
+          </button>
+        )}
+      </div>
+
+      {/* Running total */}
+      <div style={{ ...glass, padding: "24px 36px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <div>
+            <span style={{ fontSize: 14, color: C.textMuted, fontWeight: 500 }}>Allocated: </span>
+            <span style={{ fontSize: 18, fontWeight: 700, color: totalPct > 100 ? "#dc2626" : C.text }}>{totalPct.toFixed(1)}%</span>
+            <span style={{ fontSize: 14, color: C.textMuted, marginLeft: 12 }}>{fmt(totalAmt, budget.currency)} of {fmt(budget.cycleAmount, budget.currency)}</span>
+          </div>
+          <div style={{ fontSize: 14, color: C.textMuted }}>
+            Remaining: <strong style={{ color: totalPct > 100 ? "#dc2626" : C.text }}>{(100 - totalPct).toFixed(1)}%</strong>
+          </div>
+        </div>
+        {/* Progress bar */}
+        <div style={{ height: 8, background: C.divider, borderRadius: 4, overflow: "hidden", marginBottom: 20 }}>
+          <div style={{ height: "100%", width: `${Math.min(totalPct, 100)}%`, background: totalPct > 100 ? "#dc2626" : totalPct === 100 ? "#16a34a" : C.accent, borderRadius: 4, transition: "width .3s, background .3s" }} />
+        </div>
+        {totalPct > 100 && (
+          <div style={{ color: "#dc2626", fontSize: 14, fontWeight: 500, marginBottom: 16 }}>Total exceeds 100%. Please reduce your allocations.</div>
+        )}
+        {totalPct === 100 && (
+          <div style={{ color: "#16a34a", fontSize: 14, fontWeight: 500, marginBottom: 16 }}>Fully allocated!</div>
+        )}
+        {!isLocked && (
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
+            <button onClick={() => saveAllocations(false)} style={{ padding: "10px 24px", background: "transparent", border: `1px solid ${C.cardBorder}`, borderRadius: 4, color: C.textSoft, fontSize: 14, fontWeight: 500, cursor: "pointer", transition: "all .15s" }}>
+              Save Draft
+            </button>
+            <button onClick={() => saveAllocations(true)} disabled={totalPct > 100}
+              style={{ padding: "10px 28px", background: totalPct > 100 ? C.divider : C.accent, color: totalPct > 100 ? C.textMuted : C.text, border: "none", borderRadius: 4, fontSize: 14, fontWeight: 600, cursor: totalPct > 100 ? "not-allowed" : "pointer", transition: "all .15s" }}>
+              Submit Allocations
+            </button>
+          </div>
+        )}
+        {saved && <div style={{ marginTop: 14, fontSize: 14, color: C.textSoft, textAlign: "center" }}>Draft saved.</div>}
+        {submitted && <div style={{ marginTop: 14, fontSize: 14, color: "#16a34a", fontWeight: 500, textAlign: "center" }}>Allocations submitted!</div>}
+      </div>
+    </div>
+  );
+}
+
+// ─── ADMIN TAB ───────────────────────────────────────────────
+
+function ReceiptModal({ src, fileName, onClose }) {
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", animation: "fadeIn .2s ease" }}
+      onClick={onClose}>
+      <div style={{ background: "#fff", borderRadius: 8, padding: 24, maxWidth: 600, maxHeight: "80vh", overflow: "auto", position: "relative" }}
+        onClick={e => e.stopPropagation()}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{fileName || "Receipt"}</span>
+          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: C.textMuted }}>&times;</button>
+        </div>
+        {src && src.startsWith("data:image") ? (
+          <img src={src} alt="Receipt" style={{ width: "100%", borderRadius: 4 }} />
+        ) : (
+          <div style={{ padding: 40, textAlign: "center", color: C.textMuted }}>Unable to preview this file type.</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AdminTracker({ selectedCycleId }) {
+  const [tracker, setTracker] = useState(loadTracker());
+  const subs = loadSubmissions();
+  const budgets = loadBudgets();
+  const cycleSubs = subs[selectedCycleId] || {};
+  const cycleTracker = tracker[selectedCycleId] || {};
+  const [viewReceipt, setViewReceipt] = useState(null);
+
+  // Build rows: each employee's allocations for this cycle
+  const rows = [];
+  Object.entries(cycleSubs).forEach(([email, sub]) => {
+    const budget = budgets[email] || { cycleAmount: 0, currency: "$", name: email };
+    (sub.allocations || []).forEach(alloc => {
+      if (alloc.percentage <= 0) return;
+      const amt = (alloc.percentage / 100) * budget.cycleAmount;
+      const tData = cycleTracker[email]?.[alloc.orgName] || {};
+      rows.push({ email, name: budget.name, orgName: alloc.orgName, amount: Math.round(amt * 100) / 100, currency: budget.currency, paid: tData.paid || false, datePaid: tData.datePaid || "", receiptData: tData.receiptData || null, receiptFileName: tData.receiptFileName || null });
+    });
+  });
+
+  // Also include rows from tracker that came from seeded DEMO_DATA (not in current submissions)
+  Object.entries(cycleTracker).forEach(([email, orgs]) => {
+    Object.entries(orgs).forEach(([orgName, tData]) => {
+      if (!rows.find(r => r.email === email && r.orgName === orgName)) {
+        const budget = budgets[email] || { name: email, currency: "$" };
+        rows.push({ email, name: budget.name, orgName, amount: tData.amount || 0, currency: budget.currency, paid: tData.paid || false, datePaid: tData.datePaid || "", receiptData: tData.receiptData || null, receiptFileName: tData.receiptFileName || null });
+      }
+    });
+  });
+
+  rows.sort((a, b) => a.name.localeCompare(b.name) || a.orgName.localeCompare(b.orgName));
+
+  const paidCount = rows.filter(r => r.paid).length;
+  const totalAmt = rows.reduce((s, r) => s + r.amount, 0);
+
+  const updateTrackerField = (email, orgName, field, value) => {
+    const t = loadTracker();
+    if (!t[selectedCycleId]) t[selectedCycleId] = {};
+    if (!t[selectedCycleId][email]) t[selectedCycleId][email] = {};
+    if (!t[selectedCycleId][email][orgName]) t[selectedCycleId][email][orgName] = { paid: false, datePaid: "", receiptData: null, receiptFileName: null, amount: 0 };
+    t[selectedCycleId][email][orgName][field] = value;
+    // Auto-fill date when marking paid
+    if (field === "paid" && value && !t[selectedCycleId][email][orgName].datePaid) {
+      t[selectedCycleId][email][orgName].datePaid = new Date().toISOString().split("T")[0];
+    }
+    saveTracker(t);
+    setTracker({ ...t });
+  };
+
+  const handleReceiptUpload = (email, orgName, file) => {
+    if (file.size > 2 * 1024 * 1024) { alert("File too large. Please upload under 2MB."); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (file.type.startsWith("image/")) {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let w = img.width, h = img.height;
+          const max = 800;
+          if (w > max || h > max) { const r = Math.min(max / w, max / h); w *= r; h *= r; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          const compressed = canvas.toDataURL("image/jpeg", 0.6);
+          updateTrackerField(email, orgName, "receiptData", compressed);
+          updateTrackerField(email, orgName, "receiptFileName", file.name);
+        };
+        img.src = e.target.result;
+      } else {
+        updateTrackerField(email, orgName, "receiptData", e.target.result);
+        updateTrackerField(email, orgName, "receiptFileName", file.name);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  let lastEmail = "";
+  return (
+    <div>
+      {viewReceipt && <ReceiptModal src={viewReceipt.src} fileName={viewReceipt.name} onClose={() => setViewReceipt(null)} />}
+      <div style={{ ...glass, overflow: "hidden" }}>
+        {/* Header */}
+        <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 100px 50px 110px 90px", padding: "12px 20px", borderBottom: `1px solid ${C.divider}`, background: "rgba(34,37,32,0.02)" }}>
+          {["Employee", "Organization", "Amount", "Paid", "Date Paid", "Receipt"].map(h => (
+            <div key={h} style={{ fontSize: 11, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600 }}>{h}</div>
+          ))}
+        </div>
+        {/* Rows */}
+        {rows.length === 0 && (
+          <div style={{ padding: "40px 20px", textAlign: "center", color: C.textMuted, fontSize: 15 }}>No submissions for this cycle yet.</div>
+        )}
+        {rows.map((row, i) => {
+          const showName = row.email !== lastEmail;
+          lastEmail = row.email;
+          return (
+            <div key={`${row.email}-${row.orgName}`} style={{ display: "grid", gridTemplateColumns: "160px 1fr 100px 50px 110px 90px", padding: "12px 20px", borderBottom: `1px solid ${C.divider}`, alignItems: "center", background: showName && i > 0 ? "rgba(34,37,32,0.015)" : "transparent" }}>
+              <div style={{ fontSize: 14, fontWeight: showName ? 600 : 400, color: showName ? C.text : "transparent" }}>{showName ? row.name : row.name}</div>
+              <div style={{ fontSize: 14, color: C.textSoft }}>{row.orgName}</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{fmt(row.amount, row.currency)}</div>
+              <div>
+                <input type="checkbox" checked={row.paid} onChange={e => updateTrackerField(row.email, row.orgName, "paid", e.target.checked)}
+                  style={{ width: 18, height: 18, cursor: "pointer", accentColor: C.accent }} />
+              </div>
+              <div>
+                <input type="date" value={row.datePaid} onChange={e => updateTrackerField(row.email, row.orgName, "datePaid", e.target.value)}
+                  style={{ fontSize: 12, padding: "4px 6px", border: `1px solid ${C.cardBorder}`, borderRadius: 4, color: C.text, fontFamily: "'Montserrat',sans-serif" }} />
+              </div>
+              <div>
+                {row.receiptData ? (
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button onClick={() => setViewReceipt({ src: row.receiptData, name: row.receiptFileName })}
+                      style={{ fontSize: 12, color: C.navy, background: "none", border: "none", cursor: "pointer", fontWeight: 500, textDecoration: "underline" }}>View</button>
+                    <button onClick={() => { updateTrackerField(row.email, row.orgName, "receiptData", null); updateTrackerField(row.email, row.orgName, "receiptFileName", null); }}
+                      style={{ fontSize: 12, color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Remove</button>
+                  </div>
+                ) : (
+                  <label style={{ fontSize: 12, color: C.navy, cursor: "pointer", fontWeight: 500 }}>
+                    Upload
+                    <input type="file" accept="image/*,application/pdf" style={{ display: "none" }}
+                      onChange={e => { if (e.target.files[0]) handleReceiptUpload(row.email, row.orgName, e.target.files[0]); }} />
+                  </label>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        {/* Summary */}
+        <div style={{ padding: "16px 20px", borderTop: `1px solid ${C.divider}`, display: "flex", justifyContent: "space-between", background: "rgba(34,37,32,0.02)" }}>
+          <span style={{ fontSize: 14, color: C.textSoft }}>{paidCount} of {rows.length} donations paid</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Total: {fmt(totalAmt)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdminBudgets() {
+  const [budgets, setBudgets] = useState(loadBudgets());
+  const [newEmail, setNewEmail] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newAmount, setNewAmount] = useState("");
+  const [newCurrency, setNewCurrency] = useState("$");
+
+  const updateBudget = (email, field, value) => {
+    const b = { ...budgets };
+    b[email] = { ...b[email], [field]: field === "cycleAmount" ? parseFloat(value) || 0 : value };
+    saveBudgets(b);
+    setBudgets(b);
+  };
+
+  const addEmployee = () => {
+    if (!newEmail || !newEmail.includes("@")) return;
+    const b = { ...budgets };
+    b[newEmail.toLowerCase()] = { name: newName || newEmail.split("@")[0], cycleAmount: parseFloat(newAmount) || 0, currency: newCurrency };
+    saveBudgets(b);
+    setBudgets(b);
+    setNewEmail(""); setNewName(""); setNewAmount("");
+  };
+
+  const removeEmployee = (email) => {
+    const b = { ...budgets };
+    delete b[email];
+    saveBudgets(b);
+    setBudgets(b);
+  };
+
+  return (
+    <div style={{ ...glass, overflow: "hidden" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 140px 80px 80px", padding: "12px 20px", borderBottom: `1px solid ${C.divider}`, background: "rgba(34,37,32,0.02)" }}>
+        {["Employee", "Email", "Budget/Cycle", "Currency", ""].map(h => (
+          <div key={h} style={{ fontSize: 11, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600 }}>{h}</div>
+        ))}
+      </div>
+      {Object.entries(budgets).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([email, b]) => (
+        <div key={email} style={{ display: "grid", gridTemplateColumns: "160px 1fr 140px 80px 80px", padding: "10px 20px", borderBottom: `1px solid ${C.divider}`, alignItems: "center" }}>
+          <div style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{b.name}</div>
+          <div style={{ fontSize: 13, color: C.textMuted }}>{email}</div>
+          <div>
+            <input type="number" value={b.cycleAmount} onChange={e => updateBudget(email, "cycleAmount", e.target.value)}
+              style={{ width: 120, padding: "6px 10px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
+          </div>
+          <div>
+            <select value={b.currency} onChange={e => updateBudget(email, "currency", e.target.value)}
+              style={{ padding: "6px 8px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }}>
+              <option value="$">$</option><option value="£">£</option>
+            </select>
+          </div>
+          <div>
+            <button onClick={() => removeEmployee(email)} style={{ fontSize: 12, color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Remove</button>
+          </div>
+        </div>
+      ))}
+      {/* Add employee row */}
+      <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 140px 80px 80px", padding: "12px 20px", background: "rgba(34,37,32,0.02)", alignItems: "center", gap: 8 }}>
+        <input type="text" placeholder="Name" value={newName} onChange={e => setNewName(e.target.value)}
+          style={{ padding: "6px 10px", fontSize: 13, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
+        <input type="email" placeholder="email@isara.io" value={newEmail} onChange={e => setNewEmail(e.target.value)}
+          style={{ padding: "6px 10px", fontSize: 13, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
+        <input type="number" placeholder="Amount" value={newAmount} onChange={e => setNewAmount(e.target.value)}
+          style={{ width: 120, padding: "6px 10px", fontSize: 13, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
+        <select value={newCurrency} onChange={e => setNewCurrency(e.target.value)}
+          style={{ padding: "6px 8px", fontSize: 13, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }}>
+          <option value="$">$</option><option value="£">£</option>
+        </select>
+        <button onClick={addEmployee} style={{ padding: "6px 14px", background: C.accent, color: C.text, border: "none", borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Add</button>
+      </div>
+    </div>
+  );
+}
+
+function AdminManagement({ currentEmail }) {
+  const [admins, setAdmins] = useState(loadAdmins());
+  const [newAdmin, setNewAdmin] = useState("");
+
+  const addAdmin = () => {
+    if (!newAdmin || !newAdmin.includes("@")) return;
+    const updated = [...new Set([...admins, newAdmin.toLowerCase()])];
+    saveAdmins(updated);
+    setAdmins(updated);
+    setNewAdmin("");
+  };
+
+  const removeAdmin = (email) => {
+    if (email === currentEmail) return;
+    const updated = admins.filter(a => a !== email);
+    saveAdmins(updated);
+    setAdmins(updated);
+  };
+
+  return (
+    <div style={{ ...glass, padding: "32px 36px" }}>
+      <h3 style={{ fontSize: 16, fontWeight: 600, color: C.text, margin: "0 0 20px", textTransform: "uppercase", letterSpacing: ".06em" }}>Current Admins</h3>
+      {admins.map(email => (
+        <div key={email} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${C.divider}` }}>
+          <span style={{ fontSize: 15, color: C.text, fontWeight: 500 }}>{email}</span>
+          {email === currentEmail ? (
+            <span style={{ fontSize: 13, color: C.textMuted, fontStyle: "italic" }}>You</span>
+          ) : (
+            <button onClick={() => removeAdmin(email)} style={{ fontSize: 13, color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Remove</button>
+          )}
+        </div>
+      ))}
+      <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
+        <input type="email" placeholder="email@isara.io" value={newAdmin} onChange={e => setNewAdmin(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && addAdmin()}
+          style={{ flex: 1, padding: "10px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
+        <button onClick={addAdmin} style={{ padding: "10px 24px", background: C.accent, color: C.text, border: "none", borderRadius: 4, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Add Admin</button>
+      </div>
+      <p style={{ fontSize: 13, color: C.textMuted, marginTop: 16, lineHeight: 1.6 }}>Admins can view all employee submissions, manage budgets, and track donation payments.</p>
+    </div>
+  );
+}
+
+function AdminTab({ currentEmail }) {
+  const [subTab, setSubTab] = useState("tracker");
+  const cycles = loadCycles();
+  const [selectedCycleId, setSelectedCycleId] = useState(cycles.currentCycleId || "");
+
+  const subTabs = [
+    { id: "tracker", label: "Tracker" },
+    { id: "budgets", label: "Budgets" },
+    { id: "admins", label: "Admin Management" },
+  ];
+
+  return (
+    <div style={{ animation: "fadeSlideUp .3s ease" }}>
+      {/* Sub-nav */}
+      <div style={{ display: "flex", gap: 0, marginBottom: 28, borderBottom: `1px solid ${C.divider}` }}>
+        {subTabs.map(t => (
+          <button key={t.id} onClick={() => setSubTab(t.id)} style={{
+            padding: "10px 24px", background: "transparent", border: "none",
+            borderBottom: subTab === t.id ? `2px solid ${C.navy}` : "2px solid transparent",
+            color: subTab === t.id ? C.navy : C.textMuted, fontSize: 13, fontWeight: subTab === t.id ? 600 : 400,
+            cursor: "pointer", transition: "all .2s", marginBottom: -1, letterSpacing: ".04em",
+          }}>{t.label}</button>
+        ))}
+      </div>
+
+      {subTab === "tracker" && (
+        <div>
+          {/* Cycle selector */}
+          <div style={{ marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 14, color: C.textMuted, fontWeight: 500 }}>Cycle:</span>
+            <select value={selectedCycleId} onChange={e => setSelectedCycleId(e.target.value)}
+              style={{ padding: "8px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }}>
+              {cycles.cycles.map(c => (
+                <option key={c.cycleId} value={c.cycleId}>{c.label} ({c.status})</option>
+              ))}
+            </select>
+          </div>
+          <AdminTracker selectedCycleId={selectedCycleId} />
+        </div>
+      )}
+      {subTab === "budgets" && <AdminBudgets />}
+      {subTab === "admins" && <AdminManagement currentEmail={currentEmail} />}
     </div>
   );
 }
@@ -886,9 +1519,14 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [dataError, setDataError] = useState("");
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
+
+  // Seed localStorage on first load
+  useEffect(() => { seedFromDemoData(); }, []);
 
   const handleLogin = async (googleUser) => {
     setUser(googleUser); setLoading(true); setDataError("");
+    setIsUserAdmin(checkIsAdmin(googleUser.email));
     try {
       if (USE_DEMO_DATA) { setDonations(DEMO_DATA[googleUser.email] || []); }
       else {
@@ -916,14 +1554,14 @@ export default function App() {
           <div style={{ width: 36, height: 36, border: `2px solid ${C.divider}`, borderTop: `2px solid ${C.accent}`, borderRadius: "50%", animation: "spin .8s linear infinite" }} />
           <p style={{ color: C.textSoft, fontSize: 15, fontWeight: 500 }}>Loading your data...</p>
         </div>
-       ) : <Dashboard user={user} donations={donations} activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} dataError={dataError} />}
+       ) : <Dashboard user={user} donations={donations} activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} dataError={dataError} isUserAdmin={isUserAdmin} />}
     </>
   );
 }
 
 // ─── DASHBOARD ────────────────────────────────────────────────
 
-function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataError }) {
+function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataError, isUserAdmin }) {
   const [expandedOrgs, setExpandedOrgs] = useState(new Set());
   const [imgErrors, setImgErrors] = useState({});
   const [fetchedImages, setFetchedImages] = useState({});
@@ -1012,8 +1650,10 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
     { id: "overview", label: "Overview", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg> },
     { id: "breakdown", label: "Organizations", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> },
     { id: "allocation", label: "Monthly", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
+    { id: "donate", label: "Donate", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> },
     { id: "team", label: "Team", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
     { id: "impact", label: "Impact", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> },
+    ...(isUserAdmin ? [{ id: "admin", label: "Admin", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> }] : []),
   ];
 
   return (
@@ -1387,8 +2027,16 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
           )}
 
           {/* ═══════════════ IMPACT GLOBE ═══════════════ */}
+          {activeTab === "donate" && (
+            <DonateTab userEmail={user.email} />
+          )}
+
           {activeTab === "impact" && (
             <GlobeTab donations={donations} />
+          )}
+
+          {activeTab === "admin" && isUserAdmin && (
+            <AdminTab currentEmail={user.email} />
           )}
         </>)}
       </div>
