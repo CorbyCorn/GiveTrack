@@ -809,22 +809,13 @@ function LoginScreen({ onLogin }) {
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#FAF7F0", position: "relative", overflow: "hidden" }}>
-      {/* Organic blobs */}
-      <div style={{ position: "fixed", top: -120, right: -80, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,202,10,0.1) 0%, transparent 70%)", filter: "blur(60px)", animation: "float 12s ease-in-out infinite", pointerEvents: "none" }} />
-      <div style={{ position: "fixed", bottom: -100, left: -60, width: 350, height: 350, borderRadius: "50%", background: "radial-gradient(circle, rgba(0,51,102,0.06) 0%, transparent 70%)", filter: "blur(60px)", animation: "float 15s ease-in-out infinite 2s", pointerEvents: "none" }} />
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: C.bg }}>
+      <div style={{ width: 420, textAlign: "center", animation: "fadeSlideUp .6s ease" }}>
+        <h1 style={{ fontSize: 44, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700, color: C.text, margin: "0 0 12px", letterSpacing: "-0.03em" }}>GiveTrack</h1>
+        <p style={{ color: C.textMuted, fontSize: 16, margin: "0 0 48px", fontWeight: 400, lineHeight: 1.6 }}>Track the impact of your generosity</p>
 
-      <div style={{ width: 460, textAlign: "center", animation: "fadeSlideUp .6s ease", zIndex: 1 }}>
-        <div style={{ width: 64, height: 64, borderRadius: 18, background: "linear-gradient(135deg, #003366, #005599)", margin: "0 auto 32px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 24px rgba(0,51,102,0.3)" }}>
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-          </svg>
-        </div>
-        <h1 style={{ fontSize: 38, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700, color: C.text, margin: "0 0 10px", letterSpacing: "-0.03em" }}>GiveTrack</h1>
-        <p style={{ color: C.textSoft, fontSize: 17, margin: "0 0 48px", fontWeight: 400 }}>Track the impact of your generosity</p>
-
-        <div style={{ ...glass, padding: "48px 52px", boxShadow: "0 8px 40px rgba(34,37,32,0.08)" }}>
-          <p style={{ color: C.textSoft, fontSize: 16, marginBottom: 32, fontWeight: 400, lineHeight: 1.6 }}>Sign in with your company Google account to view your charitable giving.</p>
+        <div style={{ background: "#fff", borderRadius: 8, padding: "48px 48px", border: `1px solid ${C.divider}` }}>
+          <p style={{ color: C.textSoft, fontSize: 15, marginBottom: 36, fontWeight: 400, lineHeight: 1.7 }}>Sign in with your company Google account to view your charitable giving.</p>
           <div id="google-signin-btn" style={{ display: "flex", justifyContent: "center" }}></div>
           {error && <div style={{ color: "#dc2626", fontSize: 15, marginTop: 18, fontWeight: 500 }}>{error}</div>}
         </div>
@@ -990,27 +981,61 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
         </div>
       </header>
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "60px 32px 100px" }}>
+      {donations.length > 0 && activeTab === "overview" && (<>
+        {/* FULL-BLEED HERO */}
+        <div style={{ position: "relative", height: 620, overflow: "hidden", animation: "fadeSlideUp .5s ease" }}>
+          <img src={HERO_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 55%", display: "block", filter: "saturate(1.15) contrast(1.1) sepia(0.25) brightness(1.05)" }}
+            onError={e => { e.target.style.display = "none"; }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(220,160,60,0.18) 0%, rgba(200,100,50,0.12) 50%, rgba(180,140,80,0.15) 100%)", mixBlendMode: "multiply" }} />
+          <div style={{ position: "absolute", inset: 0, background: "rgba(255,240,200,0.08)", mixBlendMode: "screen" }} />
+          <div style={{ position: "absolute", inset: 0, opacity: 0.07, backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")", backgroundSize: "128px 128px", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "56px 64px" }}>
+            <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".15em", fontWeight: 600, marginBottom: 14 }}>Total Donated</div>
+            <div style={{ fontSize: 88, fontWeight: 900, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.02em", lineHeight: 1, textShadow: "0 3px 6px rgba(0,0,0,0.7), 0 6px 20px rgba(0,0,0,0.4), 0 12px 40px rgba(0,0,0,0.25)" }}>
+              <AnimatedNumber value={totalDonated} currency={primaryCurrency} />
+            </div>
+            <div style={{ fontSize: 18, color: "rgba(255,255,255,0.8)", marginTop: 18, fontWeight: 500, textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
+              Welcome back, {user.name.split(" ")[0]} — across {cycles.length} payroll cycles
+            </div>
+          </div>
+        </div>
+
+        {/* FULL-BLEED DARK STAT STRIP */}
+        <div style={{ background: C.text, padding: "44px 64px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          {[
+            { label: "Per cycle", value: avgCycle },
+            { label: "Organizations", value: orgCount, isCount: true },
+            { label: "Countries reached", value: countriesReached, isCount: true },
+            { label: "Months active", value: months.length, isCount: true },
+          ].map((stat, i) => (
+            <div key={i} style={{ textAlign: "center", flex: 1 }}>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", textTransform: "uppercase", letterSpacing: ".12em", fontWeight: 500, marginBottom: 10 }}>{stat.label}</div>
+              <div style={{ fontSize: 32, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.02em" }}>
+                {stat.isCount ? stat.value : <AnimatedNumber value={stat.value} currency={primaryCurrency} />}
+              </div>
+            </div>
+          ))}
+        </div>
+      </>)}
+
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: donations.length > 0 && activeTab === "overview" ? "72px 32px 100px" : "60px 32px 100px" }}>
         {dataError && <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "16px 20px", marginBottom: 28, color: "#dc2626", fontSize: 15, fontWeight: 500 }}>{dataError}</div>}
 
         {donations.length === 0 && !dataError ? (
-          <div style={{ ...glass, padding: "64px 36px", textAlign: "center", animation: "fadeSlideUp .4s ease" }}>
-            <div style={{ width: 56, height: 56, borderRadius: 8, background: C.accentLight, margin: "0 auto 24px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={C.navy} strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </div>
-            <h3 style={{ fontSize: 20, fontWeight: 600, color: C.text, marginBottom: 10 }}>No donations found</h3>
-            <p style={{ color: C.textSoft, fontSize: 16, maxWidth: 400, margin: "0 auto", lineHeight: 1.6 }}>We couldn't find any records linked to {user.email}. Please contact your administrator.</p>
+          <div style={{ ...glass, padding: "80px 36px", textAlign: "center", animation: "fadeSlideUp .4s ease" }}>
+            <h3 style={{ fontSize: 24, fontWeight: 600, color: C.text, marginBottom: 12, fontFamily: "'Playfair Display',Georgia,serif" }}>No donations found</h3>
+            <p style={{ color: C.textSoft, fontSize: 16, maxWidth: 400, margin: "0 auto", lineHeight: 1.7 }}>We couldn't find any records linked to {user.email}. Please contact your administrator.</p>
           </div>
         ) : donations.length > 0 && (<>
           {/* Tabs */}
-          <div style={{ display: "flex", gap: 0, marginBottom: 56, borderBottom: `1px solid ${C.divider}`, overflowX: "auto" }}>
+          <div style={{ display: "flex", gap: 0, marginBottom: activeTab === "overview" ? 0 : 56, borderBottom: activeTab === "overview" ? "none" : `1px solid ${C.divider}`, overflowX: "auto" }}>
             {tabs.map(t => (
               <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
                 padding: "14px 28px", background: "transparent", border: "none",
                 borderBottom: activeTab === t.id ? `2px solid ${C.text}` : "2px solid transparent",
-                color: activeTab === t.id ? C.text : C.textMuted, fontSize: 14, fontWeight: activeTab === t.id ? 600 : 400,
+                color: activeTab === t.id ? C.text : C.textMuted, fontSize: 13, fontWeight: activeTab === t.id ? 600 : 400,
                 cursor: "pointer", transition: "all .2s", marginBottom: -1, display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap",
-                letterSpacing: ".02em", textTransform: "uppercase",
+                letterSpacing: ".06em", textTransform: "uppercase",
               }}
                 onMouseEnter={e => { if (activeTab !== t.id) e.target.style.color = C.textSoft; }}
                 onMouseLeave={e => { if (activeTab !== t.id) e.target.style.color = C.textMuted; }}>
@@ -1021,46 +1046,14 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
 
           {/* ═══════════════ OVERVIEW ═══════════════ */}
           {activeTab === "overview" && (<>
-            {/* Hero photo — full bleed */}
-            <div style={{ borderRadius: 8, overflow: "hidden", position: "relative", height: 560, marginBottom: 0, animation: "fadeSlideUp .5s ease" }}>
-              <img src={HERO_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 55%", display: "block", filter: "saturate(1.15) contrast(1.1) sepia(0.25) brightness(1.05)" }}
-                onError={e => { e.target.style.display = "none"; }} />
-              {/* Warm retro tone overlay */}
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(220,160,60,0.18) 0%, rgba(200,100,50,0.12) 50%, rgba(180,140,80,0.15) 100%)", mixBlendMode: "multiply" }} />
-              {/* Warm highlight lift */}
-              <div style={{ position: "absolute", inset: 0, background: "rgba(255,240,200,0.08)", mixBlendMode: "screen" }} />
-              {/* Film grain overlay */}
-              <div style={{ position: "absolute", inset: 0, opacity: 0.07, backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")", backgroundSize: "128px 128px", pointerEvents: "none" }} />
-              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "48px 56px" }}>
-                <div style={{ fontSize: 16, color: "#fff", textTransform: "uppercase", letterSpacing: ".12em", fontWeight: 700, marginBottom: 12, textShadow: "0 2px 8px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.3)" }}>Total Donated</div>
-                <div style={{ fontSize: 80, fontWeight: 900, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.02em", lineHeight: 1, textShadow: "0 3px 6px rgba(0,0,0,0.7), 0 6px 20px rgba(0,0,0,0.4), 0 12px 40px rgba(0,0,0,0.25)" }}>
-                  <AnimatedNumber value={totalDonated} currency={primaryCurrency} />
-                </div>
-                <div style={{ fontSize: 19, color: "#fff", marginTop: 16, fontWeight: 600, textShadow: "0 2px 8px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.3)" }}>
-                  Welcome back, {user.name.split(" ")[0]} — across {cycles.length} payroll cycles
-                </div>
-              </div>
-            </div>
-
-            {/* Dark stat strip */}
-            <div style={{ background: C.text, borderRadius: "0 0 8px 8px", padding: "36px 56px", marginBottom: 56, display: "flex", justifyContent: "space-between", alignItems: "center", animation: "fadeSlideUp .4s ease .05s both" }}>
-              {[
-                { label: "Per cycle", value: avgCycle },
-                { label: "Organizations", value: orgCount, isCount: true },
-                { label: "Countries reached", value: countriesReached, isCount: true },
-                { label: "Months active", value: months.length, isCount: true },
-              ].map((stat, i) => (
-                <div key={i} style={{ textAlign: i === 0 ? "left" : "center", flex: 1 }}>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 8 }}>{stat.label}</div>
-                  <div style={{ fontSize: 28, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.02em" }}>
-                    {stat.isCount ? stat.value : <AnimatedNumber value={stat.value} currency={primaryCurrency} />}
-                  </div>
-                </div>
-              ))}
+            {/* Section heading */}
+            <div style={{ marginBottom: 40 }}>
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: 0 }}>Your Giving</h2>
+              <p style={{ fontSize: 15, color: C.textMuted, marginTop: 8 }}>A breakdown of where your contributions go</p>
             </div>
 
             {/* Charts — asymmetric layout */}
-            <div style={{ display: "grid", gridTemplateColumns: months.length > 1 ? "58fr 42fr" : "1fr", gap: 28, marginBottom: 56 }}>
+            <div style={{ display: "grid", gridTemplateColumns: months.length > 1 ? "58fr 42fr" : "1fr", gap: 32, marginBottom: 64 }}>
               {months.length > 1 && (
                 <div style={{ ...glass, padding: "36px 40px", animation: "fadeSlideUp .4s ease .15s both" }}>
                   <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, margin: "0 0 32px", fontFamily: "'Playfair Display',Georgia,serif" }}>Monthly overview</h3>
@@ -1099,13 +1092,13 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
             </div>
 
             {/* Cause areas */}
-            <div style={{ marginBottom: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 20 }}>Your Cause Areas</div>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <div>
+              <h2 style={{ fontSize: 22, fontWeight: 600, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: "0 0 24px" }}>Cause Areas</h2>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                 {Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]).map(([cat, amt]) => (
-                  <div key={cat} style={{ padding: "10px 20px", borderRadius: 4, background: "#fff", border: `1px solid ${C.divider}`, display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{cat}</span>
-                    <span style={{ fontSize: 13, color: C.textMuted, fontWeight: 600 }}>{fmt(amt)}</span>
+                  <div key={cat} style={{ padding: "12px 24px", borderRadius: 4, background: "#fff", border: `1px solid ${C.divider}`, display: "flex", alignItems: "center", gap: 12 }}>
+                    <span style={{ fontSize: 15, fontWeight: 500, color: C.text }}>{cat}</span>
+                    <span style={{ fontSize: 14, color: C.textMuted, fontWeight: 600 }}>{fmt(amt)}</span>
                   </div>
                 ))}
               </div>
