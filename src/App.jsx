@@ -785,7 +785,24 @@ function DonateTab({ userEmail }) {
     setShowRollforward(false);
   };
 
-  const selectedOrgs = allocations.map(a => a.orgName).filter(Boolean);
+  const [clampedIdx, setClampedIdx] = useState(null);
+
+  // Priority: first row = highest priority, last row = lowest
+  // When adjusting a slider, don't let total exceed 100%
+  const updateRowClamped = (idx, field, value) => {
+    if (field === "percentage") {
+      const othersTotal = allocations.reduce((s, a, i) => i !== idx ? s + (a.percentage || 0) : s, 0);
+      const maxAllowed = Math.max(0, 100 - othersTotal);
+      if (value > maxAllowed) {
+        value = maxAllowed;
+        setClampedIdx(idx);
+        setTimeout(() => setClampedIdx(null), 2000);
+      } else {
+        setClampedIdx(null);
+      }
+    }
+    updateRow(idx, field, value);
+  };
 
   return (
     <div style={{ animation: "fadeSlideUp .3s ease" }}>
@@ -828,6 +845,9 @@ function DonateTab({ userEmail }) {
           const amt = (alloc.percentage / 100) * budget.cycleAmount;
           return (
             <div key={idx} style={{ padding: "18px 0", borderBottom: idx < allocations.length - 1 ? `1px solid ${C.divider}` : "none", animation: `fadeSlideUp .3s ease ${idx * 0.03}s both` }}>
+              <div style={{ fontSize: 11, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600, marginBottom: 8 }}>
+                {idx === 0 ? "Highest Priority" : idx === allocations.length - 1 && allocations.length > 1 ? "Lowest Priority" : `Priority ${idx + 1}`}
+              </div>
               <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
                 <select
                   value={alloc.orgName}
@@ -841,7 +861,7 @@ function DonateTab({ userEmail }) {
                   style={{ width: 320, padding: "10px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, background: "#fff", color: C.text, fontFamily: "'Montserrat',sans-serif", cursor: isLocked ? "not-allowed" : "pointer" }}>
                   <option value="">Select an organization...</option>
                   {ALL_KNOWN_ORGS.map(name => (
-                    <option key={name} value={name} disabled={selectedOrgs.includes(name) && alloc.orgName !== name}>{name}</option>
+                    <option key={name} value={name}>{name}</option>
                   ))}
                   <option value="__other">Other (enter name or URL)</option>
                 </select>
@@ -861,19 +881,22 @@ function DonateTab({ userEmail }) {
                 <div style={{ flex: 1, position: "relative" }}>
                   <input
                     type="range" min="0" max="100" step="5" list={`ticks-${idx}`}
-                    value={alloc.percentage} onChange={e => updateRow(idx, "percentage", parseFloat(e.target.value))}
+                    value={alloc.percentage} onChange={e => updateRowClamped(idx, "percentage", parseFloat(e.target.value))}
                     disabled={isLocked}
-                    style={{ width: "100%", accentColor: C.accent, cursor: isLocked ? "not-allowed" : "pointer" }} />
+                    style={{ width: "100%", accentColor: clampedIdx === idx ? "#dc2626" : C.accent, cursor: isLocked ? "not-allowed" : "pointer" }} />
                   <datalist id={`ticks-${idx}`}>
                     {[0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100].map(v => <option key={v} value={v} />)}
                   </datalist>
                   <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2, padding: "0 2px" }}>
                     {[0,25,50,75,100].map(v => <span key={v} style={{ fontSize: 10, color: C.textMuted }}>{v}%</span>)}
                   </div>
+                  {clampedIdx === idx && (
+                    <div style={{ fontSize: 12, color: "#dc2626", fontWeight: 500, marginTop: 4 }}>Cannot exceed 100% total — reduce higher-priority orgs above first.</div>
+                  )}
                 </div>
                 <input
                   type="number" min="0" max="100" step="5"
-                  value={alloc.percentage} onChange={e => updateRow(idx, "percentage", Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)))}
+                  value={alloc.percentage} onChange={e => updateRowClamped(idx, "percentage", Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)))}
                   disabled={isLocked}
                   style={{ width: 64, padding: "6px 10px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, textAlign: "center", fontFamily: "'Montserrat',sans-serif" }} />
                 <span style={{ fontSize: 13, color: C.textMuted, width: 16 }}>%</span>
