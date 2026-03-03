@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@layer base {
+  body {
+    @apply bg-navy-950 text-gray-100 antialiased;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-navy-900;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-navy-600 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-navy-500;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-navy-900/80 backdrop-blur-sm border border-navy-700/50 rounded-xl;
+  }
+  .card-hover {
+    @apply card transition-all duration-200 hover:border-navy-600/50 hover:shadow-lg hover:shadow-navy-950/50;
+  }
+  .stat-value {
+    @apply text-2xl font-bold font-mono tracking-tight;
+  }
+  .stat-label {
+    @apply text-xs font-medium text-navy-300 uppercase tracking-wider;
+  }
+  .btn-primary {
+    @apply px-4 py-2 bg-accent-blue hover:bg-blue-600 text-white font-medium rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply px-4 py-2 bg-navy-700 hover:bg-navy-600 text-gray-200 font-medium rounded-lg transition-colors duration-150 border border-navy-600;
+  }
+  .input-field {
+    @apply w-full px-4 py-2.5 bg-navy-800 border border-navy-600 rounded-lg text-gray-100 placeholder-navy-400 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-colors;
+  }
+}
