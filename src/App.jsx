@@ -314,69 +314,43 @@ const DEMO_DATA = {
   "courtney@isara.io": [
     { orgName: "Save the Children", paidTo: "https://support.savethechildren.org/site/Ecommerce", allocatedAmount: 950, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "Save the Children", paidTo: "https://support.savethechildren.org/site/Ecommerce", allocatedAmount: 950, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
-  ],
-  "edward@isara.io": [
     { orgName: "Give To IV", paidTo: "https://givetoiv.org/justinlee", allocatedAmount: 285, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 30 },
     { orgName: "Open Door Legal", paidTo: "https://opendoorlegal.org/", allocatedAmount: 190, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 20 },
     { orgName: "Wholesome Wave", paidTo: "https://www.wholesomewave.org/", allocatedAmount: 95, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 10 },
     { orgName: "The Washing Machine Project", paidTo: "https://www.thewashingmachineproject.org/our-impact", allocatedAmount: 95, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 10 },
     { orgName: "Radiance SF", paidTo: "https://www.radiancesf.org/", allocatedAmount: 142.50, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 15 },
     { orgName: "Reality SF", paidTo: "https://realitysf.com/", allocatedAmount: 142.50, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 15 },
+    { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 125, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "NCCHC Foundation", paidTo: "https://ncchcfoundation.org/", allocatedAmount: 435, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 2367.50, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 94, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 3208.33, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "Asylum Access", paidTo: "https://www.asylumaccess.org/", allocatedAmount: 1924.83, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 1400, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "Malaria Consortium", paidTo: "https://www.malariaconsortium.org", allocatedAmount: 1039.59, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
+    { orgName: "Oceana", paidTo: "https://oceana.org", allocatedAmount: 689.59, month: "Jan 2026", currency: "$", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
+    { orgName: "WWF", paidTo: "https://www.worldwildlife.org", allocatedAmount: 689.58, month: "Jan 2026", currency: "$", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
     { orgName: "Give To IV", paidTo: "https://givetoiv.org/justinlee", allocatedAmount: 285, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
     { orgName: "Open Door Legal", paidTo: "https://opendoorlegal.org/", allocatedAmount: 190, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
     { orgName: "Wholesome Wave", paidTo: "https://www.wholesomewave.org/", allocatedAmount: 95, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 10 },
     { orgName: "The Washing Machine Project", paidTo: "https://www.thewashingmachineproject.org/our-impact", allocatedAmount: 95, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 10 },
     { orgName: "Radiance SF", paidTo: "https://www.radiancesf.org/", allocatedAmount: 142.50, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 15 },
     { orgName: "Reality SF", paidTo: "https://realitysf.com/", allocatedAmount: 142.50, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 15 },
-  ],
-  "amy@isara.io": [
-    { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 125, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 125, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
-  ],
-  "ben@isara.io": [
-    { orgName: "NCCHC Foundation", paidTo: "https://ncchcfoundation.org/", allocatedAmount: 435, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "NCCHC Foundation", paidTo: "https://ncchcfoundation.org/", allocatedAmount: 435, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
-  ],
-  "bernie@isara.io": [
-    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 2367.50, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "Action Against Hunger", paidTo: "https://www.actionagainsthunger.org", allocatedAmount: 947, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
     { orgName: "Médecins Sans Frontières", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 947, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
     { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 473.50, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
-  ],
-  "ed@isara.io": [
-    { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 94, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 94, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
-  ],
-  "peter@isara.io": [
-    { orgName: "SFHS", paidTo: "https://www.sfhs.com/make-a-gift", allocatedAmount: 10666.67, month: "Jan 2026", currency: "$", paidDate: "", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
-    { orgName: "SFHS", paidTo: "https://www.sfhs.com/make-a-gift", allocatedAmount: 10666.67, month: "Feb 2026", currency: "$", paidDate: "", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
-  ],
-  "jerry@isara.io": [
-    { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 3208.33, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 3208.33, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
-  ],
-  "rowan@isara.io": [
-    { orgName: "Asylum Access", paidTo: "https://www.asylumaccess.org/", allocatedAmount: 1924.83, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "Clean Ocean Action", paidTo: "https://www.cleanoceanaction.org", allocatedAmount: 577.45, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
     { orgName: "Middle East Children's Alliance", paidTo: "https://www.mecaforpeace.org", allocatedAmount: 769.93, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
     { orgName: "Room to Read", paidTo: "https://www.roomtoread.org", allocatedAmount: 577.45, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
-  ],
-  "sam@isara.io": [
-    { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 1400, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 1400, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
-  ],
-  "artur@isara.io": [
-    { orgName: "Malaria Consortium", paidTo: "https://www.malariaconsortium.org", allocatedAmount: 1039.59, month: "Jan 2026", currency: "£", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
-    { orgName: "En Ptahy Vidchui", paidTo: "https://en.ptahy.vidchui.org/", allocatedAmount: 1039.58, month: "Jan 2026", currency: "£", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
-    { orgName: "Malaria Consortium", paidTo: "https://www.malariaconsortium.org", allocatedAmount: 1039.59, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 50 },
-    { orgName: "En Ptahy Vidchui", paidTo: "https://en.ptahy.vidchui.org/", allocatedAmount: 1039.58, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 50 },
-  ],
-  "lily@isara.io": [
-    { orgName: "Oceana", paidTo: "https://oceana.org", allocatedAmount: 689.59, month: "Jan 2026", currency: "£", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
-    { orgName: "WWF", paidTo: "https://www.worldwildlife.org", allocatedAmount: 689.58, month: "Jan 2026", currency: "£", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
-    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 551.67, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
-    { orgName: "Médecins sans Frontières", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 551.67, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
-    { orgName: "Action Against Hunger", paidTo: "https://www.actionagainsthunger.org", allocatedAmount: 275.83, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
+    { orgName: "Malaria Consortium", paidTo: "https://www.malariaconsortium.org", allocatedAmount: 1039.59, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 50 },
+    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 551.67, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
+    { orgName: "Action Against Hunger", paidTo: "https://www.actionagainsthunger.org", allocatedAmount: 275.83, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
+    { orgName: "Oceana", paidTo: "https://oceana.org", allocatedAmount: 689.59, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 50 },
   ],
 };
 
@@ -385,13 +359,7 @@ const DEMO_DATA = {
 const INITIAL_ADMINS = ["courtney@isara.io"];
 
 const EMPLOYEE_NAMES = {
-  "courtney@isara.io": "Courtney Leung", "edward@isara.io": "Edward Kang",
-  "amy@isara.io": "Amy Wang", "ben@isara.io": "Benjamin Smith",
-  "bernie@isara.io": "Bernie Conrad", "ed@isara.io": "Edwin Zhang",
-  "peter@isara.io": "Peter Buckland", "jerry@isara.io": "Jerry Bai",
-  "rowan@isara.io": "Rowan Tran", "sam@isara.io": "Sam Kwok",
-  "artur@isara.io": "Artur Avameri", "lily@isara.io": "Lily Gasztowtt",
-  "ranah@isara.io": "Ranah Netane",
+  "courtney@isara.io": "Courtney Leung",
 };
 
 function loadStorage(key, fallback) {
@@ -1668,85 +1636,23 @@ function GlobeTab({ donations, userEmail }) {
 
 // ─── LOGIN ────────────────────────────────────────────────────
 
-function LoginScreen({ onLogin }) {
-  const [error, setError] = useState("");
-  const m = useIsMobile();
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client"; script.async = true;
-    script.onload = () => {
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: (response) => {
-          try { const payload = JSON.parse(atob(response.credential.split(".")[1])); onLogin({ email: payload.email, name: payload.name, picture: payload.picture }); }
-          catch { setError("Login failed. Please try again."); }
-        }, auto_select: false,
-      });
-      window.google.accounts.id.renderButton(document.getElementById("google-signin-btn"), { theme: "outline", size: "large", width: 300, text: "signin_with", shape: "pill" });
-    };
-    document.head.appendChild(script);
-  }, []);
-
-  return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: C.bg }}>
-      <div style={{ width: m ? "calc(100vw - 32px)" : 420, maxWidth: 420, textAlign: "center", animation: "fadeSlideUp .6s ease" }}>
-        <h1 style={{ fontSize: m ? 28 : 44, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700, color: C.text, margin: "0 0 12px", letterSpacing: "-0.03em" }}>GiveTrack</h1>
-        <p style={{ color: C.textMuted, fontSize: 16, margin: m ? "0 0 28px" : "0 0 48px", fontWeight: 400, lineHeight: 1.6 }}>Track the impact of your generosity</p>
-
-        <div style={{ background: "#fff", borderRadius: 8, padding: m ? "28px 20px" : "48px 48px", border: `1px solid ${C.divider}` }}>
-          <p style={{ color: C.textSoft, fontSize: 15, marginBottom: 36, fontWeight: 400, lineHeight: 1.7 }}>Sign in with your company Google account to view your charitable giving.</p>
-          <div id="google-signin-btn" style={{ display: "flex", justifyContent: "center" }}></div>
-          {error && <div style={{ color: "#dc2626", fontSize: 15, marginTop: 18, fontWeight: 500 }}>{error}</div>}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── MAIN APP ─────────────────────────────────────────────────
 
+const PORTFOLIO_USER = { email: "courtney@isara.io", name: "Courtney Leung", picture: null };
+
 export default function App() {
-  const [user, setUser] = useState(null);
-  const [donations, setDonations] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const [dataError, setDataError] = useState("");
-  const [isUserAdmin, setIsUserAdmin] = useState(false);
 
   // Seed localStorage on first load
   useEffect(() => { seedFromDemoData(); }, []);
 
-  const handleLogin = async (googleUser) => {
-    setUser(googleUser); setLoading(true); setDataError("");
-    setIsUserAdmin(checkIsAdmin(googleUser.email));
-    try {
-      if (USE_DEMO_DATA) { setDonations(DEMO_DATA[googleUser.email] || []); }
-      else {
-        const res = await fetch("/api/sharepoint");
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setDonations(parseSpreadsheetData(data.values || [], googleUser.email));
-      }
-    } catch { setDataError("Unable to load donation data."); }
-    finally { setLoading(false); }
-  };
-
-  const handleLogout = () => {
-    setUser(null); setDonations([]); setActiveTab("overview");
-    if (window.google?.accounts?.id) window.google.accounts.id.disableAutoSelect();
-  };
+  const donations = DEMO_DATA[PORTFOLIO_USER.email] || [];
 
   return (
     <>
       <link href={FONTS_URL} rel="stylesheet" />
       <style>{GLOBAL_CSS}</style>
-      {!user ? <LoginScreen onLogin={handleLogin} /> :
-       loading ? (
-        <div style={{ minHeight: "100vh", background: C.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 18 }}>
-          <div style={{ width: 36, height: 36, border: `2px solid ${C.divider}`, borderTop: `2px solid ${C.accent}`, borderRadius: "50%", animation: "spin .8s linear infinite" }} />
-          <p style={{ color: C.textSoft, fontSize: 15, fontWeight: 500 }}>Loading your data...</p>
-        </div>
-       ) : <Dashboard user={user} donations={donations} activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} dataError={dataError} isUserAdmin={isUserAdmin} />}
+      <Dashboard user={PORTFOLIO_USER} donations={donations} activeTab={activeTab} setActiveTab={setActiveTab} onLogout={() => {}} dataError="" isUserAdmin={false} />
     </>
   );
 }
@@ -1843,10 +1749,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
     { id: "overview", label: "Overview", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg> },
     { id: "breakdown", label: "Organizations", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> },
     { id: "allocation", label: "Monthly", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
-    { id: "donate", label: "Donate", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> },
-    { id: "team", label: "Team", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
     { id: "impact", label: "Impact", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> },
-    ...(isUserAdmin ? [{ id: "admin", label: "Admin", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> }] : []),
   ];
 
   return (
@@ -1859,12 +1762,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
           {!m && <div style={{ textAlign: "right" }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{user.name}</div>
-            <div style={{ fontSize: 12, color: C.textMuted }}>{user.email}</div>
           </div>}
-          {user.picture && <img src={user.picture} alt="" style={{ width: 34, height: 34, borderRadius: "50%", border: `1px solid ${C.divider}` }} />}
-          <button onClick={onLogout} style={{ padding: "7px 16px", background: "transparent", border: `1px solid ${C.cardBorder}`, borderRadius: 4, color: C.textSoft, fontSize: 13, cursor: "pointer", transition: "all .15s", fontWeight: 500 }}
-            onMouseEnter={e => { e.target.style.background = C.text; e.target.style.color = "#fff"; e.target.style.borderColor = C.text; }}
-            onMouseLeave={e => { e.target.style.borderColor = C.cardBorder; e.target.style.color = C.textSoft; e.target.style.background = "transparent"; }}>Sign out</button>
         </div>
       </header>
 
