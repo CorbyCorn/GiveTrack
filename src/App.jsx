@@ -11,6 +11,18 @@ import * as topojson from "topojson-client";
 const GOOGLE_CLIENT_ID = "296721826980-i3sgo6dgklh7v8fppql7mumdnuv0lu33.apps.googleusercontent.com";
 const USE_DEMO_DATA = true;
 
+// ─── RESPONSIVE ──────────────────────────────────────────────
+
+function useIsMobile(bp = 768) {
+  const [m, setM] = useState(typeof window !== "undefined" ? window.innerWidth < bp : false);
+  useEffect(() => {
+    const h = () => setM(window.innerWidth < bp);
+    window.addEventListener("resize", h);
+    return () => window.removeEventListener("resize", h);
+  }, [bp]);
+  return m;
+}
+
 // ─── UTILITIES ────────────────────────────────────────────────
 
 const fmt = (n, currency = "$") => {
@@ -129,7 +141,7 @@ const ORG_IMAGE_POS = {
   "Reality SF": "center 30%",             // volunteers at food pantry
   "SFHS": "center 30%",                   // SFHS students smiling together
 };
-const HERO_IMAGE = "/banner.jpg";
+const HERO_IMAGE = "https://cdn.builder.io/api/v1/image/assets%2F2fe4147bb8c843bb8ebba475c8973899%2Ffabbd9deb9724e1b9ce5bd36d518dd11";
 
 // ─── GLOBE DATA ──────────────────────────────────────────────
 
@@ -171,6 +183,11 @@ const COUNTRY_CENTROIDS = {
   MEX: { lat: 23.6, lng: -102.5 }, IND: { lat: 20.6, lng: 78.9 }, NPL: { lat: 28.4, lng: 84.1 },
   KEN: { lat: 0.02, lng: 37.9 }, SYR: { lat: 35.0, lng: 38.5 },
   PSE: { lat: 31.9, lng: 35.2 }, CHN: { lat: 35.9, lng: 104.2 }, UKR: { lat: 48.4, lng: 31.2 },
+};
+
+// Ring radii for ocean orgs only (land countries use polygon glow instead)
+const OCEAN_RING_RADIUS = {
+  "Sea Shepherd": 10, "Oceana": 9, "Clean Ocean Action": 8,
 };
 
 // Bright "beam of light" colors — one per destination
@@ -291,107 +308,20 @@ const ORG_WEBSITES = {
 };
 
 // ─── DEMO DATA ────────────────────────────────────────────────
+// Real donation data from company spreadsheet (Jan-31 and Feb-15 pay cycles)
 
 const DEMO_DATA = {
   "courtney@isara.io": [
-    // — Courtney's original donations —
-    { orgName: "Save the Children", paidTo: "https://support.savethechildren.org/site/Ecommerce", allocatedAmount: 320, month: "Jan 2026", currency: "$", paidDate: "15-Jan-26", cycle: "Jan-15 Payroll Cycle", percentage: 15 },
-    { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 280, month: "Jan 2026", currency: "$", paidDate: "15-Jan-26", cycle: "Jan-15 Payroll Cycle", percentage: 13 },
-    { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 200, month: "Jan 2026", currency: "$", paidDate: "15-Jan-26", cycle: "Jan-15 Payroll Cycle", percentage: 10 },
-    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 180, month: "Jan 2026", currency: "$", paidDate: "15-Jan-26", cycle: "Jan-15 Payroll Cycle", percentage: 9 },
-    { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 150, month: "Jan 2026", currency: "$", paidDate: "15-Jan-26", cycle: "Jan-15 Payroll Cycle", percentage: 7 },
-    { orgName: "Open Door Legal", paidTo: "https://opendoorlegal.org/", allocatedAmount: 120, month: "Jan 2026", currency: "$", paidDate: "15-Jan-26", cycle: "Jan-15 Payroll Cycle", percentage: 6 },
-    { orgName: "Wholesome Wave", paidTo: "https://www.wholesomewave.org/", allocatedAmount: 100, month: "Jan 2026", currency: "$", paidDate: "15-Jan-26", cycle: "Jan-15 Payroll Cycle", percentage: 5 },
-    { orgName: "Room to Read", paidTo: "Room to Read", allocatedAmount: 100, month: "Jan 2026", currency: "$", paidDate: "15-Jan-26", cycle: "Jan-15 Payroll Cycle", percentage: 5 },
-    { orgName: "Asylum Access", paidTo: "https://www.asylumaccess.org/", allocatedAmount: 90, month: "Jan 2026", currency: "$", paidDate: "15-Jan-26", cycle: "Jan-15 Payroll Cycle", percentage: 5 },
-    { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 80, month: "Jan 2026", currency: "$", paidDate: "15-Jan-26", cycle: "Jan-15 Payroll Cycle", percentage: 4 },
-    { orgName: "Malaria Consortium", paidTo: "Malaria Consortium", allocatedAmount: 75, month: "Jan 2026", currency: "$", paidDate: "15-Jan-26", cycle: "Jan-15 Payroll Cycle", percentage: 4 },
-    { orgName: "The Washing Machine Project", paidTo: "https://www.thewashingmachineproject.org/our-impact", allocatedAmount: 60, month: "Jan 2026", currency: "$", paidDate: "15-Jan-26", cycle: "Jan-15 Payroll Cycle", percentage: 3 },
-    { orgName: "Save the Children", paidTo: "https://support.savethechildren.org/site/Ecommerce", allocatedAmount: 350, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 15 },
-    { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 300, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 13 },
-    { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 220, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 10 },
-    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 190, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 9 },
-    { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 160, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 7 },
-    { orgName: "Open Door Legal", paidTo: "https://opendoorlegal.org/", allocatedAmount: 130, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 6 },
-    { orgName: "Wholesome Wave", paidTo: "https://www.wholesomewave.org/", allocatedAmount: 110, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 5 },
-    { orgName: "Room to Read", paidTo: "Room to Read", allocatedAmount: 110, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 5 },
-    { orgName: "Asylum Access", paidTo: "https://www.asylumaccess.org/", allocatedAmount: 95, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 5 },
-    { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 85, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 4 },
-    { orgName: "Malaria Consortium", paidTo: "Malaria Consortium", allocatedAmount: 80, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 4 },
-    { orgName: "The Washing Machine Project", paidTo: "https://www.thewashingmachineproject.org/our-impact", allocatedAmount: 70, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 3 },
-    { orgName: "Save the Children", paidTo: "https://support.savethechildren.org/site/Ecommerce", allocatedAmount: 380, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 15 },
-    { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 310, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 13 },
-    { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 230, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 10 },
-    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 200, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 9 },
-    { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 170, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 7 },
-    { orgName: "Open Door Legal", paidTo: "https://opendoorlegal.org/", allocatedAmount: 140, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 6 },
-    { orgName: "Wholesome Wave", paidTo: "https://www.wholesomewave.org/", allocatedAmount: 120, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 5 },
-    { orgName: "Room to Read", paidTo: "Room to Read", allocatedAmount: 115, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 5 },
-    { orgName: "Asylum Access", paidTo: "https://www.asylumaccess.org/", allocatedAmount: 100, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 5 },
-    { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 90, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 4 },
-    { orgName: "Malaria Consortium", paidTo: "Malaria Consortium", allocatedAmount: 85, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 4 },
-    { orgName: "The Washing Machine Project", paidTo: "https://www.thewashingmachineproject.org/our-impact", allocatedAmount: 75, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 3 },
-    // — Edward's donations —
-    { orgName: "Give To IV", paidTo: "https://givetoiv.org/justinlee", allocatedAmount: 285, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 30 },
-    { orgName: "Open Door Legal", paidTo: "https://opendoorlegal.org/", allocatedAmount: 190, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 20 },
-    { orgName: "Wholesome Wave", paidTo: "https://www.wholesomewave.org/", allocatedAmount: 95, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 10 },
-    { orgName: "The Washing Machine Project", paidTo: "https://www.thewashingmachineproject.org/our-impact", allocatedAmount: 95, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 10 },
-    { orgName: "Radiance SF", paidTo: "https://www.radiancesf.org/", allocatedAmount: 142.50, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 15 },
-    { orgName: "Reality SF", paidTo: "https://realitysf.com/", allocatedAmount: 142.50, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 15 },
-    { orgName: "Give To IV", paidTo: "https://givetoiv.org/justinlee", allocatedAmount: 285, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
-    { orgName: "Open Door Legal", paidTo: "https://opendoorlegal.org/", allocatedAmount: 190, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
-    { orgName: "Wholesome Wave", paidTo: "https://www.wholesomewave.org/", allocatedAmount: 95, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 10 },
-    { orgName: "The Washing Machine Project", paidTo: "https://www.thewashingmachineproject.org/our-impact", allocatedAmount: 95, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 10 },
-    { orgName: "Radiance SF", paidTo: "https://www.radiancesf.org/", allocatedAmount: 142.50, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 15 },
-    { orgName: "Reality SF", paidTo: "https://realitysf.com/", allocatedAmount: 142.50, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 15 },
-    // — Amy's donations —
-    { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 125, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
-    { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 125, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
-    // — Ben's donations —
-    { orgName: "NCCHC Foundation", paidTo: "https://ncchcfoundation.org/", allocatedAmount: 435, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
-    { orgName: "NCCHC Foundation", paidTo: "https://ncchcfoundation.org/", allocatedAmount: 435, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
-    // — Bernie's donations —
-    { orgName: "Action Against Hunger", paidTo: "Action Against Hunger", allocatedAmount: 947, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 40 },
-    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 2367.50, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
-    { orgName: "Action Against Hunger", paidTo: "Action Against Hunger", allocatedAmount: 947, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
-    { orgName: "Médecins Sans Frontières", paidTo: "Médecins Sans Frontières", allocatedAmount: 947, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
-    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 473.50, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
-    // — Ed's donations —
-    { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 94, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
-    { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 94, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
-    // — Peter's donations —
-    { orgName: "SFHS", paidTo: "https://www.sfhs.com/make-a-gift", allocatedAmount: 10666.67, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
-    { orgName: "SFHS", paidTo: "https://www.sfhs.com/make-a-gift", allocatedAmount: 10666.67, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
-    // — Jerry's donations —
-    { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 3208.33, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
-    { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 3208.33, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
-    // — Rowan's donations —
-    { orgName: "Asylum Access", paidTo: "https://www.asylumaccess.org/", allocatedAmount: 1924.83, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
-    { orgName: "Clean Ocean Action", paidTo: "Clean Ocean Action", allocatedAmount: 577.45, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
-    { orgName: "Middle East Children's Alliance", paidTo: "Middle East Children's Alliance", allocatedAmount: 769.93, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
-    { orgName: "Room to Read", paidTo: "Room to Read", allocatedAmount: 577.45, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
-    // — Sam's donations —
-    { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 1400, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
-    { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 1400, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
-    // — Artur's donations —
-    { orgName: "Malaria Consortium", paidTo: "Malaria Consortium", allocatedAmount: 1039.58, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
-    { orgName: "En Ptahy Vidchui", paidTo: "https://en.ptahy.vidchui.org/", allocatedAmount: 1039.58, month: "Feb 2026", currency: "$", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
-    { orgName: "Malaria Consortium", paidTo: "Malaria Consortium", allocatedAmount: 1039.58, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 50 },
-    { orgName: "En Ptahy Vidchui", paidTo: "https://en.ptahy.vidchui.org/", allocatedAmount: 1039.58, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 50 },
-    // — Lily's donations —
-    { orgName: "Oceana", paidTo: "Oceana", allocatedAmount: 689.58, month: "Feb 2026", currency: "$", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
-    { orgName: "WWF", paidTo: "WWF", allocatedAmount: 689.58, month: "Feb 2026", currency: "$", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
-    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 551.67, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
-    { orgName: "Médecins sans Frontières", paidTo: "Médecins sans Frontières", allocatedAmount: 551.67, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
-    { orgName: "Action Against Hunger", paidTo: "Action Against Hunger", allocatedAmount: 275.83, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
+    { orgName: "Save the Children", paidTo: "https://support.savethechildren.org/site/Ecommerce", allocatedAmount: 950, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "Save the Children", paidTo: "https://support.savethechildren.org/site/Ecommerce", allocatedAmount: 950, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
   ],
   "edward@isara.io": [
-    { orgName: "Give To IV", paidTo: "https://givetoiv.org/justinlee", allocatedAmount: 285, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 30 },
-    { orgName: "Open Door Legal", paidTo: "https://opendoorlegal.org/", allocatedAmount: 190, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 20 },
-    { orgName: "Wholesome Wave", paidTo: "https://www.wholesomewave.org/", allocatedAmount: 95, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 10 },
-    { orgName: "The Washing Machine Project", paidTo: "https://www.thewashingmachineproject.org/our-impact", allocatedAmount: 95, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 10 },
-    { orgName: "Radiance SF", paidTo: "https://www.radiancesf.org/", allocatedAmount: 142.50, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 15 },
-    { orgName: "Reality SF", paidTo: "https://realitysf.com/", allocatedAmount: 142.50, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 15 },
+    { orgName: "Give To IV", paidTo: "https://givetoiv.org/justinlee", allocatedAmount: 285, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 30 },
+    { orgName: "Open Door Legal", paidTo: "https://opendoorlegal.org/", allocatedAmount: 190, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 20 },
+    { orgName: "Wholesome Wave", paidTo: "https://www.wholesomewave.org/", allocatedAmount: 95, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 10 },
+    { orgName: "The Washing Machine Project", paidTo: "https://www.thewashingmachineproject.org/our-impact", allocatedAmount: 95, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 10 },
+    { orgName: "Radiance SF", paidTo: "https://www.radiancesf.org/", allocatedAmount: 142.50, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 15 },
+    { orgName: "Reality SF", paidTo: "https://realitysf.com/", allocatedAmount: 142.50, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 15 },
     { orgName: "Give To IV", paidTo: "https://givetoiv.org/justinlee", allocatedAmount: 285, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
     { orgName: "Open Door Legal", paidTo: "https://opendoorlegal.org/", allocatedAmount: 190, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
     { orgName: "Wholesome Wave", paidTo: "https://www.wholesomewave.org/", allocatedAmount: 95, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 10 },
@@ -400,54 +330,53 @@ const DEMO_DATA = {
     { orgName: "Reality SF", paidTo: "https://realitysf.com/", allocatedAmount: 142.50, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 15 },
   ],
   "amy@isara.io": [
-    { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 125, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 125, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 125, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
   ],
   "ben@isara.io": [
-    { orgName: "NCCHC Foundation", paidTo: "https://ncchcfoundation.org/", allocatedAmount: 435, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "NCCHC Foundation", paidTo: "https://ncchcfoundation.org/", allocatedAmount: 435, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "NCCHC Foundation", paidTo: "https://ncchcfoundation.org/", allocatedAmount: 435, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
   ],
   "bernie@isara.io": [
-    { orgName: "Action Against Hunger", paidTo: "Action Against Hunger", allocatedAmount: 947, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 40 },
-    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 2367.50, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
-    { orgName: "Action Against Hunger", paidTo: "Action Against Hunger", allocatedAmount: 947, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
-    { orgName: "Médecins Sans Frontières", paidTo: "Médecins Sans Frontières", allocatedAmount: 947, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
+    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 2367.50, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "Action Against Hunger", paidTo: "https://www.actionagainsthunger.org", allocatedAmount: 947, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
+    { orgName: "Médecins Sans Frontières", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 947, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
     { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 473.50, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
   ],
   "ed@isara.io": [
-    { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 94, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 94, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 94, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
   ],
   "peter@isara.io": [
-    { orgName: "SFHS", paidTo: "https://www.sfhs.com/make-a-gift", allocatedAmount: 10666.67, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
-    { orgName: "SFHS", paidTo: "https://www.sfhs.com/make-a-gift", allocatedAmount: 10666.67, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
+    { orgName: "SFHS", paidTo: "https://www.sfhs.com/make-a-gift", allocatedAmount: 10666.67, month: "Jan 2026", currency: "$", paidDate: "", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "SFHS", paidTo: "https://www.sfhs.com/make-a-gift", allocatedAmount: 10666.67, month: "Feb 2026", currency: "$", paidDate: "", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
   ],
   "jerry@isara.io": [
-    { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 3208.33, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 3208.33, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 3208.33, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
   ],
   "rowan@isara.io": [
-    { orgName: "Asylum Access", paidTo: "https://www.asylumaccess.org/", allocatedAmount: 1924.83, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
-    { orgName: "Clean Ocean Action", paidTo: "Clean Ocean Action", allocatedAmount: 577.45, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
-    { orgName: "Middle East Children's Alliance", paidTo: "Middle East Children's Alliance", allocatedAmount: 769.93, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
-    { orgName: "Room to Read", paidTo: "Room to Read", allocatedAmount: 577.45, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
+    { orgName: "Asylum Access", paidTo: "https://www.asylumaccess.org/", allocatedAmount: 1924.83, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "Clean Ocean Action", paidTo: "https://www.cleanoceanaction.org", allocatedAmount: 577.45, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
+    { orgName: "Middle East Children's Alliance", paidTo: "https://www.mecaforpeace.org", allocatedAmount: 769.93, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
+    { orgName: "Room to Read", paidTo: "https://www.roomtoread.org", allocatedAmount: 577.45, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
   ],
   "sam@isara.io": [
-    { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 1400, month: "Feb 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
+    { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 1400, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 1400, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
   ],
   "artur@isara.io": [
-    { orgName: "Malaria Consortium", paidTo: "Malaria Consortium", allocatedAmount: 1039.58, month: "Feb 2026", currency: "£", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
-    { orgName: "En Ptahy Vidchui", paidTo: "https://en.ptahy.vidchui.org/", allocatedAmount: 1039.58, month: "Feb 2026", currency: "£", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
-    { orgName: "Malaria Consortium", paidTo: "Malaria Consortium", allocatedAmount: 1039.58, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 50 },
+    { orgName: "Malaria Consortium", paidTo: "https://www.malariaconsortium.org", allocatedAmount: 1039.59, month: "Jan 2026", currency: "£", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
+    { orgName: "En Ptahy Vidchui", paidTo: "https://en.ptahy.vidchui.org/", allocatedAmount: 1039.58, month: "Jan 2026", currency: "£", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
+    { orgName: "Malaria Consortium", paidTo: "https://www.malariaconsortium.org", allocatedAmount: 1039.59, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 50 },
     { orgName: "En Ptahy Vidchui", paidTo: "https://en.ptahy.vidchui.org/", allocatedAmount: 1039.58, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 50 },
   ],
   "lily@isara.io": [
-    { orgName: "Oceana", paidTo: "Oceana", allocatedAmount: 689.58, month: "Feb 2026", currency: "£", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
-    { orgName: "WWF", paidTo: "WWF", allocatedAmount: 689.58, month: "Feb 2026", currency: "£", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
+    { orgName: "Oceana", paidTo: "https://oceana.org", allocatedAmount: 689.59, month: "Jan 2026", currency: "£", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
+    { orgName: "WWF", paidTo: "https://www.worldwildlife.org", allocatedAmount: 689.58, month: "Jan 2026", currency: "£", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
     { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 551.67, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
-    { orgName: "Médecins sans Frontières", paidTo: "Médecins sans Frontières", allocatedAmount: 551.67, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
-    { orgName: "Action Against Hunger", paidTo: "Action Against Hunger", allocatedAmount: 275.83, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
+    { orgName: "Médecins sans Frontières", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 551.67, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
+    { orgName: "Action Against Hunger", paidTo: "https://www.actionagainsthunger.org", allocatedAmount: 275.83, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
   ],
 };
 
@@ -456,12 +385,13 @@ const DEMO_DATA = {
 const INITIAL_ADMINS = ["courtney@isara.io"];
 
 const EMPLOYEE_NAMES = {
-  "courtney@isara.io": "Courtney Leung", "edward@isara.io": "Edward Lee",
-  "amy@isara.io": "Amy Chen", "ben@isara.io": "Ben Park",
-  "bernie@isara.io": "Bernie Liu", "ed@isara.io": "Ed Torres",
-  "peter@isara.io": "Peter Wagner", "jerry@isara.io": "Jerry Kim",
-  "rowan@isara.io": "Rowan Patel", "sam@isara.io": "Sam Reeves",
-  "artur@isara.io": "Artur Kovalenko", "lily@isara.io": "Lily Whitfield",
+  "courtney@isara.io": "Courtney Leung", "edward@isara.io": "Edward Kang",
+  "amy@isara.io": "Amy Wang", "ben@isara.io": "Benjamin Smith",
+  "bernie@isara.io": "Bernie Conrad", "ed@isara.io": "Edwin Zhang",
+  "peter@isara.io": "Peter Buckland", "jerry@isara.io": "Jerry Bai",
+  "rowan@isara.io": "Rowan Tran", "sam@isara.io": "Sam Kwok",
+  "artur@isara.io": "Artur Avameri", "lily@isara.io": "Lily Gasztowtt",
+  "ranah@isara.io": "Ranah Netane",
 };
 
 function loadStorage(key, fallback) {
@@ -488,11 +418,42 @@ function saveSubmissions(s) { saveStorage("givetrack_submissions", s); }
 function loadTracker() { return loadStorage("givetrack_admin_tracker", {}); }
 function saveTracker(t) { saveStorage("givetrack_admin_tracker", t); }
 
+// Compute live pay status for a cycle based on tracker checkboxes
+function computeCyclePayStatus(cycleId) {
+  const tracker = loadTracker();
+  const subs = loadSubmissions();
+  const cycleSubs = subs[cycleId] || {};
+  const cycleTracker = tracker[cycleId] || {};
+  const budgets = loadBudgets();
+  const seen = new Set();
+  let total = 0, paid = 0;
+  Object.entries(cycleSubs).forEach(([email, sub]) => {
+    (sub.allocations || []).forEach(alloc => {
+      if (alloc.percentage <= 0) return;
+      seen.add(`${email}:${alloc.orgName}`);
+      total++;
+      if (cycleTracker[email]?.[alloc.orgName]?.paid) paid++;
+    });
+  });
+  Object.entries(cycleTracker).forEach(([email, orgs]) => {
+    Object.entries(orgs).forEach(([orgName, tData]) => {
+      if (!seen.has(`${email}:${orgName}`)) {
+        total++;
+        if (tData.paid) paid++;
+      }
+    });
+  });
+  if (total === 0) return "no submissions";
+  if (paid === total) return "paid";
+  return `${paid}/${total} paid`;
+}
+
 // Map cycle labels from DEMO_DATA to cycleIds
 const CYCLE_MAP = {
-  "Jan-15 Payroll Cycle": "2026-01-15",
   "Jan-31 Payroll Cycle": "2026-01-31",
   "Feb-15 Payroll Cycle": "2026-02-15",
+  "Feb-28 Payroll Cycle": "2026-02-28",
+  "Mar-15 Payroll Cycle": "2026-03-15",
 };
 
 // All known org names for the dropdown
@@ -508,76 +469,71 @@ function seedFromDemoData() {
   // 1. Seed admins
   saveAdmins(INITIAL_ADMINS);
 
-  // 2. Derive employee budgets from individual DEMO_DATA entries (not courtney's merged data)
+  // 2. Derive employee budgets from DEMO_DATA
   const budgets = {};
-  const individualEmails = Object.keys(DEMO_DATA).filter(e => e !== "courtney@isara.io");
-  individualEmails.forEach(email => {
+  Object.keys(DEMO_DATA).forEach(email => {
     const dons = DEMO_DATA[email];
-    // Get latest cycle's total
     const latestCycle = dons.length > 0 ? dons[dons.length - 1].cycle : "";
     const cycleDons = dons.filter(d => d.cycle === latestCycle);
     const total = cycleDons.reduce((s, d) => s + d.allocatedAmount, 0);
     budgets[email] = { name: EMPLOYEE_NAMES[email] || email.split("@")[0], cycleAmount: Math.round(total * 100) / 100, currency: dons[0]?.currency || "$" };
   });
-  // Courtney's own budget — use her original data (the first 12 entries are Jan-15 cycle)
-  const courtneyJan15 = DEMO_DATA["courtney@isara.io"].filter(d => d.cycle === "Jan-15 Payroll Cycle" && d.allocatedAmount < 500);
-  const courtneyTotal = courtneyJan15.reduce((s, d) => s + d.allocatedAmount, 0);
-  budgets["courtney@isara.io"] = { name: "Courtney Leung", cycleAmount: Math.round(courtneyTotal * 100) / 100, currency: "$" };
+  // Ranah has no allocations yet — add budget manually
+  budgets["ranah@isara.io"] = { name: "Ranah Netane", cycleAmount: 350.77, currency: "$" };
   saveBudgets(budgets);
 
-  // 3. Seed pay cycles
+  // 3. Seed pay cycles (past cycles are "closed" — display status computed dynamically from tracker)
   const cyclesData = {
-    currentCycleId: "2026-03-15",
+    currentCycleId: "2026-02-28",
     cycles: [
-      { cycleId: "2026-01-15", label: "Jan-15 Payroll Cycle", deadline: "2026-01-10", payDate: "2026-01-15", status: "paid" },
-      { cycleId: "2026-01-31", label: "Jan-31 Payroll Cycle", deadline: "2026-01-26", payDate: "2026-01-31", status: "paid" },
+      { cycleId: "2026-01-31", label: "Jan-31 Payroll Cycle", deadline: "2026-01-26", payDate: "2026-01-31", status: "closed" },
       { cycleId: "2026-02-15", label: "Feb-15 Payroll Cycle", deadline: "2026-02-10", payDate: "2026-02-15", status: "closed" },
-      { cycleId: "2026-03-15", label: "Mar-15 Payroll Cycle", deadline: "2026-03-10", payDate: "2026-03-15", status: "open" },
+      { cycleId: "2026-02-28", label: "Feb-28 Payroll Cycle", deadline: "2026-02-23", payDate: "2026-02-28", status: "open" },
+      { cycleId: "2026-03-15", label: "Mar-15 Payroll Cycle", deadline: "2026-03-10", payDate: "2026-03-15", status: "upcoming" },
     ],
   };
   saveCycles(cyclesData);
 
-  // 4. Seed admin tracker from individual DEMO_DATA (mark all past as paid)
+  // 4. Seed admin tracker from DEMO_DATA (mark paid only if paidDate exists)
   const tracker = {};
-  individualEmails.forEach(email => {
+  Object.keys(DEMO_DATA).forEach(email => {
     DEMO_DATA[email].forEach(d => {
       const cycleId = CYCLE_MAP[d.cycle];
       if (!cycleId) return;
       if (!tracker[cycleId]) tracker[cycleId] = {};
       if (!tracker[cycleId][email]) tracker[cycleId][email] = {};
-      tracker[cycleId][email][d.orgName] = { paid: true, datePaid: d.paidDate, receiptData: null, receiptFileName: null, amount: d.allocatedAmount };
+      tracker[cycleId][email][d.orgName] = { paid: !!d.paidDate, datePaid: d.paidDate || "", receiptData: null, receiptFileName: null, amount: d.allocatedAmount };
     });
-  });
-  // Courtney's own entries
-  const courtneyOwn = DEMO_DATA["courtney@isara.io"].filter(d => d.allocatedAmount < 500);
-  courtneyOwn.forEach(d => {
-    const cycleId = CYCLE_MAP[d.cycle];
-    if (!cycleId) return;
-    if (!tracker[cycleId]) tracker[cycleId] = {};
-    if (!tracker[cycleId]["courtney@isara.io"]) tracker[cycleId]["courtney@isara.io"] = {};
-    tracker[cycleId]["courtney@isara.io"][d.orgName] = { paid: true, datePaid: d.paidDate, receiptData: null, receiptFileName: null, amount: d.allocatedAmount };
   });
   saveTracker(tracker);
 
-  // 5. Seed submissions for current open cycle (rollforward from Feb-15)
-  const subs = { "2026-03-15": {} };
-  individualEmails.forEach(email => {
+  // 5. Seed submissions for all cycles
+  const subs = {};
+  Object.keys(DEMO_DATA).forEach(email => {
+    const dons = DEMO_DATA[email];
+    [...new Set(dons.map(d => d.cycle))].forEach(cycleName => {
+      const cycleId = CYCLE_MAP[cycleName];
+      if (!cycleId) return;
+      const cycleDons = dons.filter(d => d.cycle === cycleName);
+      if (!subs[cycleId]) subs[cycleId] = {};
+      subs[cycleId][email] = {
+        submittedAt: new Date("2026-02-01").toISOString(),
+        rolledForward: false,
+        allocations: cycleDons.map(d => ({ orgName: d.orgName, paidTo: d.paidTo, percentage: d.percentage })),
+      };
+    });
+  });
+  // Rollforward Feb-15 allocations into Feb-28 (current open cycle)
+  if (!subs["2026-02-28"]) subs["2026-02-28"] = {};
+  Object.keys(DEMO_DATA).forEach(email => {
     const feb15 = DEMO_DATA[email].filter(d => d.cycle === "Feb-15 Payroll Cycle");
-    if (feb15.length > 0) {
-      subs["2026-03-15"][email] = {
+    if (feb15.length > 0 && !subs["2026-02-28"][email]) {
+      subs["2026-02-28"][email] = {
         submittedAt: null, rolledForward: true,
         allocations: feb15.map(d => ({ orgName: d.orgName, paidTo: d.paidTo, percentage: d.percentage })),
       };
     }
   });
-  // Courtney's rollforward
-  const courtneyFeb15 = courtneyOwn.filter(d => d.cycle === "Feb-15 Payroll Cycle");
-  if (courtneyFeb15.length > 0) {
-    subs["2026-03-15"]["courtney@isara.io"] = {
-      submittedAt: null, rolledForward: true,
-      allocations: courtneyFeb15.map(d => ({ orgName: d.orgName, paidTo: d.paidTo, percentage: d.percentage })),
-    };
-  }
   saveSubmissions(subs);
 }
 
@@ -624,6 +580,9 @@ const GLOBAL_CSS = `
   @keyframes float { 0%,100% { transform:translateY(0) scale(1); } 50% { transform:translateY(-20px) scale(1.05); } }
   @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.7; } }
   @keyframes shimmer { 0% { background-position:-200% 0; } 100% { background-position:200% 0; } }
+  @keyframes breathe { 0%,100% { opacity:0.6; } 50% { opacity:1; } }
+  @keyframes shine { 0% { transform:translateX(-100%); } 100% { transform:translateX(200%); } }
+  @keyframes gentlePulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.015); } }
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#FAF7F0; color:#222520; -webkit-font-smoothing:antialiased; }
   ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; }
@@ -648,7 +607,7 @@ const C = {
   warm: "#E07A30",
   warmLight: "#FFF4E8",
   divider: "rgba(34,37,32,0.08)",
-  navy: "#003366",
+  navy: "#007888",
 };
 
 const glass = {
@@ -759,6 +718,8 @@ function DonateTab({ userEmail }) {
   const totalPct = allocations.reduce((s, a) => s + (a.percentage || 0), 0);
   const totalAmt = (totalPct / 100) * budget.cycleAmount;
   const sym = budget.currency === "£" ? "£" : "$";
+  const hasIncompleteOther = allocations.some(a => a.orgName === "__other" && a.percentage > 0 && !(a.paidTo || "").trim());
+  const m = useIsMobile();
 
   const updateRow = (idx, field, value) => {
     setAllocations(prev => prev.map((a, i) => i === idx ? { ...a, [field]: value } : a));
@@ -769,7 +730,7 @@ function DonateTab({ userEmail }) {
     setSaved(false); setSubmitted(false);
   };
   const addRow = () => {
-    setAllocations(prev => [...prev, { orgName: "", paidTo: "", percentage: 0 }]);
+    setAllocations(prev => [...prev, { orgName: "", paidTo: "", percentage: 0, fund: "", customName: "" }]);
   };
 
   const saveAllocations = (isSubmit) => {
@@ -778,7 +739,7 @@ function DonateTab({ userEmail }) {
     subs[cycles.currentCycleId][userEmail] = {
       submittedAt: isSubmit ? new Date().toISOString() : null,
       rolledForward: false,
-      allocations: allocations.filter(a => a.percentage > 0).map(a => ({ orgName: a.orgName, paidTo: a.paidTo, percentage: a.percentage })),
+      allocations: allocations.filter(a => a.percentage > 0).map(a => ({ orgName: a.orgName === "__other" ? extractOrgName(a.paidTo) : a.orgName, paidTo: a.paidTo, percentage: a.percentage, fund: a.fund || "" })),
     };
     saveSubmissions(subs);
     if (isSubmit) setSubmitted(true); else setSaved(true);
@@ -796,9 +757,8 @@ function DonateTab({ userEmail }) {
       if (value > maxAllowed) {
         value = maxAllowed;
         setClampedIdx(idx);
-        setTimeout(() => setClampedIdx(null), 2000);
       } else {
-        setClampedIdx(null);
+        if (clampedIdx === idx) setClampedIdx(null);
       }
     }
     updateRow(idx, field, value);
@@ -858,24 +818,31 @@ function DonateTab({ userEmail }) {
                     updateRow(idx, "paidTo", url);
                   }}
                   disabled={isLocked}
-                  style={{ width: 320, padding: "10px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, background: "#fff", color: C.text, fontFamily: "'Montserrat',sans-serif", cursor: isLocked ? "not-allowed" : "pointer" }}>
+                  style={{ width: m ? "100%" : 320, padding: "10px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, background: "#fff", color: C.text, fontFamily: "'Montserrat',sans-serif", cursor: isLocked ? "not-allowed" : "pointer" }}>
                   <option value="">Select an organization...</option>
                   {ALL_KNOWN_ORGS.map(name => (
                     <option key={name} value={name}>{name}</option>
                   ))}
-                  <option value="__other">Other (enter name or URL)</option>
+                  <option value="__other">Other (enter manually)</option>
                 </select>
                 {alloc.orgName === "__other" && (
                   <input
-                    type="text" placeholder="Enter org name or URL" value={alloc.paidTo}
-                    onChange={e => updateRow(idx, "paidTo", e.target.value)}
+                    type="url" placeholder="Organization URL *" value={alloc.paidTo || ""}
+                    onChange={e => { updateRow(idx, "paidTo", e.target.value); updateRow(idx, "customName", extractOrgName(e.target.value)); }}
                     disabled={isLocked}
-                    style={{ width: 260, padding: "10px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
+                    style={{ width: m ? "100%" : 280, padding: "10px 14px", fontSize: 14, border: `1px solid ${(alloc.paidTo || "").trim() ? C.cardBorder : "#dc2626"}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
                 )}
                 <span style={{ fontSize: 15, fontWeight: 600, color: C.navy, minWidth: 90, textAlign: "right", marginLeft: "auto" }}>{fmt(amt, budget.currency)}</span>
                 {allocations.length > 1 && !isLocked && (
                   <button onClick={() => removeRow(idx)} style={{ background: "none", border: "none", color: C.textMuted, cursor: "pointer", fontSize: 20, padding: "4px 8px", lineHeight: 1 }}>&times;</button>
                 )}
+              </div>
+              <div style={{ marginBottom: 10 }}>
+                <input
+                  type="text" placeholder="Fund or campaign (optional)" value={alloc.fund || ""}
+                  onChange={e => updateRow(idx, "fund", e.target.value)}
+                  disabled={isLocked}
+                  style={{ width: 320, padding: "8px 14px", fontSize: 13, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif", color: C.text }} />
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                 <div style={{ flex: 1, position: "relative" }}>
@@ -891,7 +858,7 @@ function DonateTab({ userEmail }) {
                     {[0,25,50,75,100].map(v => <span key={v} style={{ fontSize: 10, color: C.textMuted }}>{v}%</span>)}
                   </div>
                   {clampedIdx === idx && (
-                    <div style={{ fontSize: 12, color: "#dc2626", fontWeight: 500, marginTop: 4 }}>Cannot exceed 100% total — reduce higher-priority orgs above first.</div>
+                    <div style={{ fontSize: 12, color: "#dc2626", fontWeight: 500, marginTop: 4 }}>Cannot exceed 100% total — reduce the above organizations first.</div>
                   )}
                 </div>
                 <input
@@ -914,7 +881,7 @@ function DonateTab({ userEmail }) {
       </div>
 
       {/* Running total */}
-      <div style={{ ...glass, padding: "24px 36px" }}>
+      <div style={{ ...glass, padding: m ? "20px 16px" : "24px 36px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <div>
             <span style={{ fontSize: 14, color: C.textMuted, fontWeight: 500 }}>Allocated: </span>
@@ -927,23 +894,30 @@ function DonateTab({ userEmail }) {
         </div>
         {/* Progress bar */}
         <div style={{ height: 8, background: C.divider, borderRadius: 4, overflow: "hidden", marginBottom: 20 }}>
-          <div style={{ height: "100%", width: `${Math.min(totalPct, 100)}%`, background: totalPct > 100 ? "#dc2626" : totalPct === 100 ? "#16a34a" : C.accent, borderRadius: 4, transition: "width .3s, background .3s" }} />
+          <div style={{ height: "100%", width: `${Math.min(totalPct, 100)}%`, background: totalPct > 100 ? "#dc2626" : totalPct === 100 ? "#16a34a" : C.accent, borderRadius: 4, transition: "width .3s, background .3s", position: "relative", overflow: "hidden" }}>
+            {totalPct === 100 && (
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)", animation: "shine 2s ease-in-out infinite" }} />
+            )}
+          </div>
         </div>
         {totalPct > 100 && (
           <div style={{ color: "#dc2626", fontSize: 14, fontWeight: 500, marginBottom: 16 }}>Total exceeds 100%. Please reduce your allocations.</div>
         )}
         {totalPct === 100 && (
-          <div style={{ color: "#16a34a", fontSize: 14, fontWeight: 500, marginBottom: 16 }}>Fully allocated!</div>
+          <div style={{ color: "#16a34a", fontSize: 14, fontWeight: 500, marginBottom: 16, animation: "breathe 2s ease-in-out" }}>Fully allocated!</div>
         )}
         {!isLocked && (
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
             <button onClick={() => saveAllocations(false)} style={{ padding: "10px 24px", background: "transparent", border: `1px solid ${C.cardBorder}`, borderRadius: 4, color: C.textSoft, fontSize: 14, fontWeight: 500, cursor: "pointer", transition: "all .15s" }}>
               Save Draft
             </button>
-            <button onClick={() => saveAllocations(true)} disabled={totalPct > 100}
-              style={{ padding: "10px 28px", background: totalPct > 100 ? C.divider : C.accent, color: totalPct > 100 ? C.textMuted : C.text, border: "none", borderRadius: 4, fontSize: 14, fontWeight: 600, cursor: totalPct > 100 ? "not-allowed" : "pointer", transition: "all .15s" }}>
+            <button onClick={() => saveAllocations(true)} disabled={totalPct > 100 || hasIncompleteOther}
+              style={{ padding: "10px 28px", background: (totalPct > 100 || hasIncompleteOther) ? C.divider : C.accent, color: (totalPct > 100 || hasIncompleteOther) ? C.textMuted : C.text, border: "none", borderRadius: 4, fontSize: 14, fontWeight: 600, cursor: (totalPct > 100 || hasIncompleteOther) ? "not-allowed" : "pointer", transition: "all .15s" }}>
               Submit Allocations
             </button>
+            {hasIncompleteOther && (
+              <div style={{ fontSize: 12, color: "#dc2626", fontWeight: 500, marginTop: 4 }}>Please provide a URL for custom organizations.</div>
+            )}
           </div>
         )}
         {saved && <div style={{ marginTop: 14, fontSize: 14, color: C.textSoft, textAlign: "center" }}>Draft saved.</div>}
@@ -975,8 +949,9 @@ function ReceiptModal({ src, fileName, onClose }) {
   );
 }
 
-function AdminTracker({ selectedCycleId }) {
+function AdminTracker({ selectedCycleId, onTrackerChange }) {
   const [tracker, setTracker] = useState(loadTracker());
+  const m = useIsMobile();
   const subs = loadSubmissions();
   const budgets = loadBudgets();
   const cycleSubs = subs[selectedCycleId] || {};
@@ -991,7 +966,7 @@ function AdminTracker({ selectedCycleId }) {
       if (alloc.percentage <= 0) return;
       const amt = (alloc.percentage / 100) * budget.cycleAmount;
       const tData = cycleTracker[email]?.[alloc.orgName] || {};
-      rows.push({ email, name: budget.name, orgName: alloc.orgName, amount: Math.round(amt * 100) / 100, currency: budget.currency, paid: tData.paid || false, datePaid: tData.datePaid || "", receiptData: tData.receiptData || null, receiptFileName: tData.receiptFileName || null });
+      rows.push({ email, name: budget.name, orgName: alloc.orgName, paidTo: alloc.paidTo || ORG_WEBSITES[alloc.orgName] || "", fund: alloc.fund || "", amount: Math.round(amt * 100) / 100, currency: budget.currency, paid: tData.paid || false, datePaid: tData.datePaid || "", receiptData: tData.receiptData || null, receiptFileName: tData.receiptFileName || null });
     });
   });
 
@@ -1000,7 +975,7 @@ function AdminTracker({ selectedCycleId }) {
     Object.entries(orgs).forEach(([orgName, tData]) => {
       if (!rows.find(r => r.email === email && r.orgName === orgName)) {
         const budget = budgets[email] || { name: email, currency: "$" };
-        rows.push({ email, name: budget.name, orgName, amount: tData.amount || 0, currency: budget.currency, paid: tData.paid || false, datePaid: tData.datePaid || "", receiptData: tData.receiptData || null, receiptFileName: tData.receiptFileName || null });
+        rows.push({ email, name: budget.name, orgName, paidTo: ORG_WEBSITES[orgName] || "", fund: "", amount: tData.amount || 0, currency: budget.currency, paid: tData.paid || false, datePaid: tData.datePaid || "", receiptData: tData.receiptData || null, receiptFileName: tData.receiptFileName || null });
       }
     });
   });
@@ -1022,6 +997,7 @@ function AdminTracker({ selectedCycleId }) {
     }
     saveTracker(t);
     setTracker({ ...t });
+    if (onTrackerChange) onTrackerChange();
   };
 
   const handleReceiptUpload = (email, orgName, file) => {
@@ -1064,7 +1040,7 @@ function AdminTracker({ selectedCycleId }) {
   return (
     <div>
       {viewReceipt && <ReceiptModal src={viewReceipt.src} fileName={viewReceipt.name} onClose={() => setViewReceipt(null)} />}
-      <div style={{ ...glass, overflow: "hidden" }}>
+      <div style={{ ...glass, overflow: "hidden", overflowX: m ? "auto" : "hidden" }}>
         {/* Header */}
         <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 100px 50px 110px 90px", padding: "12px 20px", borderBottom: `1px solid ${C.divider}`, background: "rgba(34,37,32,0.02)" }}>
           {["Employee", "Organization", "Amount", "Paid", "Date Paid", "Receipt"].map(h => (
@@ -1084,7 +1060,12 @@ function AdminTracker({ selectedCycleId }) {
               <div key={`${row.email}-${row.orgName}`}>
                 <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 100px 50px 110px 90px", padding: "12px 20px", borderBottom: isLastInGroup ? "none" : `1px solid ${C.divider}`, alignItems: "center", background: gi % 2 === 1 ? "rgba(34,37,32,0.015)" : "transparent" }}>
               <div style={{ fontSize: 14, fontWeight: showName ? 600 : 400, color: showName ? C.text : "transparent" }}>{row.name}</div>
-              <div style={{ fontSize: 14, color: C.textSoft }}>{row.orgName}</div>
+              <div style={{ fontSize: 14, color: C.textSoft }}>
+                {row.paidTo ? (
+                  <a href={row.paidTo} target="_blank" rel="noopener noreferrer" style={{ color: C.navy, textDecoration: "underline", fontWeight: 500 }}>{row.orgName}</a>
+                ) : row.orgName}
+                {row.fund && <div style={{ fontSize: 12, color: C.textMuted, marginTop: 2 }}>Fund: {row.fund}</div>}
+              </div>
               <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{fmt(row.amount, row.currency)}</div>
               <div>
                 <input type="checkbox" checked={row.paid} onChange={e => updateTrackerField(row.email, row.orgName, "paid", e.target.checked)}
@@ -1125,10 +1106,20 @@ function AdminTracker({ selectedCycleId }) {
           });
         })}
         {/* Summary */}
-        <div style={{ padding: "16px 20px", borderTop: `1px solid ${C.divider}`, display: "flex", justifyContent: "space-between", background: "rgba(34,37,32,0.02)" }}>
-          <span style={{ fontSize: 14, color: C.textSoft }}>{paidCount} of {rows.length} donations paid</span>
-          <span style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Total: {fmt(totalAmt)}</span>
-        </div>
+        {paidCount === rows.length && rows.length > 0 ? (
+          <div style={{ padding: "16px 20px", borderTop: `1px solid ${C.divider}`, display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(22,163,74,0.08)", animation: "gentlePulse 2s ease-in-out 1" }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: "#16a34a", display: "flex", alignItems: "center", gap: 8 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              All {rows.length} donations paid
+            </span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Total: {fmt(totalAmt)}</span>
+          </div>
+        ) : (
+          <div style={{ padding: "16px 20px", borderTop: `1px solid ${C.divider}`, display: "flex", justifyContent: "space-between", background: "rgba(34,37,32,0.02)" }}>
+            <span style={{ fontSize: 14, color: C.textSoft }}>{paidCount} of {rows.length} donations paid</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Total: {fmt(totalAmt)}</span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1136,6 +1127,7 @@ function AdminTracker({ selectedCycleId }) {
 
 function AdminBudgets() {
   const [budgets, setBudgets] = useState(loadBudgets());
+  const m = useIsMobile();
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
   const [newAmount, setNewAmount] = useState("");
@@ -1165,7 +1157,7 @@ function AdminBudgets() {
   };
 
   return (
-    <div style={{ ...glass, overflow: "hidden" }}>
+    <div style={{ ...glass, overflow: "hidden", overflowX: m ? "auto" : "hidden" }}>
       <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 140px 80px 80px", padding: "12px 20px", borderBottom: `1px solid ${C.divider}`, background: "rgba(34,37,32,0.02)" }}>
         {["Employee", "Email", "Budget/Cycle", "Currency", ""].map(h => (
           <div key={h} style={{ fontSize: 11, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600 }}>{h}</div>
@@ -1251,10 +1243,61 @@ function AdminManagement({ currentEmail }) {
   );
 }
 
+function exportTrackerCSV(cycleId, cycleLabel) {
+  const subs = loadSubmissions();
+  const budgets = loadBudgets();
+  const tracker = loadTracker();
+  const cycleSubs = subs[cycleId] || {};
+  const cycleTracker = tracker[cycleId] || {};
+  const rows = [];
+  Object.entries(cycleSubs).forEach(([email, sub]) => {
+    const budget = budgets[email] || { cycleAmount: 0, currency: "$", name: email };
+    (sub.allocations || []).forEach(alloc => {
+      if (alloc.percentage <= 0) return;
+      const amt = Math.round((alloc.percentage / 100) * budget.cycleAmount * 100) / 100;
+      const tData = cycleTracker[email]?.[alloc.orgName] || {};
+      rows.push({ name: budget.name, email, org: alloc.orgName, paidTo: alloc.paidTo || ORG_WEBSITES[alloc.orgName] || "", amount: amt, currency: budget.currency, paid: tData.paid ? "Yes" : "No", datePaid: tData.datePaid || "" });
+    });
+  });
+  Object.entries(cycleTracker).forEach(([email, orgs]) => {
+    Object.entries(orgs).forEach(([orgName, tData]) => {
+      if (!rows.find(r => r.email === email && r.org === orgName)) {
+        const budget = budgets[email] || { name: email, currency: "$" };
+        rows.push({ name: budget.name, email, org: orgName, paidTo: ORG_WEBSITES[orgName] || "", amount: tData.amount || 0, currency: budget.currency, paid: tData.paid ? "Yes" : "No", datePaid: tData.datePaid || "" });
+      }
+    });
+  });
+  rows.sort((a, b) => a.name.localeCompare(b.name) || a.org.localeCompare(b.org));
+  const esc = v => `"${String(v).replace(/"/g, '""')}"`;
+  const header = "Name,Email,Organization,Paid To,Amount,Currency,Paid,Date Paid";
+  const csv = [header, ...rows.map(r => [esc(r.name), esc(r.email), esc(r.org), esc(r.paidTo), r.amount, r.currency, r.paid, r.datePaid].join(","))].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `givetrack-${cycleLabel.replace(/\s+/g, "-").toLowerCase()}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
 function AdminTab({ currentEmail }) {
   const [subTab, setSubTab] = useState("tracker");
   const cycles = loadCycles();
   const [selectedCycleId, setSelectedCycleId] = useState(cycles.currentCycleId || "");
+  const [, refreshStatus] = useState(0);
+
+  // Compute live display status for a cycle
+  const getCycleDisplayStatus = (cycle) => {
+    if (cycle.status === "open") return "open";
+    if (cycle.status === "upcoming") return "upcoming";
+    // For closed/past cycles, compute from tracker checkboxes
+    return computeCyclePayStatus(cycle.cycleId);
+  };
+
+  const statusColor = (status) => {
+    if (status === "paid") return "#16a34a";
+    if (status === "open") return C.navy;
+    if (status === "upcoming") return C.textMuted;
+    return "#d97706";
+  };
 
   const subTabs = [
     { id: "tracker", label: "Tracker" },
@@ -1283,12 +1326,30 @@ function AdminTab({ currentEmail }) {
             <span style={{ fontSize: 14, color: C.textMuted, fontWeight: 500 }}>Cycle:</span>
             <select value={selectedCycleId} onChange={e => setSelectedCycleId(e.target.value)}
               style={{ padding: "8px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }}>
-              {cycles.cycles.map(c => (
-                <option key={c.cycleId} value={c.cycleId}>{c.label} ({c.status})</option>
-              ))}
+              {cycles.cycles.map(c => {
+                const displayStatus = getCycleDisplayStatus(c);
+                return (
+                  <option key={c.cycleId} value={c.cycleId}>{c.label} ({displayStatus})</option>
+                );
+              })}
             </select>
+            {(() => {
+              const sel = cycles.cycles.find(c => c.cycleId === selectedCycleId);
+              if (!sel) return null;
+              const ds = getCycleDisplayStatus(sel);
+              return (
+                <span style={{ fontSize: 13, fontWeight: 600, color: statusColor(ds), textTransform: "uppercase", letterSpacing: ".06em" }}>
+                  {ds}
+                </span>
+              );
+            })()}
+            <button onClick={() => { const sel = cycles.cycles.find(c => c.cycleId === selectedCycleId); exportTrackerCSV(selectedCycleId, sel?.label || selectedCycleId); }}
+              style={{ marginLeft: "auto", padding: "8px 18px", background: C.navy, color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export CSV
+            </button>
           </div>
-          <AdminTracker selectedCycleId={selectedCycleId} />
+          <AdminTracker selectedCycleId={selectedCycleId} onTrackerChange={() => refreshStatus(v => v + 1)} />
         </div>
       )}
       {subTab === "budgets" && <AdminBudgets />}
@@ -1299,7 +1360,7 @@ function AdminTab({ currentEmail }) {
 
 // ─── GLOBE ────────────────────────────────────────────────────
 
-function GlobeTab({ donations }) {
+function GlobeTab({ donations, userEmail }) {
   const globeRef = useRef();
   const containerRef = useRef();
   const [countries, setCountries] = useState([]);
@@ -1307,15 +1368,61 @@ function GlobeTab({ donations }) {
   const [fetchError, setFetchError] = useState(false);
   const [containerWidth, setContainerWidth] = useState(800);
   const [selectedPoint, setSelectedPoint] = useState(null);
+  const [showData, setShowData] = useState(false);
+  const m = useIsMobile();
 
-  const countryData = useMemo(() => aggregateDonationsByCountry(donations), [donations]);
+  useEffect(() => {
+    if (globeReady) {
+      const t = setTimeout(() => setShowData(true), 600);
+      return () => clearTimeout(t);
+    }
+  }, [globeReady]);
+
+  // Build company-wide donations from submissions + budgets
+  const companyDonations = useMemo(() => {
+    const subs = loadSubmissions();
+    const budgets = loadBudgets();
+    const all = [];
+    Object.entries(subs).forEach(([cycleId, cycleSubs]) => {
+      Object.entries(cycleSubs).forEach(([email, sub]) => {
+        const b = budgets[email];
+        if (!b || !sub.allocations) return;
+        sub.allocations.forEach(a => {
+          if (a.percentage <= 0) return;
+          all.push({ email, orgName: a.orgName, allocatedAmount: (a.percentage / 100) * b.cycleAmount, currency: b.currency || "$" });
+        });
+      });
+    });
+    return all;
+  }, []);
+
+  // User's org names for highlighting
+  const userOrgNames = useMemo(() => {
+    const s = new Set();
+    companyDonations.filter(d => d.email === userEmail).forEach(d => s.add(d.orgName));
+    return s;
+  }, [companyDonations, userEmail]);
+
+  const countryData = useMemo(() => aggregateDonationsByCountry(companyDonations), [companyDonations]);
   const maxDonation = useMemo(() => Math.max(...Object.values(countryData).map(d => d.total), 1), [countryData]);
   const colorScale = useMemo(() => scaleSqrt().domain([0, maxDonation]).range([0, 1]), [maxDonation]);
   const countryCount = Object.keys(countryData).length;
+  const donatedCountries = useMemo(() => new Set(Object.keys(countryData)), [countryData]);
+
+  // Breathing glow phase for donated countries (0→1→0 over ~2 seconds)
+  const [glowPhase, setGlowPhase] = useState(0);
+  useEffect(() => {
+    const start = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = (Date.now() - start) / 1000;
+      setGlowPhase((Math.sin(elapsed * Math.PI) + 1) / 2);
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
 
   const oceanPointsData = useMemo(() => {
     const orgTotals = {};
-    donations.forEach(d => {
+    companyDonations.forEach(d => {
       if (OCEAN_ORGS[d.orgName]) {
         orgTotals[d.orgName] = (orgTotals[d.orgName] || 0) + d.allocatedAmount;
       }
@@ -1324,7 +1431,7 @@ function GlobeTab({ donations }) {
       const loc = OCEAN_ORGS[name];
       return { lat: loc.lat, lng: loc.lng, name, total, label: loc.label, color: "rgba(14,165,233,0.85)" };
     });
-  }, [donations]);
+  }, [companyDonations]);
 
   const allDestinations = useMemo(() => {
     const maxAll = Math.max(maxDonation, ...oceanPointsData.map(d => d.total), 1);
@@ -1332,17 +1439,21 @@ function GlobeTab({ donations }) {
       const c = COUNTRY_CENTROIDS[code];
       if (!c) return null;
       const lightColor = LIGHT_COLORS[code] || "#fbbf24";
-      return { lat: c.lat, lng: c.lng, name: COUNTRY_NAMES[code] || code, code, total: data.total, orgs: data.orgs, isOcean: false, maxRadius: 2 + (data.total / maxAll) * 4, color: lightColor };
+      const isUser = Object.keys(data.orgs).some(org => userOrgNames.has(org));
+      return { lat: c.lat, lng: c.lng, name: COUNTRY_NAMES[code] || code, code, total: data.total, orgs: data.orgs, isOcean: false, color: lightColor, isUser };
     }).filter(Boolean);
     const oceanDests = oceanPointsData.map(d => ({
-      ...d, isOcean: true, orgs: { [d.name]: d.total }, maxRadius: 2 + (d.total / maxAll) * 4, color: LIGHT_COLORS[d.name] || "#22d3ee"
+      ...d, isOcean: true, orgs: { [d.name]: d.total }, maxRadius: OCEAN_RING_RADIUS[d.name] || 8, color: LIGHT_COLORS[d.name] || "#22d3ee", isUser: userOrgNames.has(d.name)
     }));
     return [...countryDests, ...oceanDests];
-  }, [countryData, oceanPointsData, maxDonation]);
+  }, [countryData, oceanPointsData, maxDonation, userOrgNames]);
 
   const arcsData = useMemo(() => allDestinations.map(d => ({
-    startLat: SF.lat, startLng: SF.lng, endLat: d.lat, endLng: d.lng, name: d.name, total: d.total, orgs: d.orgs, isOcean: d.isOcean, color: d.color, code: d.code
+    startLat: SF.lat, startLng: SF.lng, endLat: d.lat, endLng: d.lng, name: d.name, total: d.total, orgs: d.orgs, isOcean: d.isOcean, color: d.isUser ? d.color : "rgba(255,255,255,0.5)", code: d.code, isUser: d.isUser
   })), [allDestinations]);
+
+  // Rings only for ocean orgs (land countries use polygon glow)
+  const oceanRingsData = useMemo(() => allDestinations.filter(d => d.isOcean), [allDestinations]);
 
   useEffect(() => {
     fetch("https://unpkg.com/world-atlas@2.0.2/countries-110m.json")
@@ -1375,7 +1486,7 @@ function GlobeTab({ donations }) {
     const controls = globeRef.current.controls();
     controls.autoRotate = false;
     clearTimeout(pauseRef.current);
-    globeRef.current.pointOfView({ lat, lng, altitude: 0.9 }, 800);
+    globeRef.current.pointOfView({ lat, lng, altitude: 1.8 }, 800);
     if (data) setSelectedPoint(data);
     pauseRef.current = setTimeout(() => { controls.autoRotate = true; }, 10000);
   };
@@ -1384,22 +1495,17 @@ function GlobeTab({ donations }) {
 
   return (
     <div style={{ animation: "fadeSlideUp .4s ease" }}>
-      <div style={{ ...glass, padding: "32px 40px", marginBottom: 24, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ ...glass, padding: m ? "20px 16px" : "32px 40px", marginBottom: 24, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <h3 style={{ fontSize: 22, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 600, color: C.text, margin: 0 }}>Global Impact</h3>
           <p style={{ fontSize: 15, color: C.textSoft, fontWeight: 400, marginTop: 5 }}>
             Your donations reach {countryCount} {countryCount === 1 ? "country" : "countries"}{oceanPointsData.length > 0 ? " and the world's oceans" : ""}
           </p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 12, color: C.textMuted, fontWeight: 500, marginRight: 4 }}>From SF</span>
-          <div style={{ width: 40, height: 3, borderRadius: 2, background: "linear-gradient(to right, #fbbf24, #f472b6, #34d399, #22d3ee)", opacity: 0.7 }} />
-          <span style={{ fontSize: 12, color: C.textMuted, fontWeight: 500 }}>to the world</span>
-        </div>
       </div>
 
-      <div ref={containerRef} style={{ background: "#2d3748", borderRadius: 8, overflow: "hidden", position: "relative", minHeight: 520 }}>
-        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 40%, rgba(255,247,230,0.12) 0%, rgba(255,237,200,0.06) 40%, transparent 70%)", pointerEvents: "none", zIndex: 1 }} />
+      <div ref={containerRef} style={{ background: "#1a3a3a", borderRadius: 8, overflow: "hidden", position: "relative", minHeight: Math.round(containerWidth * 0.7) }}>
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 40%, rgba(0,180,180,0.10) 0%, rgba(0,120,136,0.05) 40%, transparent 70%)", pointerEvents: "none", zIndex: 1 }} />
         {!globeReady && !fetchError && (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, zIndex: 5 }}>
             <div style={{ width: 28, height: 28, border: "2px solid rgba(255,255,255,0.1)", borderTop: "2px solid rgba(255,255,255,0.6)", borderRadius: "50%", animation: "spin .8s linear infinite" }} />
@@ -1412,34 +1518,44 @@ function GlobeTab({ donations }) {
           </div>
         )}
         {globeReady && (
-          <Globe ref={globeRef} width={containerWidth} height={520} backgroundColor="rgba(0,0,0,0)"
+          <Globe ref={globeRef} width={containerWidth} height={Math.round(containerWidth * 0.7)} backgroundColor="rgba(0,0,0,0)"
             globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-            showAtmosphere={true} atmosphereColor="rgba(255,237,200,0.3)" atmosphereAltitude={0.18} animateIn={true}
+            showAtmosphere={true} atmosphereColor="rgba(0,200,200,0.25)" atmosphereAltitude={0.18} animateIn={false}
             polygonsData={countries}
             polygonAltitude={() => 0.002}
-            polygonCapColor={() => "rgba(255,255,255,0.03)"}
+            polygonCapColor={d => {
+              const code = getAlpha3(d);
+              if (code && donatedCountries.has(code)) {
+                const hex = LIGHT_COLORS[code] || "#fbbf24";
+                const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+                const alpha = 0.05 + 0.18 * glowPhase;
+                return `rgba(${r},${g},${b},${alpha})`;
+              }
+              return "rgba(0,180,180,0.04)";
+            }}
             polygonSideColor={() => "rgba(0,0,0,0)"}
-            polygonStrokeColor={() => "rgba(255,255,255,0.18)"}
+            polygonStrokeColor={() => "rgba(0,220,210,0.2)"}
             polygonLabel={d => {
               const name = d.properties.name || "Unknown";
               return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(34,37,32,0.12);border-radius:6px;padding:8px 14px;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-family:'Montserrat',sans-serif;"><div style="font-size:14px;color:#222520;font-weight:500;">${name}</div></div>`;
             }}
             onPolygonClick={d => { const code = getAlpha3(d); const c = code && COUNTRY_CENTROIDS[code]; const data = code && countryData[code]; if (c) focusPoint(c.lat, c.lng, data ? { name: d.properties.name || code, orgs: data.orgs, total: data.total, color: LIGHT_COLORS[code] || "#fbbf24", isOcean: false } : null); }}
-            onPolygonHover={() => {}} polygonsTransitionDuration={300}
-            arcsData={arcsData}
+            onPolygonHover={() => {}} polygonsTransitionDuration={100}
+            arcsData={showData ? arcsData : []}
             arcStartLat={d => d.startLat}
             arcStartLng={d => d.startLng}
             arcEndLat={d => d.endLat}
             arcEndLng={d => d.endLng}
-            arcColor={d => [`rgba(255,255,255,1)`, `${d.color}ff`]}
-            arcStroke={0.6}
-            arcDashLength={0.5}
-            arcDashGap={0.15}
-            arcDashAnimateTime={1500}
+            arcColor={d => d.isUser ? [`rgba(255,255,255,0.9)`, `${d.color}`] : [`rgba(255,255,255,0.15)`, `rgba(255,255,255,0.3)`]}
+            arcStroke={d => d.isUser ? 0.9 : 0.4}
+            arcDashLength={0.8}
+            arcDashGap={2}
+            arcDashInitialGap={() => 0}
+            arcDashAnimateTime={1200}
             arcAltitudeAutoScale={0.4}
             onArcClick={d => focusPoint(d.endLat, d.endLng, { name: d.name, orgs: d.orgs, total: d.total, color: d.color, isOcean: d.isOcean })}
             arcLabel={d => `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(34,37,32,0.12);border-radius:6px;padding:8px 14px;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-family:'Montserrat',sans-serif;"><div style="font-size:14px;color:#222520;font-weight:500;">${d.name}</div></div>`}
-            ringsData={allDestinations}
+            ringsData={showData ? oceanRingsData : []}
             ringLat={d => d.lat}
             ringLng={d => d.lng}
             ringAltitude={0.005}
@@ -1449,9 +1565,9 @@ function GlobeTab({ donations }) {
               return t => `rgba(${Math.min(255, r + 60)},${Math.min(255, g + 60)},${Math.min(255, b + 60)},${Math.pow(1 - t, 0.5)})`;
             }}
             ringMaxRadius={d => d.maxRadius}
-            ringPropagationSpeed={1.2}
-            ringRepeatPeriod={1200}
-            pointsData={allDestinations}
+            ringPropagationSpeed={0.8}
+            ringRepeatPeriod={2000}
+            pointsData={showData ? allDestinations : []}
             pointLat={d => d.lat}
             pointLng={d => d.lng}
             pointAltitude={0.008}
@@ -1461,8 +1577,24 @@ function GlobeTab({ donations }) {
             onRingClick={d => focusPoint(d.lat, d.lng, { name: d.name, orgs: d.orgs, total: d.total, color: d.color, isOcean: d.isOcean })}
           />
         )}
-        {selectedPoint && (
-          <div style={{ position: "absolute", top: 20, right: 20, zIndex: 10, background: "#fff", border: "1px solid rgba(34,37,32,0.08)", borderRadius: 8, padding: "20px 24px", minWidth: 240, maxWidth: 320, boxShadow: "0 4px 16px rgba(0,0,0,0.15)", fontFamily: "'Montserrat',sans-serif", animation: "fadeSlideUp .3s ease" }}>
+        {selectedPoint && (() => {
+          const topOrg = Object.entries(selectedPoint.orgs).sort((a, b) => b[1] - a[1])[0]?.[0];
+          const topOrgImg = topOrg ? ORG_IMAGES[topOrg] : null;
+          const topOrgPos = topOrg ? (ORG_IMAGE_POS[topOrg] || "center center") : "center center";
+          return (
+          <div style={{ position: "absolute", top: m ? 10 : 20, right: m ? 10 : 20, left: m ? 10 : "auto", zIndex: 10, background: "#fff", border: "1px solid rgba(34,37,32,0.08)", borderRadius: 8, overflow: "hidden", minWidth: 240, maxWidth: m ? "calc(100vw - 40px)" : 320, boxShadow: "0 4px 16px rgba(0,0,0,0.15)", fontFamily: "'Montserrat',sans-serif", animation: "fadeSlideUp .3s ease" }}>
+            {topOrgImg ? (
+              <div style={{ width: "100%", height: 160, overflow: "hidden", position: "relative" }}>
+                <img src={topOrgImg} alt={topOrg} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: topOrgPos, display: "block" }} />
+              </div>
+            ) : topOrg && (
+              <div style={{ width: "100%", height: 160, overflow: "hidden", position: "relative", background: `linear-gradient(135deg, ${getOrgColor(topOrg)}44, ${getOrgColor(topOrg)}88)`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: 48, fontWeight: 700, color: "rgba(255,255,255,0.7)", fontFamily: "'Playfair Display',Georgia,serif" }}>
+                  {topOrg.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
+                </span>
+              </div>
+            )}
+            <div style={{ padding: "20px 24px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
               <div>
                 <div style={{ fontSize: 12, color: selectedPoint.color, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 500, marginBottom: 4 }}>{selectedPoint.isOcean ? "Ocean Conservation" : "Country"}</div>
@@ -1482,8 +1614,10 @@ function GlobeTab({ donations }) {
               <span style={{ fontSize: 12, color: "#8A8D85", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 500 }}>Total</span>
               <span style={{ fontSize: 20, fontWeight: 700, color: selectedPoint.color }}>{fmt(selectedPoint.total)}</span>
             </div>
+            </div>
           </div>
-        )}
+          );
+        })()}
       </div>
 
       {(countryCount > 0 || oceanPointsData.length > 0) && (
@@ -1536,6 +1670,7 @@ function GlobeTab({ donations }) {
 
 function LoginScreen({ onLogin }) {
   const [error, setError] = useState("");
+  const m = useIsMobile();
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://accounts.google.com/gsi/client"; script.async = true;
@@ -1554,11 +1689,11 @@ function LoginScreen({ onLogin }) {
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: C.bg }}>
-      <div style={{ width: 420, textAlign: "center", animation: "fadeSlideUp .6s ease" }}>
-        <h1 style={{ fontSize: 44, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700, color: C.text, margin: "0 0 12px", letterSpacing: "-0.03em" }}>GiveTrack</h1>
-        <p style={{ color: C.textMuted, fontSize: 16, margin: "0 0 48px", fontWeight: 400, lineHeight: 1.6 }}>Track the impact of your generosity</p>
+      <div style={{ width: m ? "calc(100vw - 32px)" : 420, maxWidth: 420, textAlign: "center", animation: "fadeSlideUp .6s ease" }}>
+        <h1 style={{ fontSize: m ? 28 : 44, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700, color: C.text, margin: "0 0 12px", letterSpacing: "-0.03em" }}>GiveTrack</h1>
+        <p style={{ color: C.textMuted, fontSize: 16, margin: m ? "0 0 28px" : "0 0 48px", fontWeight: 400, lineHeight: 1.6 }}>Track the impact of your generosity</p>
 
-        <div style={{ background: "#fff", borderRadius: 8, padding: "48px 48px", border: `1px solid ${C.divider}` }}>
+        <div style={{ background: "#fff", borderRadius: 8, padding: m ? "28px 20px" : "48px 48px", border: `1px solid ${C.divider}` }}>
           <p style={{ color: C.textSoft, fontSize: 15, marginBottom: 36, fontWeight: 400, lineHeight: 1.7 }}>Sign in with your company Google account to view your charitable giving.</p>
           <div id="google-signin-btn" style={{ display: "flex", justifyContent: "center" }}></div>
           {error && <div style={{ color: "#dc2626", fontSize: 15, marginTop: 18, fontWeight: 500 }}>{error}</div>}
@@ -1622,6 +1757,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
   const [expandedOrgs, setExpandedOrgs] = useState(new Set());
   const [imgErrors, setImgErrors] = useState({});
   const [fetchedImages, setFetchedImages] = useState({});
+  const m = useIsMobile();
 
   const totalDonated = donations.reduce((s, d) => s + d.allocatedAmount, 0);
   const primaryCurrency = donations[0]?.currency || "$";
@@ -1716,15 +1852,15 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
   return (
     <div style={{ minHeight: "100vh", background: C.bg }}>
       {/* Header */}
-      <header style={{ padding: "16px 48px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.divider}`, background: C.bg, position: "sticky", top: 0, zIndex: 100 }}>
+      <header style={{ padding: m ? "12px 16px" : "16px 48px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.divider}`, background: C.bg, position: "sticky", top: 0, zIndex: 100 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span style={{ fontSize: 20, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700, color: C.text, letterSpacing: "-0.01em" }}>GiveTrack</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-          <div style={{ textAlign: "right" }}>
+          {!m && <div style={{ textAlign: "right" }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{user.name}</div>
             <div style={{ fontSize: 12, color: C.textMuted }}>{user.email}</div>
-          </div>
+          </div>}
           {user.picture && <img src={user.picture} alt="" style={{ width: 34, height: 34, borderRadius: "50%", border: `1px solid ${C.divider}` }} />}
           <button onClick={onLogout} style={{ padding: "7px 16px", background: "transparent", border: `1px solid ${C.cardBorder}`, borderRadius: 4, color: C.textSoft, fontSize: 13, cursor: "pointer", transition: "all .15s", fontWeight: 500 }}
             onMouseEnter={e => { e.target.style.background = C.text; e.target.style.color = "#fff"; e.target.style.borderColor = C.text; }}
@@ -1734,14 +1870,14 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
 
       {/* STICKY TAB BAR — full width, below header */}
       {donations.length > 0 && (
-        <nav style={{ position: "sticky", top: 67, zIndex: 99, background: C.bg, borderBottom: `1px solid ${C.divider}` }}>
-          <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px", display: "flex", gap: 0, overflowX: "auto" }}>
+        <nav style={{ position: "sticky", top: m ? 53 : 67, zIndex: 99, background: C.bg, borderBottom: `1px solid ${C.divider}` }}>
+          <div style={{ maxWidth: 1100, margin: "0 auto", padding: m ? "0 8px" : "0 32px", display: "flex", gap: 0, overflowX: "auto" }}>
             {tabs.map(t => (
               <button key={t.id} onClick={() => { setActiveTab(t.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
-                padding: "14px 28px", background: "transparent", border: "none",
+                padding: m ? "12px 12px" : "14px 28px", background: "transparent", border: "none",
                 borderBottom: activeTab === t.id ? `2px solid ${C.text}` : "2px solid transparent",
-                color: activeTab === t.id ? C.text : C.textMuted, fontSize: 13, fontWeight: activeTab === t.id ? 600 : 400,
-                cursor: "pointer", transition: "all .2s", marginBottom: -1, display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap",
+                color: activeTab === t.id ? C.text : C.textMuted, fontSize: m ? 11 : 13, fontWeight: activeTab === t.id ? 600 : 400,
+                cursor: "pointer", transition: "all .2s", marginBottom: -1, display: "flex", alignItems: "center", gap: m ? 4 : 8, whiteSpace: "nowrap",
                 letterSpacing: ".06em", textTransform: "uppercase",
               }}
                 onMouseEnter={e => { if (activeTab !== t.id) e.target.style.color = C.textSoft; }}
@@ -1755,34 +1891,34 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
 
       {donations.length > 0 && activeTab === "overview" && (<>
         {/* FULL-BLEED HERO */}
-        <div style={{ position: "relative", height: 620, overflow: "hidden", animation: "fadeSlideUp .5s ease" }}>
-          <img src={HERO_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 60%", display: "block", filter: "saturate(1.15) contrast(1.1) sepia(0.25) brightness(1.05)" }}
+        <div style={{ position: "relative", height: m ? 380 : 620, overflow: "hidden", animation: "fadeSlideUp .5s ease" }}>
+          <img src={HERO_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 40%", display: "block", filter: "saturate(1.1) contrast(1.08) brightness(1.02)" }}
             onError={e => { e.target.style.display = "none"; }} />
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(220,160,60,0.18) 0%, rgba(200,100,50,0.12) 50%, rgba(180,140,80,0.15) 100%)", mixBlendMode: "multiply" }} />
-          <div style={{ position: "absolute", inset: 0, background: "rgba(255,240,200,0.08)", mixBlendMode: "screen" }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(0,120,136,0.15) 0%, rgba(0,90,100,0.10) 50%, rgba(0,120,136,0.12) 100%)", mixBlendMode: "multiply" }} />
+          <div style={{ position: "absolute", inset: 0, background: "rgba(240,250,250,0.06)", mixBlendMode: "screen" }} />
           <div style={{ position: "absolute", inset: 0, opacity: 0.07, backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")", backgroundSize: "128px 128px", pointerEvents: "none" }} />
-          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "56px 64px" }}>
+          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: m ? "32px 20px" : "56px 64px" }}>
             <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".15em", fontWeight: 600, marginBottom: 14 }}>Total Donated</div>
-            <div style={{ fontSize: 88, fontWeight: 900, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.02em", lineHeight: 1, textShadow: "0 3px 6px rgba(0,0,0,0.7), 0 6px 20px rgba(0,0,0,0.4), 0 12px 40px rgba(0,0,0,0.25)" }}>
+            <div style={{ fontSize: m ? 40 : 88, fontWeight: 900, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.02em", lineHeight: 1, textShadow: "0 3px 6px rgba(0,0,0,0.7), 0 6px 20px rgba(0,0,0,0.4), 0 12px 40px rgba(0,0,0,0.25)" }}>
               <AnimatedNumber value={totalDonated} currency={primaryCurrency} />
             </div>
-            <div style={{ fontSize: 18, color: "rgba(255,255,255,0.8)", marginTop: 18, fontWeight: 500, textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
+            <div style={{ fontSize: m ? 14 : 18, color: "rgba(255,255,255,0.8)", marginTop: 18, fontWeight: 500, textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
               Welcome back, {user.name.split(" ")[0]} — across {cycles.length} payroll cycles
             </div>
           </div>
         </div>
 
         {/* FULL-BLEED DARK STAT STRIP */}
-        <div style={{ background: C.text, padding: "44px 64px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ background: C.text, padding: m ? "24px 16px" : "44px 64px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: m ? "wrap" : "nowrap", gap: m ? 16 : 0 }}>
           {[
             { label: "Per cycle", value: avgCycle },
             { label: "Organizations", value: orgCount, isCount: true },
             { label: "Countries reached", value: countriesReached, isCount: true },
             { label: "Months active", value: months.length, isCount: true },
           ].map((stat, i) => (
-            <div key={i} style={{ textAlign: "center", flex: 1 }}>
-              <div style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", textTransform: "uppercase", letterSpacing: ".12em", fontWeight: 500, marginBottom: 12 }}>{stat.label}</div>
-              <div style={{ fontSize: 42, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.02em" }}>
+            <div key={i} style={{ textAlign: "center", flex: m ? "1 1 45%" : 1 }}>
+              <div style={{ fontSize: m ? 11 : 14, color: "rgba(255,255,255,0.45)", textTransform: "uppercase", letterSpacing: ".12em", fontWeight: 500, marginBottom: 12 }}>{stat.label}</div>
+              <div style={{ fontSize: m ? 26 : 42, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.02em" }}>
                 {stat.isCount ? stat.value : <AnimatedNumber value={stat.value} currency={primaryCurrency} />}
               </div>
             </div>
@@ -1790,7 +1926,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
         </div>
       </>)}
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: donations.length > 0 && activeTab === "overview" ? "72px 32px 100px" : "48px 32px 100px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: donations.length > 0 && activeTab === "overview" ? (m ? "32px 12px 60px" : "72px 32px 100px") : (m ? "24px 12px 60px" : "48px 32px 100px") }}>
         {dataError && <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "16px 20px", marginBottom: 28, color: "#dc2626", fontSize: 15, fontWeight: 500 }}>{dataError}</div>}
 
         {donations.length === 0 && !dataError ? (
@@ -1808,12 +1944,12 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
             </div>
 
             {/* Charts — asymmetric layout */}
-            <div style={{ display: "grid", gridTemplateColumns: months.length > 1 ? "58fr 42fr" : "1fr", gap: 32, marginBottom: 64 }}>
+            <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : (months.length > 1 ? "58fr 42fr" : "1fr"), gap: 32, marginBottom: 64 }}>
               {months.length > 1 && (
-                <div style={{ ...glass, padding: "36px 40px", animation: "fadeSlideUp .4s ease .15s both" }}>
+                <div style={{ ...glass, padding: m ? "24px 16px" : "36px 40px", animation: "fadeSlideUp .4s ease .15s both" }}>
                   <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, margin: "0 0 32px", fontFamily: "'Playfair Display',Georgia,serif" }}>Monthly overview</h3>
                   <BarChart data={monthlyData} />
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px 18px", marginTop: 20, padding: "20px 0 0", borderTop: `1px solid ${C.divider}` }}>
+                  <div style={{ display: "grid", gridTemplateColumns: m ? "1fr 1fr" : "1fr 1fr 1fr", gap: "6px 18px", marginTop: 20, padding: "20px 0 0", borderTop: `1px solid ${C.divider}` }}>
                     {Object.entries(orgTotals).sort((a, b) => b[1] - a[1]).map(([n]) => (
                       <div key={n} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: C.textSoft, minWidth: 0, padding: "4px 0" }}>
                         <div style={{ width: 8, height: 8, borderRadius: 3, background: getOrgColor(n), flexShrink: 0 }} />
@@ -1823,7 +1959,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                   </div>
                 </div>
               )}
-              <div style={{ ...glass, padding: "36px 40px", display: "flex", flexDirection: "column", alignItems: "center", animation: "fadeSlideUp .4s ease .2s both" }}>
+              <div style={{ ...glass, padding: m ? "24px 16px" : "36px 40px", display: "flex", flexDirection: "column", alignItems: "center", animation: "fadeSlideUp .4s ease .2s both" }}>
                 <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, margin: "0 0 32px", alignSelf: "flex-start", fontFamily: "'Playfair Display',Georgia,serif" }}>Allocation breakdown</h3>
                 <DonutChart data={donutData} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 28, width: "100%" }}>
@@ -1863,7 +1999,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
           {/* ═══════════════ ORGANIZATIONS ═══════════════ */}
           {activeTab === "breakdown" && (
             <div style={{ animation: "fadeSlideUp .3s ease" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+              <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr", gap: 24 }}>
                 {Object.entries(orgTotals).sort((a, b) => b[1] - a[1]).map(([name, total], i) => {
                   const od = donations.filter(d => d.orgName === name);
                   const url = orgUrls[name];
@@ -1881,9 +2017,15 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                       onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; e.currentTarget.style.transform = "translateY(0)"; }}>
                       {/* Photo banner */}
                       <div style={{ height: 180, position: "relative", overflow: "hidden", background: `linear-gradient(135deg, ${color}22, ${color}44)` }}>
-                        {img && !imgErrors[name] && (
-                          <img src={img} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", objectPosition: ORG_IMAGE_POS[name] || "center center" }}
+                        {img && !imgErrors[name] ? (
+                          <img src={img} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", objectPosition: ORG_IMAGE_POS[name] || "center 30%" }}
                             onError={() => setImgErrors(prev => ({ ...prev, [name]: true }))} />
+                        ) : (
+                          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <span style={{ fontSize: 48, fontWeight: 700, color: "rgba(255,255,255,0.6)", fontFamily: "'Playfair Display',Georgia,serif" }}>
+                              {name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
+                            </span>
+                          </div>
                         )}
                         <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)` }} />
                         {/* Category badge */}
@@ -1950,7 +2092,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
           {/* ═══════════════ MONTHLY ALLOCATION ═══════════════ */}
           {activeTab === "allocation" && (
             <div style={{ animation: "fadeSlideUp .3s ease" }}>
-              <div style={{ ...glass, padding: "28px 40px", marginBottom: 36, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ ...glass, padding: m ? "20px 16px" : "28px 40px", marginBottom: 36, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: C.navy, textTransform: "uppercase", letterSpacing: ".06em" }}>Allocation Summary</div>
                   <div style={{ fontSize: 16, color: C.textSoft, marginTop: 5 }}>
@@ -1964,7 +2106,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
 
               {[...monthBreakdowns].reverse().map((mb, ci) => (
                 <div key={mb.month} style={{ ...glass, marginBottom: 28, overflow: "hidden", animation: `fadeSlideUp .4s ease ${ci*.06}s both` }}>
-                  <div style={{ padding: "22px 32px", borderBottom: `1px solid ${C.divider}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ padding: m ? "16px 16px" : "22px 32px", borderBottom: `1px solid ${C.divider}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
                       <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: 0 }}>{mb.month}</h3>
                       <span style={{ fontSize: 14, color: C.textSoft, marginTop: 4, display: "block" }}>{mb.donationCount} transaction{mb.donationCount !== 1 ? "s" : ""}</span>
@@ -1972,7 +2114,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                     <div style={{ fontSize: 28, fontWeight: 700, color: C.navy, fontFamily: "'Playfair Display',Georgia,serif" }}>{fmt(mb.total, primaryCurrency)}</div>
                   </div>
 
-                  <div style={{ padding: "26px 32px", display: "flex", gap: 36, alignItems: "flex-start" }}>
+                  <div style={{ padding: "26px 32px", display: "flex", flexDirection: m ? "column" : "row", gap: m ? 20 : 36, alignItems: m ? "center" : "flex-start" }}>
                     <div style={{ flexShrink: 0 }}>
                       <DonutChart data={mb.donutData} size={170} />
                     </div>
@@ -2002,10 +2144,12 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
           {activeTab === "team" && (
             <div style={{ animation: "fadeSlideUp .3s ease" }}>
               {/* Team hero */}
-              <div style={{ borderRadius: 8, overflow: "hidden", position: "relative", height: 240, marginBottom: 28, background: C.text }}>
-                <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "36px 48px" }}>
+              <div style={{ borderRadius: 8, overflow: "hidden", position: "relative", height: m ? 220 : 320, marginBottom: 28, background: C.text }}>
+                <img src="https://assets.evidenceaction.org/web/images/_1280xAUTO_crop_center-center_none/ea-kids.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center bottom", display: "block", filter: "brightness(0.6) saturate(1.1)" }} />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(0,120,136,0.2) 0%, rgba(34,37,32,0.35) 100%)" }} />
+                <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: m ? "28px 20px" : "36px 48px" }}>
                   <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 8 }}>Isara Team Impact</div>
-                  <div style={{ fontSize: 54, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.25), 0 0 80px rgba(255,255,255,0.15)" }}>
+                  <div style={{ fontSize: m ? 32 : 54, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.25), 0 0 80px rgba(255,255,255,0.15)" }}>
                     <AnimatedNumber value={teamData.teamTotal} />
                   </div>
                   <div style={{ fontSize: 17, color: "rgba(255,255,255,0.7)", marginTop: 12 }}>
@@ -2015,7 +2159,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
               </div>
 
               {/* Summary stats */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18, marginBottom: 22 }}>
+              <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr 1fr", gap: 18, marginBottom: 22 }}>
                 {[
                   { label: "Team Members", value: teamData.memberCount, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
                   { label: "Organizations", value: teamData.orgCount, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> },
@@ -2030,7 +2174,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
               </div>
 
               {/* Organizations we support — grouped by category */}
-              <div style={{ ...glass, padding: "40px 44px", animation: "fadeSlideUp .4s ease .1s both" }}>
+              <div style={{ ...glass, padding: m ? "24px 16px" : "40px 44px", animation: "fadeSlideUp .4s ease .1s both" }}>
                 <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, margin: "0 0 8px", fontFamily: "'Playfair Display',Georgia,serif" }}>Organizations We Support</h3>
                 <p style={{ fontSize: 15, color: C.textSoft, margin: "0 0 32px" }}>Our team collectively supports these organizations across {teamData.orgsByCategory.length} cause areas.</p>
 
@@ -2040,7 +2184,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                       <div style={{ fontSize: 12, fontWeight: 600, color: C.navy, textTransform: "uppercase", letterSpacing: ".08em" }}>{category}</div>
                       <div style={{ flex: 1, height: 1, background: C.divider }} />
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr", gap: 14 }}>
                       {orgs.map((orgName) => {
                         const img = ORG_IMAGES[orgName] || fetchedImages[orgName];
                         const desc = ORG_DESCRIPTIONS[orgName] || "";
@@ -2053,7 +2197,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                             {/* Org thumbnail */}
                             <div style={{ width: 52, height: 52, borderRadius: 12, overflow: "hidden", flexShrink: 0, background: `linear-gradient(135deg, ${color}22, ${color}44)` }}>
                               {img && !imgErrors[orgName] ? (
-                                <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: ORG_IMAGE_POS[orgName] || "center center" }}
+                                <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: ORG_IMAGE_POS[orgName] || "center 30%" }}
                                   onError={() => setImgErrors(prev => ({ ...prev, [orgName]: true }))} />
                               ) : (
                                 <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700, color, fontFamily: "'Playfair Display',Georgia,serif" }}>
@@ -2089,7 +2233,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
           )}
 
           {activeTab === "impact" && (
-            <GlobeTab donations={donations} />
+            <GlobeTab donations={donations} userEmail={user.email} />
           )}
 
           {activeTab === "admin" && isUserAdmin && (
@@ -2098,14 +2242,16 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
         </>)}
       </div>
 
-      {/* Photo */}
-      <div style={{ display: "flex", justifyContent: "center", padding: "20px 0 40px" }}>
-        <img src="/hero.jpg" alt="" style={{ maxWidth: 640, width: "100%", borderRadius: 0, display: "block", filter: "saturate(1.15) contrast(1.1) sepia(0.25) brightness(1.05)" }} />
-      </div>
+      {/* Photo — only on overview */}
+      {activeTab === "overview" && (
+        <div style={{ display: "flex", justifyContent: "center", padding: m ? "20px 12px 32px" : "20px 0 48px" }}>
+          <img src="/hero.jpg" alt="" style={{ maxWidth: 760, width: "100%", borderRadius: 0, display: "block", filter: "saturate(1.1) contrast(1.08) brightness(1.02)" }} />
+        </div>
+      )}
 
       {/* Footer */}
-      <div style={{ textAlign: "center", padding: "60px 0 48px", borderTop: `1px solid ${C.divider}` }}>
-        <p style={{ color: C.textMuted, fontSize: 15, fontStyle: "italic", fontWeight: 400, letterSpacing: ".01em", lineHeight: 1.7, fontFamily: "'Playfair Display',Georgia,serif" }}>
+      <div style={{ textAlign: "center", padding: m ? "40px 16px 32px" : "60px 0 48px", borderTop: `1px solid ${C.divider}`, background: "#ffffff" }}>
+        <p style={{ color: C.textMuted, fontSize: 15, fontStyle: "italic", fontWeight: 400, letterSpacing: ".01em", lineHeight: 1.7, fontFamily: "'Playfair Display',Georgia,serif", animation: "fadeIn 1.5s ease .3s both" }}>
           "No one has ever become poor by giving." — Anne Frank
         </p>
         <p style={{ color: C.textMuted, fontSize: 12, letterSpacing: ".1em", fontWeight: 500, marginTop: 16, textTransform: "uppercase" }}>GiveTrack · {new Date().getFullYear()}</p>
