@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'GiveTrack — OpenAI Credit Tracker',
+  title: 'CreditLedger — API Credit Tracker',
   description: 'Track and forecast $40M in OpenAI API credits',
 };
 

@@ -13,7 +13,7 @@ export function generateMonthlyReport(
   // Header
   doc.setFontSize(20);
   doc.setTextColor(11, 17, 33);
-  doc.text('GiveTrack — OpenAI Credit Report', 14, 22);
+  doc.text('CreditLedger — API Credit Report', 14, 22);
 
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
@@ -62,8 +62,8 @@ export function generateMonthlyReport(
     doc.setPage(i);
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
-    doc.text(`GiveTrack Credit Tracker — Page ${i} of ${pageCount}`, 14, doc.internal.pageSize.height - 10);
+    doc.text(`CreditLedger — Page ${i} of ${pageCount}`, 14, doc.internal.pageSize.height - 10);
   }
 
-  doc.save(`givetrack-credit-report-${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`creditledger-report-${new Date().toISOString().slice(0, 10)}.pdf`);
 }

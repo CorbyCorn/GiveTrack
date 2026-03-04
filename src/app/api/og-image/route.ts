@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
  *
  * Fetches a website and extracts the best representative image
  * (og:image, twitter:image, or first large <img>).
- * Used by the GiveTrack dashboard to auto-discover images for new orgs.
+ * Used by the CreditLedger dashboard to auto-discover images for new orgs.
  */
 
 const cache = new Map<string, { url: string | null; ts: number }>();
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     const res = await fetch(normalizedUrl, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; GiveTrack/1.0)',
+        'User-Agent': 'Mozilla/5.0 (compatible; CreditLedger/1.0)',
         'Accept': 'text/html',
       },
       redirect: 'follow',

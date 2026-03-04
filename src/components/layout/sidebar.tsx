@@ -57,12 +57,12 @@ export default function Sidebar() {
         {/* Logo */}
         <div className="flex items-center gap-3 px-4 h-16 border-b border-navy-700/50">
           <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-accent-blue/20 flex items-center justify-center">
-            <span className="text-accent-blue font-bold text-sm">GT</span>
+            <span className="text-accent-blue font-bold text-sm">CL</span>
           </div>
           {!collapsed && (
             <div className="overflow-hidden">
-              <h1 className="text-sm font-display font-bold text-white truncate">Credit Tracker</h1>
-              <p className="text-[10px] text-navy-400 truncate">OpenAI API Credits</p>
+              <h1 className="text-sm font-display font-bold text-white truncate">CreditLedger</h1>
+              <p className="text-[10px] text-navy-400 truncate">API Credit Tracker</p>
             </div>
           )}
           <button
