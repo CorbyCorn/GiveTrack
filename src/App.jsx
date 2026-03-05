@@ -11,6 +11,37 @@ import * as topojson from "topojson-client";
 const GOOGLE_CLIENT_ID = "296721826980-i3sgo6dgklh7v8fppql7mumdnuv0lu33.apps.googleusercontent.com";
 const USE_DEMO_DATA = true;
 
+// ─── GOOGLE SHEETS SYNC ─────────────────────────────────────
+// Replace DEPLOYMENT_ID with your Google Apps Script deployment URL
+const SHEET_URL = "__SHEET_URL_PLACEHOLDER__";
+const SHEET_ENABLED = SHEET_URL !== "__SHEET_URL_PLACEHOLDER__";
+
+// Fetch all data from Google Sheet
+async function fetchFromSheet() {
+  if (!SHEET_ENABLED) return null;
+  try {
+    const res = await fetch(SHEET_URL);
+    if (!res.ok) throw new Error("Sheet fetch failed");
+    const data = await res.json();
+    Object.entries(data).forEach(([key, value]) => {
+      try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+    });
+    return data;
+  } catch (err) {
+    console.warn("Sheet fetch failed, using localStorage cache:", err);
+    return null;
+  }
+}
+
+// Write a key to Google Sheet (async, non-blocking)
+function syncToSheet(key, value) {
+  if (!SHEET_ENABLED) return;
+  fetch(SHEET_URL, {
+    method: "POST",
+    body: JSON.stringify({ key, value }),
+  }).catch(err => console.warn("Sheet sync failed:", err));
+}
+
 // ─── RESPONSIVE ──────────────────────────────────────────────
 
 function useIsMobile(bp = 768) {
@@ -504,23 +535,36 @@ function saveStorage(key, value) {
 }
 
 function loadAdmins() { return loadStorage("givetrack_admins", INITIAL_ADMINS); }
-function saveAdmins(list) { saveStorage("givetrack_admins", list); }
+function saveAdmins(list) { saveStorage("givetrack_admins", list); syncToSheet("givetrack_admins", list); }
 function checkIsAdmin(email) {
   const e = email?.toLowerCase();
   return INITIAL_ADMINS.includes(e) || loadAdmins().includes(e);
 }
 
 function loadBudgets() { return loadStorage("givetrack_employee_budgets", {}); }
-function saveBudgets(b) { saveStorage("givetrack_employee_budgets", b); }
+function saveBudgets(b) { saveStorage("givetrack_employee_budgets", b); syncToSheet("givetrack_employee_budgets", b); }
 
 function loadCycles() { return loadStorage("givetrack_pay_cycles", { currentCycleId: null, cycles: [] }); }
-function saveCycles(c) { saveStorage("givetrack_pay_cycles", c); }
+function saveCycles(c) { saveStorage("givetrack_pay_cycles", c); syncToSheet("givetrack_pay_cycles", c); }
 
 function loadSubmissions() { return loadStorage("givetrack_submissions", {}); }
-function saveSubmissions(s) { saveStorage("givetrack_submissions", s); }
+function saveSubmissions(s) { saveStorage("givetrack_submissions", s); syncToSheet("givetrack_submissions", s); }
 
 function loadTracker() { return loadStorage("givetrack_admin_tracker", {}); }
-function saveTracker(t) { saveStorage("givetrack_admin_tracker", t); }
+function saveTracker(t) {
+  saveStorage("givetrack_admin_tracker", t);
+  // Strip receipt data before syncing (too large for Sheet cells)
+  const stripped = JSON.parse(JSON.stringify(t));
+  Object.values(stripped).forEach(cycle =>
+    Object.values(cycle).forEach(employee =>
+      Object.values(employee).forEach(org => { delete org.receiptData; delete org.receiptFileName; })
+    )
+  );
+  syncToSheet("givetrack_admin_tracker", stripped);
+}
+
+function loadDonations() { return loadStorage("givetrack_donations", null); }
+function saveDonations(d) { saveStorage("givetrack_donations", d); syncToSheet("givetrack_donations", d); }
 
 // Compute live pay status for a cycle based on tracker checkboxes
 function computeCyclePayStatus(cycleId) {
@@ -639,6 +683,11 @@ function seedFromDemoData() {
     }
   });
   saveSubmissions(subs);
+
+  // 6. Seed donations to sheet (flat array with email for shared access)
+  saveDonations(
+    Object.entries(DEMO_DATA).flatMap(([email, dons]) => dons.map(d => ({ ...d, email })))
+  );
 }
 
 // ─── PARSE LIVE DATA ──────────────────────────────────────────
@@ -1408,6 +1457,7 @@ function AdminTab({ currentEmail }) {
 
   const subTabs = [
     { id: "tracker", label: "Tracker" },
+    { id: "unpaid", label: "Unpaid" },
     { id: "budgets", label: "Budgets" },
     { id: "admins", label: "Admin Management" },
   ];
@@ -1459,8 +1509,117 @@ function AdminTab({ currentEmail }) {
           <AdminTracker selectedCycleId={selectedCycleId} onTrackerChange={() => refreshStatus(v => v + 1)} />
         </div>
       )}
+      {subTab === "unpaid" && <CumulativeUnpaid />}
       {subTab === "budgets" && <AdminBudgets />}
       {subTab === "admins" && <AdminManagement currentEmail={currentEmail} />}
+    </div>
+  );
+}
+
+function CumulativeUnpaid() {
+  const m = useIsMobile();
+  const tracker = loadTracker();
+  const subs = loadSubmissions();
+  const budgets = loadBudgets();
+  const cycles = loadCycles();
+
+  // Build ALL unpaid rows across ALL cycles
+  const unpaidRows = [];
+  cycles.cycles.forEach(cycle => {
+    const cycleId = cycle.cycleId;
+    const cycleSubs = subs[cycleId] || {};
+    const cycleTracker = tracker[cycleId] || {};
+    const seen = new Set();
+
+    Object.entries(cycleSubs).forEach(([email, sub]) => {
+      const budget = budgets[email] || { cycleAmount: 0, currency: "$", name: email };
+      (sub.allocations || []).forEach(alloc => {
+        if (alloc.percentage <= 0) return;
+        seen.add(`${email}:${alloc.orgName}`);
+        const tData = cycleTracker[email]?.[alloc.orgName] || {};
+        if (!tData.paid) {
+          const amt = (alloc.percentage / 100) * budget.cycleAmount;
+          unpaidRows.push({ email, name: budget.name, orgName: alloc.orgName, paidTo: alloc.paidTo || ORG_WEBSITES[alloc.orgName] || "", amount: Math.round(amt * 100) / 100, currency: budget.currency, cycleLabel: cycle.label });
+        }
+      });
+    });
+
+    Object.entries(cycleTracker).forEach(([email, orgs]) => {
+      Object.entries(orgs).forEach(([orgName, tData]) => {
+        if (!seen.has(`${email}:${orgName}`) && !tData.paid) {
+          const budget = budgets[email] || { name: email, currency: "$" };
+          unpaidRows.push({ email, name: budget.name, orgName, paidTo: ORG_WEBSITES[orgName] || "", amount: tData.amount || 0, currency: budget.currency, cycleLabel: cycle.label });
+        }
+      });
+    });
+  });
+
+  unpaidRows.sort((a, b) => a.name.localeCompare(b.name) || a.cycleLabel.localeCompare(b.cycleLabel) || a.orgName.localeCompare(b.orgName));
+
+  // Group by employee
+  const groups = [];
+  let currentGroup = null;
+  unpaidRows.forEach(row => {
+    if (!currentGroup || currentGroup.email !== row.email) {
+      currentGroup = { email: row.email, name: row.name, rows: [] };
+      groups.push(currentGroup);
+    }
+    currentGroup.rows.push(row);
+  });
+
+  const totalUnpaid = unpaidRows.reduce((s, r) => s + r.amount, 0);
+
+  return (
+    <div>
+      <div style={{ ...glass, padding: "20px 28px", marginBottom: 24, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: C.warm, textTransform: "uppercase", letterSpacing: ".06em" }}>Cumulative Unpaid</div>
+          <div style={{ fontSize: 16, color: C.textSoft, marginTop: 5 }}>
+            <strong style={{ color: C.text }}>{unpaidRows.length}</strong> unpaid donation{unpaidRows.length !== 1 ? "s" : ""} across all cycles
+          </div>
+        </div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: C.warm, fontFamily: "'Playfair Display',Georgia,serif" }}>{fmt(totalUnpaid)}</div>
+      </div>
+
+      {unpaidRows.length === 0 ? (
+        <div style={{ ...glass, padding: "60px 36px", textAlign: "center" }}>
+          <div style={{ fontSize: 20, fontWeight: 600, color: "#16a34a", marginBottom: 8 }}>All caught up!</div>
+          <div style={{ fontSize: 15, color: C.textMuted }}>Every donation across all cycles has been paid.</div>
+        </div>
+      ) : (
+        <div style={{ ...glass, overflow: "hidden", overflowX: m ? "auto" : "hidden" }}>
+          {/* Header */}
+          <div style={{ display: "grid", gridTemplateColumns: "140px 1fr 120px 100px", padding: "12px 20px", borderBottom: `1px solid ${C.divider}`, background: "rgba(139,119,90,0.03)" }}>
+            {["Employee", "Organization", "Cycle", "Amount"].map(h => (
+              <div key={h} style={{ fontSize: 11, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600 }}>{h}</div>
+            ))}
+          </div>
+          {groups.map((group, gi) => {
+            const groupTotal = group.rows.reduce((s, r) => s + r.amount, 0);
+            return (
+              <div key={group.email}>
+                {group.rows.map((row, ri) => (
+                  <div key={`${row.cycleLabel}-${row.orgName}`} style={{ display: "grid", gridTemplateColumns: "140px 1fr 120px 100px", padding: "12px 20px", borderBottom: ri === group.rows.length - 1 ? "none" : `1px solid ${C.divider}`, alignItems: "center" }}>
+                    <div style={{ fontSize: 14, fontWeight: ri === 0 ? 600 : 400, color: ri === 0 ? C.text : "transparent" }}>{row.name}</div>
+                    <div style={{ fontSize: 14, color: C.textSoft }}>
+                      {row.paidTo ? <a href={row.paidTo} target="_blank" rel="noopener noreferrer" style={{ color: C.navy, textDecoration: "underline", fontWeight: 500 }}>{row.orgName}</a> : row.orgName}
+                    </div>
+                    <div style={{ fontSize: 13, color: C.textMuted }}>{row.cycleLabel.replace(" Payroll Cycle", "")}</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: C.warm }}>{fmt(row.amount, row.currency)}</div>
+                  </div>
+                ))}
+                {/* Employee subtotal + dark separator */}
+                <div style={{ display: "grid", gridTemplateColumns: "140px 1fr 120px 100px", padding: "8px 20px", background: C.text, alignItems: "center" }}>
+                  <div />
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,253,248,0.6)", textAlign: "right", paddingRight: 12 }}>Subtotal — {group.rows.length} unpaid</div>
+                  <div />
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{fmt(groupTotal, group.rows[0]?.currency)}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -1819,15 +1978,60 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("overview");
   const [dataError, setDataError] = useState("");
   const [isUserAdmin, setIsUserAdmin] = useState(false);
+  const [sheetData, setSheetData] = useState(null);
+  const userRef = useRef(null);
 
   // Seed localStorage on first load
   useEffect(() => { seedFromDemoData(); }, []);
 
+  // Google Sheets polling for live updates
+  useEffect(() => {
+    // Initial fetch
+    fetchFromSheet().then(data => { if (data) setSheetData(data); });
+
+    // Poll every 30s
+    const interval = setInterval(async () => {
+      const data = await fetchFromSheet();
+      if (data) {
+        setSheetData(data);
+        // If user is logged in, refresh their donations from sheet data
+        if (userRef.current) {
+          const sheetDons = loadDonations();
+          if (sheetDons) {
+            setDonations(sheetDons.filter(d => d.email === userRef.current.email.toLowerCase()));
+          }
+        }
+      }
+    }, 30000);
+
+    // Also refresh on tab focus
+    const onFocus = async () => {
+      const data = await fetchFromSheet();
+      if (data) {
+        setSheetData(data);
+        if (userRef.current) {
+          const sheetDons = loadDonations();
+          if (sheetDons) {
+            setDonations(sheetDons.filter(d => d.email === userRef.current.email.toLowerCase()));
+          }
+        }
+      }
+    };
+    window.addEventListener("focus", onFocus);
+
+    return () => { clearInterval(interval); window.removeEventListener("focus", onFocus); };
+  }, []);
+
   const handleLogin = async (googleUser) => {
     setUser(googleUser); setLoading(true); setDataError("");
+    userRef.current = googleUser;
     setIsUserAdmin(checkIsAdmin(googleUser.email));
     try {
-      if (USE_DEMO_DATA) { setDonations(DEMO_DATA[googleUser.email] || []); }
+      // Try sheet donations first, fall back to DEMO_DATA
+      const sheetDons = loadDonations();
+      if (sheetDons) {
+        setDonations(sheetDons.filter(d => d.email === googleUser.email.toLowerCase()));
+      } else if (USE_DEMO_DATA) { setDonations(DEMO_DATA[googleUser.email] || []); }
       else {
         const res = await fetch("/api/sharepoint");
         if (!res.ok) throw new Error();
@@ -1840,6 +2044,7 @@ export default function App() {
 
   const handleLogout = () => {
     setUser(null); setDonations([]); setActiveTab("overview");
+    userRef.current = null;
     if (window.google?.accounts?.id) window.google.accounts.id.disableAutoSelect();
   };
 
@@ -1853,7 +2058,7 @@ export default function App() {
           <div style={{ width: 36, height: 36, border: `2px solid ${C.divider}`, borderTop: `2px solid ${C.accent}`, borderRadius: "50%", animation: "spin .8s linear infinite" }} />
           <p style={{ color: C.textSoft, fontSize: 15, fontWeight: 500 }}>Loading your data...</p>
         </div>
-       ) : <Dashboard user={user} donations={donations} activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} dataError={dataError} isUserAdmin={isUserAdmin} />}
+       ) : <Dashboard user={user} donations={donations} activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} dataError={dataError} isUserAdmin={isUserAdmin} sheetData={sheetData} />}
     </>
   );
 }
@@ -1916,7 +2121,7 @@ function TeamOrgCard({ orgName, isExpanded, onToggle, fetchedImages, fetchedDesc
   );
 }
 
-function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataError, isUserAdmin }) {
+function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataError, isUserAdmin, sheetData }) {
   const [expandedOrgs, setExpandedOrgs] = useState(new Set());
   const [imgErrors, setImgErrors] = useState({});
   const [fetchedImages, setFetchedImages] = useState({});
@@ -1992,15 +2197,22 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
   });
 
   // Team data — aggregate totals only (no individual breakdowns for privacy)
+  // Uses shared sheet donations if available, otherwise falls back to DEMO_DATA
   const teamData = useMemo(() => {
     let teamTotal = 0;
     const teamOrgs = new Set();
-    const memberCount = Object.keys(DEMO_DATA).length;
-    Object.values(DEMO_DATA).forEach(dons => {
-      dons.forEach(d => {
-        teamTotal += d.allocatedAmount;
-        teamOrgs.add(d.orgName);
-      });
+    const sheetDons = loadDonations();
+    let memberCount, allDons;
+    if (sheetDons && sheetDons.length > 0) {
+      memberCount = new Set(sheetDons.map(d => d.email)).size;
+      allDons = sheetDons;
+    } else {
+      memberCount = Object.keys(DEMO_DATA).length;
+      allDons = Object.values(DEMO_DATA).flat();
+    }
+    allDons.forEach(d => {
+      teamTotal += d.allocatedAmount;
+      teamOrgs.add(d.orgName);
     });
     // Deduplicate variant org names (MSF variants → Doctors Without Borders)
     const deduped = new Set();
@@ -2018,7 +2230,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
     // Sort categories by number of orgs (descending), then alphabetically
     const sortedCategories = Object.entries(orgsByCategory).sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
     return { teamTotal, memberCount, orgCount: deduped.size, orgsByCategory: sortedCategories };
-  }, []);
+  }, [sheetData]);
 
   const tabs = [
     { id: "overview", label: "Overview", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg> },
