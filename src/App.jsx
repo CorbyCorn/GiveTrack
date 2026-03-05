@@ -13,7 +13,7 @@ const USE_DEMO_DATA = true;
 
 // ─── GOOGLE SHEETS SYNC ─────────────────────────────────────
 // Replace DEPLOYMENT_ID with your Google Apps Script deployment URL
-const SHEET_URL = "__SHEET_URL_PLACEHOLDER__";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwf9zNPkHFLn6dEpmhC7JNlD07gMqJlLYhkbTQi6f79AHe5ECmnceDLanbkgyxDAjH5AA/exec";
 const SHEET_ENABLED = SHEET_URL !== "__SHEET_URL_PLACEHOLDER__";
 
 // Fetch all data from Google Sheet
