@@ -23,6 +23,55 @@ function useIsMobile(bp = 768) {
   return m;
 }
 
+// ─── SCROLL REVEAL ──────────────────────────────────────────
+
+function ScrollReveal({ children, delay = 0, style = {} }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.unobserve(el); } },
+      { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return (
+    <div ref={ref} style={{ ...style, opacity: visible ? 1 : 0, animation: visible ? `fadeSlideUp .5s ease ${delay}s both` : "none" }}>
+      {children}
+    </div>
+  );
+}
+
+// ─── IMAGE CENTERING ────────────────────────────────────────
+// Uses manual ORG_IMAGE_POS if set, otherwise smart default based on
+// image aspect ratio. Positions favor the upper portion where faces are,
+// while keeping enough room so scalps aren't clipped.
+const facePositionCache = {};
+function useFacePosition(src, manualPos) {
+  const [pos, setPos] = useState(manualPos || "center 20%");
+  useEffect(() => {
+    if (manualPos) { setPos(manualPos); return; }
+    if (!src) return;
+    if (facePositionCache[src]) { setPos(facePositionCache[src]); return; }
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const ratio = img.naturalWidth / img.naturalHeight;
+      let smart;
+      if (ratio < 0.85) smart = "center 15%";       // portrait — face near top
+      else if (ratio > 1.5) smart = "center 20%";    // wide landscape — face in upper fifth
+      else smart = "center 18%";                      // square-ish — face in upper portion
+      facePositionCache[src] = smart;
+      setPos(smart);
+    };
+    img.src = src;
+  }, [src, manualPos]);
+  return pos;
+}
+
 // ─── UTILITIES ────────────────────────────────────────────────
 
 const fmt = (n, currency = "$") => {
@@ -86,28 +135,28 @@ function getOrgColor(name) {
 // ─── ORG IMAGES ──────────────────────────────────────────────
 
 const ORG_IMAGES = {
-  "Save the Children": "https://plus.unsplash.com/premium_photo-1770394034525-2aa9baaabd5b?w=800&h=500&fit=crop&q=80",
+  "Save the Children": "https://plus.unsplash.com/premium_photo-1770394034525-2aa9baaabd5b?w=800&q=80",
   "Doctors Without Borders": "https://www.doctorswithoutborders.org/sites/default/files/styles/media_besides_text_666_520/public/MSF163911%28High%29_0.jpg",
   "Médecins Sans Frontières": "https://www.doctorswithoutborders.org/sites/default/files/styles/collection_block_desktop_666_519/public/image_base_media/2026/02/MSF358702.jpg",
   "Médecins sans Frontières": "https://www.doctorswithoutborders.org/sites/default/files/styles/collection_block_desktop_666_519/public/image_base_media/2026/02/MSF358702.jpg",
   "GiveWell": "https://assets.evidenceaction.org/web/images/_1280xAUTO_crop_center-center_none/ea-doctor.jpg",
-  "Sea Shepherd": "https://images.unsplash.com/photo-1610581950163-c37ae06c3a96?w=800&h=500&fit=crop&q=80",
+  "Sea Shepherd": "https://images.unsplash.com/photo-1610581950163-c37ae06c3a96?w=800&q=80",
   "Evidence Action": "https://assets.evidenceaction.org/web/images/_1280xAUTO_crop_center-center_none/ea-kids.jpg",
   "Open Door Legal": "https://opendoorlegal.org/wp-content/uploads/2019/08/claudia-for-web.jpg",
   "Wholesome Wave": "https://images.squarespace-cdn.com/content/v1/5febb5b1df316630764c4dec/1b65a895-6b11-4898-b025-f7e397195b1c/ww-little-girl-eating-watermelon.png",
-  "Room to Read": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=500&fit=crop&q=80",
+  "Room to Read": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80",
   "Asylum Access": "https://asylumaccess.org/wp-content/uploads/2025/05/AAE201609-Skoll-GabrielDiamond1-1ahaje.jpg",
   "School on Wheels": "https://schoolonwheels.org/wp-content/uploads/2026/02/jordan-and-anne.jpg",
-  "Malaria Consortium": "https://images.unsplash.com/photo-1694286068362-5dcea7ed282a?w=800&h=500&fit=crop&q=80",
+  "Malaria Consortium": "https://images.unsplash.com/photo-1694286068362-5dcea7ed282a?w=800&q=80",
   "The Washing Machine Project": "https://images.squarespace-cdn.com/content/v1/61aa260eae89d2514d87e72a/97bd3be0-03a9-4a2f-b1b8-00bcdb61d495/uganda24-hand-wash-young-lady_DPI300.jpg",
   "Action Against Hunger": "https://www.actionagainsthunger.org/app/themes/actionagainsthunger/assets/images/aah-og.jpg",
-  "Clean Ocean Action": "https://images.unsplash.com/photo-1583749063749-423914dce445?w=800&h=500&fit=crop&q=80",
+  "Clean Ocean Action": "https://images.unsplash.com/photo-1583749063749-423914dce445?w=800&q=80",
   "Middle East Children's Alliance": "https://www.mecaforpeace.org/wp-content/uploads/2024/12/DSC04045-scaled.jpg",
-  "Oceana": "https://images.unsplash.com/photo-1676186013887-fa1c4c658274?w=800&h=500&fit=crop&q=80",
-  "WWF": "https://images.unsplash.com/photo-1535759802691-bf5a6cfe6ce9?w=800&h=500&fit=crop&q=80",
-  "En Ptahy Vidchui": "https://plus.unsplash.com/premium_photo-1663126366512-62a1e0494bad?w=800&h=500&fit=crop&q=80",
+  "Oceana": "https://images.unsplash.com/photo-1676186013887-fa1c4c658274?w=800&q=80",
+  "WWF": "https://images.unsplash.com/photo-1535759802691-bf5a6cfe6ce9?w=800&q=80",
+  "En Ptahy Vidchui": "https://plus.unsplash.com/premium_photo-1663126366512-62a1e0494bad?w=800&q=80",
   "Give To IV": "https://give.intervarsity.org/themes/custom/donate/images/meta_img/metatag.jpg",
-  "NCCHC Foundation": "https://images.unsplash.com/photo-1617565980755-d57f254b0ba7?w=800&h=500&fit=crop&q=80",
+  "NCCHC Foundation": "https://ncchcfoundation.org/wp-content/uploads/2024-Foundation-Home-Pg-Banner-1920x700_c.jpg",
   "Radiance SF": "https://images.squarespace-cdn.com/content/v1/683e4d39bcde3364772e61ad/b0420a5e-6c73-461e-b4f2-457cc659ccc4/SHK_1720+%281%29.jpg",
   "Reality SF": "https://realitysf.com/wp-content/uploads/2024/08/20240504-Food_Pantry_-08-1024x683.jpg",
   "SFHS": "https://saintfrancishigh.static.amais.com/Hero_Banner_Student_Community-49-Page-Image_157.webp?version=638823013438500000",
@@ -121,22 +170,22 @@ const ORG_IMAGE_POS = {
   "Médecins sans Frontières": "30% 30%",
   "GiveWell": "40% 30%",                  // healthcare worker examining patient
   "Sea Shepherd": "center 40%",            // dramatic ocean waves
-  "Evidence Action": "center 40%",        // row of children's faces centered
+  "Evidence Action": "30% center",         // row of children's faces, front faces left
   "Open Door Legal": "center 25%",        // woman portrait, face upper center
-  "Wholesome Wave": "center 20%",         // little girl eating watermelon
+  "Wholesome Wave": "center center",       // little girl eating watermelon, tight crop
   "Room to Read": "center 30%",           // children in classroom
   "Asylum Access": "center 30%",          // two women smiling together
-  "School on Wheels": "center 25%",       // volunteer tutoring child
-  "Malaria Consortium": "60% 25%",        // health worker feeding child in Africa
+  "School on Wheels": "center 20%",        // volunteer tutoring child, faces at top
+  "Malaria Consortium": "55% 30%",         // health worker feeding child in Africa
   "The Washing Machine Project": "center 20%", // young woman hand-washing
-  "Action Against Hunger": "60% 30%",     // mother in orange with baby
+  "Action Against Hunger": "65% 20%",      // mother in orange with baby, right side
   "Clean Ocean Action": "center center",  // clean coastline
   "Middle East Children's Alliance": "center 35%", // MECA workers with children
   "Oceana": "center center",              // coral reef underwater
   "WWF": "center center",                 // African wildlife safari
   "En Ptahy Vidchui": "center 30%",       // three men with Ukraine aid box
   "Give To IV": "center 25%",             // five young people arms around each other
-  "NCCHC Foundation": "center 20%",       // medical professional smiling
+  "NCCHC Foundation": "65% top",             // woman with thumbs up, right-center of banner
   "Radiance SF": "center 30%",            // women on stage at gathering
   "Reality SF": "center 30%",             // volunteers at food pantry
   "SFHS": "center 30%",                   // SFHS students smiling together
@@ -251,6 +300,25 @@ const ORG_CATEGORIES = {
   "Middle East Children's Alliance": "Children & Youth",
 };
 
+// Fallback images by category — used when an org has no hardcoded or scraped image
+// Unsplash crop=faces auto-centers on detected faces in the photo
+const CATEGORY_FALLBACK_IMAGES = {
+  "Children & Youth": "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800&h=800&fit=crop&crop=faces&q=80",
+  "Healthcare": "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&h=800&fit=crop&crop=faces&q=80",
+  "Global Health": "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?w=800&h=800&fit=crop&crop=faces&q=80",
+  "Education": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800&h=800&fit=crop&crop=faces&q=80",
+  "Ocean Conservation": "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800&h=800&fit=crop&q=80",
+  "Food Access": "https://images.unsplash.com/photo-1593113598332-cd288d649433?w=800&h=800&fit=crop&crop=faces&q=80",
+  "Food Security": "https://images.unsplash.com/photo-1593113598332-cd288d649433?w=800&h=800&fit=crop&crop=faces&q=80",
+  "Human Rights": "https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=800&h=800&fit=crop&crop=faces&q=80",
+  "Humanitarian": "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=800&h=800&fit=crop&crop=faces&q=80",
+  "Legal Aid": "https://images.unsplash.com/photo-1591522810850-58128c5f1a26?w=800&h=800&fit=crop&crop=faces&q=80",
+  "Wildlife": "https://images.unsplash.com/photo-1474511320723-9a56873571b7?w=800&h=800&fit=crop&q=80",
+  "Effective Giving": "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800&h=800&fit=crop&crop=faces&q=80",
+  "Community": "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=800&h=800&fit=crop&crop=faces&q=80",
+  "_default": "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800&h=800&fit=crop&crop=faces&q=80",
+};
+
 const ORG_DESCRIPTIONS = {
   "Save the Children": "Working to improve the lives of children through better education, health care, and economic opportunities.",
   "Doctors Without Borders": "Providing independent, impartial medical humanitarian assistance to people affected by conflict, epidemics, and disasters.",
@@ -277,6 +345,34 @@ const ORG_DESCRIPTIONS = {
   "Radiance SF": "Empowering women in San Francisco through community, mentorship, and professional development.",
   "Reality SF": "Serving the San Francisco community through food pantries, housing support, and neighborhood care.",
   "SFHS": "Providing Catholic college-preparatory education that develops the whole person in faith, intellect, and character.",
+};
+
+const ORG_LONG_DESCRIPTIONS = {
+  "Save the Children": "Save the Children has been at the forefront of child welfare since 1919, operating in over 100 countries. They respond to emergencies, deliver innovative development programs, and advocate for children's rights. Their work spans education, health, nutrition, and child protection — giving every child the best chance for a healthy, fulfilling future.",
+  "Doctors Without Borders": "Founded in 1971, Doctors Without Borders (MSF) delivers emergency medical care in over 70 countries. Their teams — doctors, nurses, and logisticians — respond to armed conflicts, epidemics, natural disasters, and healthcare exclusion. Operating independently of political, economic, or religious influence, MSF treats millions of patients each year.",
+  "Médecins Sans Frontières": "Founded in 1971, Doctors Without Borders (MSF) delivers emergency medical care in over 70 countries. Their teams — doctors, nurses, and logisticians — respond to armed conflicts, epidemics, natural disasters, and healthcare exclusion. Operating independently of political, economic, or religious influence, MSF treats millions of patients each year.",
+  "Médecins sans Frontières": "Founded in 1971, Doctors Without Borders (MSF) delivers emergency medical care in over 70 countries. Their teams — doctors, nurses, and logisticians — respond to armed conflicts, epidemics, natural disasters, and healthcare exclusion. Operating independently of political, economic, or religious influence, MSF treats millions of patients each year.",
+  "GiveWell": "GiveWell conducts rigorous research to find the most cost-effective charities in the world. Rather than rating organizations on overhead or popularity, they analyze the actual impact per dollar — tracking lives saved, diseases prevented, and economic gains. Since 2007, they've directed over $1 billion to high-impact interventions in global health and poverty.",
+  "Sea Shepherd": "Sea Shepherd Conservation Society uses direct-action tactics to defend marine wildlife and habitats worldwide. Founded in 1977, they patrol the oceans to combat illegal fishing, poaching, and habitat destruction. Their fleet of ships has intervened against whaling operations, shark finning, and illegal trawling across every ocean.",
+  "Evidence Action": "Evidence Action bridges the gap between research and implementation, scaling programs that rigorous evidence shows are effective. Their flagship programs include mass deworming treatments reaching over 300 million people annually and safe water initiatives serving millions across Africa and Asia. Every program they run is backed by randomized controlled trials.",
+  "Open Door Legal": "Open Door Legal is the nation's first civil right-to-counsel organization, providing free legal services to all low-income residents of San Francisco. They handle housing, immigration, public benefits, and consumer protection cases — ensuring that justice isn't reserved for those who can afford a lawyer. They've served thousands of families since 2012.",
+  "Wholesome Wave": "Wholesome Wave increases access to fresh, healthy food for underserved communities by making fruits and vegetables more affordable. Their programs double the value of federal nutrition benefits at farmers' markets, ensuring that families on SNAP and WIC can bring home twice as much produce. They've operated in hundreds of sites across the United States.",
+  "Room to Read": "Room to Read transforms the lives of children in low-income communities through literacy and gender equality in education. They've established over 40,000 libraries, published more than 1,700 original children's book titles in local languages, and supported tens of thousands of girls through secondary school. They operate across Asia and Africa.",
+  "Asylum Access": "Asylum Access works in transit countries where refugees face exploitation and legal limbo. They provide direct legal aid, train local lawyers, and advocate for policy changes that give refugees the right to work, attend school, and move freely. Operating across Latin America, Africa, and Asia, they're reshaping how the world treats displaced people.",
+  "School on Wheels": "School on Wheels provides free one-on-one tutoring and mentoring for children living in shelters, motels, vehicles, and other temporary housing. Every week, their volunteers meet with students to help with homework, build confidence, and provide stability. They also distribute backpacks filled with school supplies and books to children in need.",
+  "Malaria Consortium": "Malaria Consortium is a leading non-profit specializing in the prevention, control, and treatment of malaria and other communicable diseases. Their seasonal malaria chemoprevention program alone protects millions of children in West and Central Africa each year. Rated as one of GiveWell's top charities, they consistently demonstrate exceptional cost-effectiveness.",
+  "The Washing Machine Project": "The Washing Machine Project designs and distributes hand-powered, off-grid washing machines to communities displaced by conflict and natural disaster. Their machines reduce the 20+ hours per week that women and girls in refugee camps spend hand-washing clothes — freeing time for education, work, and rest. They operate in camps across East Africa and the Middle East.",
+  "Action Against Hunger": "Action Against Hunger has been saving the lives of malnourished children and providing communities with access to safe water and sustainable solutions to hunger since 1979. They operate in nearly 50 countries, treating severe acute malnutrition, building water systems, and supporting livelihoods — reaching over 28 million people annually.",
+  "Clean Ocean Action": "Clean Ocean Action is a broad-based coalition dedicated to improving the water quality of the marine waters off the New Jersey and New York coast. Through research, education, and citizen action programs including their famous beach sweeps, they've engaged hundreds of thousands of volunteers in protecting the coast and marine ecosystems.",
+  "Middle East Children's Alliance": "The Middle East Children's Alliance provides direct aid to children and families in Palestine and Lebanon, funding community-based projects in health, education, and emergency relief. They deliver clean water systems, build playgrounds, and sponsor programs that help children process trauma through art and storytelling.",
+  "Oceana": "Oceana is the largest international advocacy organization focused solely on ocean conservation. They win policy victories that reduce pollution, prevent overfishing, and protect marine habitats. Since 2001, their campaigns have protected over 4.5 million square miles of ocean and helped set catch limits on fish populations across the globe.",
+  "WWF": "The World Wildlife Fund is one of the world's largest conservation organizations, working in nearly 100 countries. They protect critical habitats, combat wildlife trafficking, and push for sustainable practices in agriculture, fisheries, and energy. Their initiatives span from saving endangered species to fighting climate change and preserving forests.",
+  "En Ptahy Vidchui": "En Ptahy Vidchui (Birds of Responsibility) provides humanitarian aid to communities affected by the conflict in Ukraine. They coordinate emergency supplies, support displaced families, and help rebuild community infrastructure in war-affected regions. Their grassroots approach ensures aid reaches those most in need quickly and directly.",
+  "Give To IV": "InterVarsity supports campus ministries at hundreds of colleges and universities, helping students explore questions of faith, justice, and purpose. Through small groups, retreats, and service projects, they develop the next generation of thoughtful leaders. Their Urbana conference is one of the largest missions gatherings in North America.",
+  "NCCHC Foundation": "The NCCHC Foundation advances the quality of health care in correctional facilities — jails, prisons, and juvenile detention centers. Through accreditation programs, education, and research, they set the standard for how incarcerated individuals receive medical, mental health, and dental care. They believe health care is a right, not a privilege.",
+  "Radiance SF": "Radiance SF empowers women in San Francisco through mentorship circles, community gatherings, and professional development programs. They create spaces where women support each other through life transitions, career challenges, and personal growth. Their approach combines spiritual formation with practical skill-building.",
+  "Reality SF": "Reality SF serves the San Francisco community through weekly food pantries, housing assistance, and neighborhood care programs. They partner with local organizations to address homelessness, food insecurity, and social isolation. Their community dinners bring together people from all walks of life in the city.",
+  "SFHS": "Saint Francis High School provides Catholic college-preparatory education in the heart of the Bay Area. They develop the whole person through rigorous academics, athletics, and community service — preparing students to be compassionate leaders. Their commitment to character formation shapes young people of faith, intellect, and purpose.",
 };
 
 const ORG_WEBSITES = {
@@ -382,7 +478,12 @@ const DEMO_DATA = {
 
 // ─── LOCAL STORAGE DATA LAYER ─────────────────────────────────
 
-const INITIAL_ADMINS = ["courtney@isara.io"];
+const INITIAL_ADMINS = [
+  "courtney@isara.io", "edward@isara.io", "amy@isara.io", "ben@isara.io",
+  "bernie@isara.io", "ed@isara.io", "peter@isara.io", "jerry@isara.io",
+  "rowan@isara.io", "sam@isara.io", "artur@isara.io", "lily@isara.io",
+  "ranah@isara.io",
+];
 
 const EMPLOYEE_NAMES = {
   "courtney@isara.io": "Courtney Leung", "edward@isara.io": "Edward Kang",
@@ -404,7 +505,10 @@ function saveStorage(key, value) {
 
 function loadAdmins() { return loadStorage("givetrack_admins", INITIAL_ADMINS); }
 function saveAdmins(list) { saveStorage("givetrack_admins", list); }
-function checkIsAdmin(email) { return loadAdmins().includes(email?.toLowerCase()); }
+function checkIsAdmin(email) {
+  const e = email?.toLowerCase();
+  return INITIAL_ADMINS.includes(e) || loadAdmins().includes(e);
+}
 
 function loadBudgets() { return loadStorage("givetrack_employee_budgets", {}); }
 function saveBudgets(b) { saveStorage("givetrack_employee_budgets", b); }
@@ -583,43 +687,44 @@ const GLOBAL_CSS = `
   @keyframes breathe { 0%,100% { opacity:0.6; } 50% { opacity:1; } }
   @keyframes shine { 0% { transform:translateX(-100%); } 100% { transform:translateX(200%); } }
   @keyframes gentlePulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.015); } }
+  @keyframes scaleIn { from { opacity:0; transform:scale(0.92) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
   * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#FAF7F0; color:#222520; -webkit-font-smoothing:antialiased; }
+  body { font-family:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#F5F0E8; color:#2C2416; -webkit-font-smoothing:antialiased; }
   ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:rgba(34,37,32,0.15); border-radius:3px; }
-  ::selection { background:rgba(255,202,10,0.25); }
+  ::-webkit-scrollbar-thumb { background:rgba(139,119,90,0.20); border-radius:3px; }
+  ::selection { background:rgba(212,168,83,0.25); }
   img { -webkit-user-drag:none; }
 `;
 
 const C = {
-  bg: "#FAF7F0",
-  card: "#ffffff",
-  cardBorder: "rgba(34,37,32,0.08)",
-  cardShadow: "0 2px 8px rgba(34,37,32,0.06), 0 1px 3px rgba(34,37,32,0.04)",
-  cardHover: "0 8px 28px rgba(34,37,32,0.1)",
-  text: "#222520",
-  textSoft: "#555850",
-  textMuted: "#8A8D85",
-  accent: "#FFCA0A",
-  accentDark: "#E0A800",
-  accentLight: "#FFF8E0",
-  accentSoft: "rgba(255,202,10,0.08)",
-  warm: "#E07A30",
-  warmLight: "#FFF4E8",
-  divider: "rgba(34,37,32,0.08)",
-  navy: "#007888",
+  bg: "#F5F0E8",
+  card: "#FFFDF8",
+  cardBorder: "rgba(139,119,90,0.15)",
+  cardShadow: "0 2px 8px rgba(120,100,70,0.14), 0 1px 3px rgba(120,100,70,0.10)",
+  cardHover: "0 8px 28px rgba(120,100,70,0.24), 0 2px 8px rgba(120,100,70,0.14)",
+  text: "#2C2416",
+  textSoft: "#5C4F3A",
+  textMuted: "#9A8E78",
+  accent: "#D4A853",
+  accentDark: "#B8913A",
+  accentLight: "#FAF0D8",
+  accentSoft: "rgba(212,168,83,0.10)",
+  warm: "#C4693A",
+  warmLight: "#FBF0E0",
+  divider: "rgba(139,119,90,0.12)",
+  navy: "#3D7A6A",
 };
 
 const glass = {
-  background: "#ffffff",
-  borderRadius: 8,
+  background: C.card,
+  borderRadius: 6,
   border: `1px solid ${C.cardBorder}`,
   boxShadow: C.cardShadow,
 };
 
 // ─── COMPONENTS ───────────────────────────────────────────────
 
-function AnimatedNumber({ value, currency = "$", duration = 900 }) {
+function AnimatedNumber({ value, currency = "$", duration = 900, isCount = false }) {
   const [display, setDisplay] = useState(0);
   const startRef = useRef(null), fromRef = useRef(0);
   useEffect(() => {
@@ -632,6 +737,7 @@ function AnimatedNumber({ value, currency = "$", duration = 900 }) {
     };
     requestAnimationFrame(animate);
   }, [value]);
+  if (isCount) return <>{Math.round(display)}</>;
   return <>{fmt(display, currency)}</>;
 }
 
@@ -783,7 +889,7 @@ function DonateTab({ userEmail }) {
           </div>
         </div>
         {isLocked && (
-          <div style={{ marginTop: 16, padding: "12px 16px", background: "rgba(34,37,32,0.06)", borderRadius: 4, display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ marginTop: 16, padding: "12px 16px", background: "rgba(139,119,90,0.08)", borderRadius: 4, display: "flex", alignItems: "center", gap: 10 }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.textMuted} strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             <span style={{ fontSize: 14, color: C.textSoft }}>This cycle's deadline has passed. Your allocations are locked.</span>
           </div>
@@ -818,7 +924,7 @@ function DonateTab({ userEmail }) {
                     updateRow(idx, "paidTo", url);
                   }}
                   disabled={isLocked}
-                  style={{ width: m ? "100%" : 320, padding: "10px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, background: "#fff", color: C.text, fontFamily: "'Montserrat',sans-serif", cursor: isLocked ? "not-allowed" : "pointer" }}>
+                  style={{ width: m ? "100%" : 320, padding: "10px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, background: C.card, color: C.text, fontFamily: "'Montserrat',sans-serif", cursor: isLocked ? "not-allowed" : "pointer" }}>
                   <option value="">Select an organization...</option>
                   {ALL_KNOWN_ORGS.map(name => (
                     <option key={name} value={name}>{name}</option>
@@ -933,7 +1039,7 @@ function ReceiptModal({ src, fileName, onClose }) {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", animation: "fadeIn .2s ease" }}
       onClick={onClose}>
-      <div style={{ background: "#fff", borderRadius: 8, padding: 24, maxWidth: 600, maxHeight: "80vh", overflow: "auto", position: "relative" }}
+      <div style={{ background: C.card, borderRadius: 8, padding: 24, maxWidth: 600, maxHeight: "80vh", overflow: "auto", position: "relative" }}
         onClick={e => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
           <span style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{fileName || "Receipt"}</span>
@@ -1042,7 +1148,7 @@ function AdminTracker({ selectedCycleId, onTrackerChange }) {
       {viewReceipt && <ReceiptModal src={viewReceipt.src} fileName={viewReceipt.name} onClose={() => setViewReceipt(null)} />}
       <div style={{ ...glass, overflow: "hidden", overflowX: m ? "auto" : "hidden" }}>
         {/* Header */}
-        <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 100px 50px 110px 90px", padding: "12px 20px", borderBottom: `1px solid ${C.divider}`, background: "rgba(34,37,32,0.02)" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 100px 50px 110px 90px", padding: "12px 20px", borderBottom: `1px solid ${C.divider}`, background: "rgba(139,119,90,0.03)" }}>
           {["Employee", "Organization", "Amount", "Paid", "Date Paid", "Receipt"].map(h => (
             <div key={h} style={{ fontSize: 11, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600 }}>{h}</div>
           ))}
@@ -1058,7 +1164,7 @@ function AdminTracker({ selectedCycleId, onTrackerChange }) {
             const isLastInGroup = ri === group.rows.length - 1;
             return (
               <div key={`${row.email}-${row.orgName}`}>
-                <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 100px 50px 110px 90px", padding: "12px 20px", borderBottom: isLastInGroup ? "none" : `1px solid ${C.divider}`, alignItems: "center", background: gi % 2 === 1 ? "rgba(34,37,32,0.015)" : "transparent" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 100px 50px 110px 90px", padding: "12px 20px", borderBottom: isLastInGroup ? "none" : `1px solid ${C.divider}`, alignItems: "center", background: gi % 2 === 1 ? "rgba(139,119,90,0.02)" : "transparent" }}>
               <div style={{ fontSize: 14, fontWeight: showName ? 600 : 400, color: showName ? C.text : "transparent" }}>{row.name}</div>
               <div style={{ fontSize: 14, color: C.textSoft }}>
                 {row.paidTo ? (
@@ -1094,7 +1200,7 @@ function AdminTracker({ selectedCycleId, onTrackerChange }) {
                 </div>
                 {/* Subtotal row after last item in group */}
                 {isLastInGroup && (
-                  <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 100px 50px 110px 90px", padding: "8px 20px", borderBottom: `2px solid ${C.divider}`, alignItems: "center", background: gi % 2 === 1 ? "rgba(34,37,32,0.03)" : "rgba(34,37,32,0.02)" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 100px 50px 110px 90px", padding: "8px 20px", borderBottom: `2px solid ${C.divider}`, alignItems: "center", background: gi % 2 === 1 ? "rgba(139,119,90,0.04)" : "rgba(139,119,90,0.03)" }}>
                     <div />
                     <div style={{ fontSize: 13, fontWeight: 600, color: C.textMuted, textAlign: "right", paddingRight: 12 }}>Subtotal</div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: C.navy }}>{fmt(groupTotal, group.currency)}</div>
@@ -1115,7 +1221,7 @@ function AdminTracker({ selectedCycleId, onTrackerChange }) {
             <span style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Total: {fmt(totalAmt)}</span>
           </div>
         ) : (
-          <div style={{ padding: "16px 20px", borderTop: `1px solid ${C.divider}`, display: "flex", justifyContent: "space-between", background: "rgba(34,37,32,0.02)" }}>
+          <div style={{ padding: "16px 20px", borderTop: `1px solid ${C.divider}`, display: "flex", justifyContent: "space-between", background: "rgba(139,119,90,0.03)" }}>
             <span style={{ fontSize: 14, color: C.textSoft }}>{paidCount} of {rows.length} donations paid</span>
             <span style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Total: {fmt(totalAmt)}</span>
           </div>
@@ -1158,7 +1264,7 @@ function AdminBudgets() {
 
   return (
     <div style={{ ...glass, overflow: "hidden", overflowX: m ? "auto" : "hidden" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 140px 80px 80px", padding: "12px 20px", borderBottom: `1px solid ${C.divider}`, background: "rgba(34,37,32,0.02)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 140px 80px 80px", padding: "12px 20px", borderBottom: `1px solid ${C.divider}`, background: "rgba(139,119,90,0.03)" }}>
         {["Employee", "Email", "Budget/Cycle", "Currency", ""].map(h => (
           <div key={h} style={{ fontSize: 11, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600 }}>{h}</div>
         ))}
@@ -1183,7 +1289,7 @@ function AdminBudgets() {
         </div>
       ))}
       {/* Add employee row */}
-      <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 140px 80px 80px", padding: "12px 20px", background: "rgba(34,37,32,0.02)", alignItems: "center", gap: 8 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 140px 80px 80px", padding: "12px 20px", background: "rgba(139,119,90,0.03)", alignItems: "center", gap: 8 }}>
         <input type="text" placeholder="Name" value={newName} onChange={e => setNewName(e.target.value)}
           style={{ padding: "6px 10px", fontSize: 13, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
         <input type="email" placeholder="email@isara.io" value={newEmail} onChange={e => setNewEmail(e.target.value)}
@@ -1201,7 +1307,7 @@ function AdminBudgets() {
 }
 
 function AdminManagement({ currentEmail }) {
-  const [admins, setAdmins] = useState(loadAdmins());
+  const [admins, setAdmins] = useState(() => [...new Set([...INITIAL_ADMINS, ...loadAdmins()])]);
   const [newAdmin, setNewAdmin] = useState("");
 
   const addAdmin = () => {
@@ -1214,6 +1320,7 @@ function AdminManagement({ currentEmail }) {
 
   const removeAdmin = (email) => {
     if (email === currentEmail) return;
+    if (INITIAL_ADMINS.includes(email)) return; // can't remove hardcoded admins
     const updated = admins.filter(a => a !== email);
     saveAdmins(updated);
     setAdmins(updated);
@@ -1505,7 +1612,7 @@ function GlobeTab({ donations, userEmail }) {
       </div>
 
       <div ref={containerRef} style={{ background: "#1a3a3a", borderRadius: 8, overflow: "hidden", position: "relative", minHeight: Math.round(containerWidth * 0.7) }}>
-        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 40%, rgba(0,180,180,0.10) 0%, rgba(0,120,136,0.05) 40%, transparent 70%)", pointerEvents: "none", zIndex: 1 }} />
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 40%, rgba(61,122,106,0.10) 0%, rgba(61,122,106,0.05) 40%, transparent 70%)", pointerEvents: "none", zIndex: 1 }} />
         {!globeReady && !fetchError && (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, zIndex: 5 }}>
             <div style={{ width: 28, height: 28, border: "2px solid rgba(255,255,255,0.1)", borderTop: "2px solid rgba(255,255,255,0.6)", borderRadius: "50%", animation: "spin .8s linear infinite" }} />
@@ -1537,7 +1644,7 @@ function GlobeTab({ donations, userEmail }) {
             polygonStrokeColor={() => "rgba(0,220,210,0.2)"}
             polygonLabel={d => {
               const name = d.properties.name || "Unknown";
-              return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(34,37,32,0.12);border-radius:6px;padding:8px 14px;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-family:'Montserrat',sans-serif;"><div style="font-size:14px;color:#222520;font-weight:500;">${name}</div></div>`;
+              return `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(139,119,90,0.15);border-radius:6px;padding:8px 14px;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-family:'Montserrat',sans-serif;"><div style="font-size:14px;color:#2C2416;font-weight:500;">${name}</div></div>`;
             }}
             onPolygonClick={d => { const code = getAlpha3(d); const c = code && COUNTRY_CENTROIDS[code]; const data = code && countryData[code]; if (c) focusPoint(c.lat, c.lng, data ? { name: d.properties.name || code, orgs: data.orgs, total: data.total, color: LIGHT_COLORS[code] || "#fbbf24", isOcean: false } : null); }}
             onPolygonHover={() => {}} polygonsTransitionDuration={100}
@@ -1554,7 +1661,7 @@ function GlobeTab({ donations, userEmail }) {
             arcDashAnimateTime={1200}
             arcAltitudeAutoScale={0.4}
             onArcClick={d => focusPoint(d.endLat, d.endLng, { name: d.name, orgs: d.orgs, total: d.total, color: d.color, isOcean: d.isOcean })}
-            arcLabel={d => `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(34,37,32,0.12);border-radius:6px;padding:8px 14px;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-family:'Montserrat',sans-serif;"><div style="font-size:14px;color:#222520;font-weight:500;">${d.name}</div></div>`}
+            arcLabel={d => `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1px solid rgba(139,119,90,0.15);border-radius:6px;padding:8px 14px;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-family:'Montserrat',sans-serif;"><div style="font-size:14px;color:#2C2416;font-weight:500;">${d.name}</div></div>`}
             ringsData={showData ? oceanRingsData : []}
             ringLat={d => d.lat}
             ringLng={d => d.lng}
@@ -1582,7 +1689,7 @@ function GlobeTab({ donations, userEmail }) {
           const topOrgImg = topOrg ? ORG_IMAGES[topOrg] : null;
           const topOrgPos = topOrg ? (ORG_IMAGE_POS[topOrg] || "center center") : "center center";
           return (
-          <div style={{ position: "absolute", top: m ? 10 : 20, right: m ? 10 : 20, left: m ? 10 : "auto", zIndex: 10, background: "#fff", border: "1px solid rgba(34,37,32,0.08)", borderRadius: 8, overflow: "hidden", minWidth: 240, maxWidth: m ? "calc(100vw - 40px)" : 320, boxShadow: "0 4px 16px rgba(0,0,0,0.15)", fontFamily: "'Montserrat',sans-serif", animation: "fadeSlideUp .3s ease" }}>
+          <div style={{ position: "absolute", top: m ? 10 : 20, right: m ? 10 : 20, left: m ? 10 : "auto", zIndex: 10, background: C.card, border: "1px solid rgba(139,119,90,0.10)", borderRadius: 8, overflow: "hidden", minWidth: 240, maxWidth: m ? "calc(100vw - 40px)" : 320, boxShadow: "0 4px 16px rgba(0,0,0,0.15)", fontFamily: "'Montserrat',sans-serif", animation: "scaleIn .25s cubic-bezier(.34,1.56,.64,1)" }}>
             {topOrgImg ? (
               <div style={{ width: "100%", height: 160, overflow: "hidden", position: "relative" }}>
                 <img src={topOrgImg} alt={topOrg} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: topOrgPos, display: "block" }} />
@@ -1598,19 +1705,19 @@ function GlobeTab({ donations, userEmail }) {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
               <div>
                 <div style={{ fontSize: 12, color: selectedPoint.color, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 500, marginBottom: 4 }}>{selectedPoint.isOcean ? "Ocean Conservation" : "Country"}</div>
-                <div style={{ fontSize: 20, fontWeight: 600, color: "#222520", fontFamily: "'Playfair Display',Georgia,serif" }}>{selectedPoint.name}</div>
+                <div style={{ fontSize: 20, fontWeight: 600, color: "#2C2416", fontFamily: "'Playfair Display',Georgia,serif" }}>{selectedPoint.name}</div>
               </div>
               <button onClick={() => setSelectedPoint(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: "2px 6px", fontSize: 18, color: "#8A8D85", lineHeight: 1 }}>&times;</button>
             </div>
             <div style={{ marginBottom: 14 }}>
               {Object.entries(selectedPoint.orgs).sort((a, b) => b[1] - a[1]).map(([org, amt]) => (
-                <div key={org} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, padding: "7px 0", borderBottom: "1px solid rgba(34,37,32,0.08)" }}>
+                <div key={org} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, padding: "7px 0", borderBottom: "1px solid rgba(139,119,90,0.10)" }}>
                   <span style={{ fontSize: 14, color: "#555850" }}>{org}</span>
-                  <span style={{ fontSize: 14, color: "#222520", fontWeight: 600, whiteSpace: "nowrap" }}>{fmt(amt)}</span>
+                  <span style={{ fontSize: 14, color: "#2C2416", fontWeight: 600, whiteSpace: "nowrap" }}>{fmt(amt)}</span>
                 </div>
               ))}
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12, borderTop: "1px solid rgba(34,37,32,0.1)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12, borderTop: "1px solid rgba(139,119,90,0.12)" }}>
               <span style={{ fontSize: 12, color: "#8A8D85", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 500 }}>Total</span>
               <span style={{ fontSize: 20, fontWeight: 700, color: selectedPoint.color }}>{fmt(selectedPoint.total)}</span>
             </div>
@@ -1693,7 +1800,7 @@ function LoginScreen({ onLogin }) {
         <h1 style={{ fontSize: m ? 28 : 44, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700, color: C.text, margin: "0 0 12px", letterSpacing: "-0.03em" }}>GiveTrack</h1>
         <p style={{ color: C.textMuted, fontSize: 16, margin: m ? "0 0 28px" : "0 0 48px", fontWeight: 400, lineHeight: 1.6 }}>Track the impact of your generosity</p>
 
-        <div style={{ background: "#fff", borderRadius: 8, padding: m ? "28px 20px" : "48px 48px", border: `1px solid ${C.divider}` }}>
+        <div style={{ background: C.card, borderRadius: 6, padding: m ? "28px 20px" : "48px 48px", border: `1px solid ${C.cardBorder}` }}>
           <p style={{ color: C.textSoft, fontSize: 15, marginBottom: 36, fontWeight: 400, lineHeight: 1.7 }}>Sign in with your company Google account to view your charitable giving.</p>
           <div id="google-signin-btn" style={{ display: "flex", justifyContent: "center" }}></div>
           {error && <div style={{ color: "#dc2626", fontSize: 15, marginTop: 18, fontWeight: 500 }}>{error}</div>}
@@ -1753,10 +1860,68 @@ export default function App() {
 
 // ─── DASHBOARD ────────────────────────────────────────────────
 
+// ─── TEAM ORG CARD (component so it can use hooks) ───────────
+function TeamOrgCard({ orgName, isExpanded, onToggle, fetchedImages, fetchedDescs, allOrgUrls, imgErrors, setImgErrors, m }) {
+  const img = ORG_IMAGES[orgName] || fetchedImages[orgName];
+  const fallbackImg = CATEGORY_FALLBACK_IMAGES[ORG_CATEGORIES[orgName]] || CATEGORY_FALLBACK_IMAGES._default;
+  const displayImg = img && !imgErrors[orgName] ? img : fallbackImg;
+  const desc = ORG_DESCRIPTIONS[orgName] || fetchedDescs[orgName] || "";
+  const longDesc = ORG_LONG_DESCRIPTIONS[orgName] || desc;
+  const website = ORG_WEBSITES[orgName] || allOrgUrls[orgName];
+  const color = getOrgColor(orgName);
+  const categoryName = ORG_CATEGORIES[orgName];
+  // Face detection: use manual position if defined, otherwise auto-detect faces
+  const thumbPos = useFacePosition(displayImg, ORG_IMAGE_POS[orgName]);
+  const squarePos = useFacePosition(displayImg, ORG_IMAGE_POS[orgName]);
+  return (
+    <div style={{ borderRadius: 12, border: `1px solid ${isExpanded ? "rgba(61,122,106,0.25)" : C.divider}`, transition: "all .3s ease", background: isExpanded ? C.card : "rgba(255,253,248,0.4)", cursor: "pointer", overflow: "hidden", boxShadow: isExpanded ? "0 8px 32px rgba(120,100,70,0.15)" : "none" }}
+      onClick={onToggle}
+      onMouseEnter={e => { if (!isExpanded) { e.currentTarget.style.borderColor = "rgba(139,119,90,0.3)"; e.currentTarget.style.background = C.accentSoft; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(120,100,70,0.22), 0 2px 6px rgba(120,100,70,0.12)"; }}}
+      onMouseLeave={e => { if (!isExpanded) { e.currentTarget.style.borderColor = C.divider; e.currentTarget.style.background = "rgba(255,255,255,0.4)"; e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}}>
+      <div style={{ display: "flex", gap: 14, padding: "16px 18px", alignItems: "center" }}>
+        <div style={{ width: 52, height: 52, borderRadius: 12, overflow: "hidden", flexShrink: 0, background: `linear-gradient(135deg, ${color}22, ${color}44)` }}>
+          <img src={displayImg} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: thumbPos, opacity: 0, transition: "opacity .3s ease" }}
+            onLoad={e => { e.target.style.opacity = "1"; }}
+            onError={(e) => { e.target.style.display = "none"; setImgErrors(prev => ({ ...prev, [orgName]: true })); }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 4 }}>{orgName}</div>
+          {!isExpanded && <div style={{ fontSize: 13, color: C.textSoft, lineHeight: 1.5 }}>{desc}</div>}
+          {isExpanded && categoryName && <div style={{ fontSize: 11, fontWeight: 600, color: C.navy, textTransform: "uppercase", letterSpacing: ".08em" }}>{categoryName}</div>}
+        </div>
+        <div style={{ flexShrink: 0, alignSelf: "center", color: C.textMuted, opacity: 0.4, transition: "transform .25s", transform: isExpanded ? "rotate(90deg)" : "none" }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      {isExpanded && (
+        <div style={{ animation: "fadeSlideUp .25s ease" }} onClick={e => e.stopPropagation()}>
+          <div style={{ width: "100%", paddingBottom: "100%", position: "relative", overflow: "hidden", background: `linear-gradient(135deg, ${color}22, ${color}44)` }}>
+            <img src={displayImg} alt={orgName} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: squarePos, display: "block", opacity: 0, transition: "opacity .5s ease" }}
+              onLoad={e => { e.target.style.opacity = "1"; }} />
+          </div>
+          <div style={{ padding: m ? "18px 18px 20px" : "20px 22px 22px" }}>
+            <p style={{ fontSize: 14, color: C.textSoft, lineHeight: 1.75, margin: "0 0 16px" }}>{longDesc}</p>
+            {website && (
+              <a href={website} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 20px", background: C.navy, color: "#fff", borderRadius: 6, fontSize: 13, fontWeight: 600, textDecoration: "none", transition: "all .2s" }}
+                onMouseEnter={e => { e.currentTarget.style.background = "#005a66"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = C.navy; }}>
+                Visit {orgName.length > 25 ? "Website" : orgName}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataError, isUserAdmin }) {
   const [expandedOrgs, setExpandedOrgs] = useState(new Set());
   const [imgErrors, setImgErrors] = useState({});
   const [fetchedImages, setFetchedImages] = useState({});
+  const [fetchedDescs, setFetchedDescs] = useState({});
+  const [selectedTeamOrg, setSelectedTeamOrg] = useState(null);
   const m = useIsMobile();
 
   const totalDonated = donations.reduce((s, d) => s + d.allocatedAmount, 0);
@@ -1767,23 +1932,39 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
     if (d.paidTo?.startsWith("http")) orgUrls[d.orgName] = d.paidTo;
   });
 
-  // Auto-fetch og:image for orgs not in the hardcoded ORG_IMAGES map
+  // Collect ALL org URLs across entire team (not just current user)
+  const allOrgUrls = useMemo(() => {
+    const urls = { ...orgUrls };
+    Object.values(DEMO_DATA).forEach(dons => {
+      dons.forEach(d => { if (d.paidTo?.startsWith("http") && !urls[d.orgName]) urls[d.orgName] = d.paidTo; });
+    });
+    // Also check ORG_WEBSITES for anything missing
+    Object.entries(ORG_WEBSITES).forEach(([name, url]) => { if (!urls[name]) urls[name] = url; });
+    return urls;
+  }, []);
+
+  // Auto-fetch og:image + description for orgs not in hardcoded maps
   useEffect(() => {
-    const orgsNeedingImages = Object.keys(orgTotals).filter(
-      name => !ORG_IMAGES[name] && !fetchedImages[name] && orgUrls[name]
+    const orgsNeedingFetch = Object.keys(allOrgUrls).filter(
+      name => (!ORG_IMAGES[name] && !fetchedImages[name]) || (!ORG_DESCRIPTIONS[name] && !fetchedDescs[name])
     );
-    orgsNeedingImages.forEach(name => {
-      const url = orgUrls[name];
+    orgsNeedingFetch.forEach(name => {
+      const url = allOrgUrls[name];
+      if (!url) return;
       fetch(`/api/og-image?url=${encodeURIComponent(url)}`)
         .then(r => r.json())
         .then(data => {
-          if (data.image) {
-            setFetchedImages(prev => ({ ...prev, [name]: data.image }));
+          if (!ORG_IMAGES[name]) {
+            var bestImg = data.banner || data.image;
+            if (bestImg) setFetchedImages(prev => ({ ...prev, [name]: bestImg }));
+          }
+          if (data.description && !ORG_DESCRIPTIONS[name]) {
+            setFetchedDescs(prev => ({ ...prev, [name]: data.description }));
           }
         })
         .catch(() => {});
     });
-  }, [Object.keys(orgTotals).join(",")]);
+  }, [Object.keys(allOrgUrls).join(",")]);
   const orgCount = Object.keys(orgTotals).length;
   const months = sortMonths([...new Set(donations.map(d => d.month).filter(Boolean))]);
   const cycles = [...new Set(donations.map(d => d.cycle).filter(Boolean))];
@@ -1850,11 +2031,13 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg }}>
+    <div style={{ minHeight: "100vh", background: C.bg, position: "relative" }}>
+      {/* Paper grain texture */}
+      <div style={{ position: "fixed", inset: 0, opacity: 0.03, backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")", backgroundSize: "200px 200px", pointerEvents: "none", zIndex: 0 }} />
       {/* Header */}
       <header style={{ padding: m ? "12px 16px" : "16px 48px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.divider}`, background: C.bg, position: "sticky", top: 0, zIndex: 100 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ fontSize: 20, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700, color: C.text, letterSpacing: "-0.01em" }}>GiveTrack</span>
+          <span style={{ fontSize: 20, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700, color: C.text, letterSpacing: "0.01em" }}>GiveTrack</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
           {!m && <div style={{ textAlign: "right" }}>
@@ -1869,13 +2052,13 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
       </header>
 
       {/* STICKY TAB BAR — full width, below header */}
-      {donations.length > 0 && (
-        <nav style={{ position: "sticky", top: m ? 53 : 67, zIndex: 99, background: C.bg, borderBottom: `1px solid ${C.divider}` }}>
+      {(
+        <nav style={{ position: "sticky", top: m ? 53 : 67, zIndex: 99, background: C.bg, borderBottom: `1px solid ${C.divider}`, boxShadow: "0 1px 3px rgba(139,119,90,0.08)" }}>
           <div style={{ maxWidth: 1100, margin: "0 auto", padding: m ? "0 8px" : "0 32px", display: "flex", gap: 0, overflowX: "auto" }}>
             {tabs.map(t => (
               <button key={t.id} onClick={() => { setActiveTab(t.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
                 padding: m ? "12px 12px" : "14px 28px", background: "transparent", border: "none",
-                borderBottom: activeTab === t.id ? `2px solid ${C.text}` : "2px solid transparent",
+                borderBottom: activeTab === t.id ? `2px solid ${C.accent}` : "2px solid transparent",
                 color: activeTab === t.id ? C.text : C.textMuted, fontSize: m ? 11 : 13, fontWeight: activeTab === t.id ? 600 : 400,
                 cursor: "pointer", transition: "all .2s", marginBottom: -1, display: "flex", alignItems: "center", gap: m ? 4 : 8, whiteSpace: "nowrap",
                 letterSpacing: ".06em", textTransform: "uppercase",
@@ -1894,12 +2077,12 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
         <div style={{ position: "relative", height: m ? 380 : 620, overflow: "hidden", animation: "fadeSlideUp .5s ease" }}>
           <img src={HERO_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 40%", display: "block", filter: "saturate(1.1) contrast(1.08) brightness(1.02)" }}
             onError={e => { e.target.style.display = "none"; }} />
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(0,120,136,0.15) 0%, rgba(0,90,100,0.10) 50%, rgba(0,120,136,0.12) 100%)", mixBlendMode: "multiply" }} />
-          <div style={{ position: "absolute", inset: 0, background: "rgba(240,250,250,0.06)", mixBlendMode: "screen" }} />
-          <div style={{ position: "absolute", inset: 0, opacity: 0.07, backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")", backgroundSize: "128px 128px", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(80,55,25,0.20) 0%, rgba(60,40,20,0.15) 50%, rgba(80,55,25,0.18) 100%)", mixBlendMode: "multiply" }} />
+          <div style={{ position: "absolute", inset: 0, background: "rgba(245,240,230,0.08)", mixBlendMode: "screen" }} />
+          <div style={{ position: "absolute", inset: 0, opacity: 0.09, backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")", backgroundSize: "128px 128px", pointerEvents: "none" }} />
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: m ? "32px 20px" : "56px 64px" }}>
-            <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".15em", fontWeight: 600, marginBottom: 14 }}>Total Donated</div>
-            <div style={{ fontSize: m ? 40 : 88, fontWeight: 900, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.02em", lineHeight: 1, textShadow: "0 3px 6px rgba(0,0,0,0.7), 0 6px 20px rgba(0,0,0,0.4), 0 12px 40px rgba(0,0,0,0.25)" }}>
+            <div style={{ fontSize: 14, color: "rgba(255,248,230,0.7)", textTransform: "uppercase", letterSpacing: ".15em", fontWeight: 600, marginBottom: 14 }}>Total Donated</div>
+            <div style={{ fontSize: m ? 40 : 88, fontWeight: 900, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.02em", lineHeight: 1, textShadow: "0 3px 6px rgba(40,25,10,0.7), 0 6px 20px rgba(40,25,10,0.4), 0 12px 40px rgba(40,25,10,0.25)" }}>
               <AnimatedNumber value={totalDonated} currency={primaryCurrency} />
             </div>
             <div style={{ fontSize: m ? 14 : 18, color: "rgba(255,255,255,0.8)", marginTop: 18, fontWeight: 500, textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
@@ -1916,10 +2099,12 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
             { label: "Countries reached", value: countriesReached, isCount: true },
             { label: "Months active", value: months.length, isCount: true },
           ].map((stat, i) => (
-            <div key={i} style={{ textAlign: "center", flex: m ? "1 1 45%" : 1 }}>
-              <div style={{ fontSize: m ? 11 : 14, color: "rgba(255,255,255,0.45)", textTransform: "uppercase", letterSpacing: ".12em", fontWeight: 500, marginBottom: 12 }}>{stat.label}</div>
+            <div key={i} style={{ textAlign: "center", flex: m ? "1 1 45%" : 1, padding: "16px 12px", borderRadius: 8, transition: "all .25s ease", cursor: "default" }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.06)"; e.currentTarget.style.background = "rgba(70,55,35,0.6)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(30,20,10,0.4)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.boxShadow = "none"; }}>
+              <div style={{ fontSize: m ? 11 : 14, color: "rgba(255,248,230,0.45)", textTransform: "uppercase", letterSpacing: ".18em", fontWeight: 500, marginBottom: 12 }}>{stat.label}</div>
               <div style={{ fontSize: m ? 26 : 42, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.02em" }}>
-                {stat.isCount ? stat.value : <AnimatedNumber value={stat.value} currency={primaryCurrency} />}
+                <AnimatedNumber value={stat.value} currency={stat.isCount ? null : primaryCurrency} isCount={!!stat.isCount} />
               </div>
             </div>
           ))}
@@ -1929,25 +2114,29 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: donations.length > 0 && activeTab === "overview" ? (m ? "32px 12px 60px" : "72px 32px 100px") : (m ? "24px 12px 60px" : "48px 32px 100px") }}>
         {dataError && <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "16px 20px", marginBottom: 28, color: "#dc2626", fontSize: 15, fontWeight: 500 }}>{dataError}</div>}
 
-        {donations.length === 0 && !dataError ? (
+        {donations.length === 0 && !dataError && (activeTab === "overview" || activeTab === "breakdown" || activeTab === "allocation") ? (
           <div style={{ ...glass, padding: "80px 36px", textAlign: "center", animation: "fadeSlideUp .4s ease" }}>
-            <h3 style={{ fontSize: 24, fontWeight: 600, color: C.text, marginBottom: 12, fontFamily: "'Playfair Display',Georgia,serif" }}>No donations found</h3>
-            <p style={{ color: C.textSoft, fontSize: 16, maxWidth: 400, margin: "0 auto", lineHeight: 1.7 }}>We couldn't find any records linked to {user.email}. Please contact your administrator.</p>
+            <h3 style={{ fontSize: 24, fontWeight: 600, color: C.text, marginBottom: 12, fontFamily: "'Playfair Display',Georgia,serif" }}>No donations yet</h3>
+            <p style={{ color: C.textSoft, fontSize: 16, maxWidth: 400, margin: "0 auto", lineHeight: 1.7 }}>You haven't made any donations yet. Head to the <strong style={{ cursor: "pointer", color: C.navy }} onClick={() => setActiveTab("donate")}>Donate</strong> tab to get started, or check out the <strong style={{ cursor: "pointer", color: C.navy }} onClick={() => setActiveTab("team")}>Team</strong> tab to see what your colleagues support.</p>
           </div>
-        ) : donations.length > 0 && (<>
+        ) : null}
+        {(donations.length > 0 || activeTab === "team" || activeTab === "impact" || activeTab === "donate" || activeTab === "admin") && (<>
           {/* ═══════════════ OVERVIEW ═══════════════ */}
           {activeTab === "overview" && (<>
             {/* Section heading */}
             <div style={{ marginBottom: 40 }}>
-              <h2 style={{ fontSize: 28, fontWeight: 600, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: 0 }}>Your Giving</h2>
+              <h2 style={{ fontSize: 28, fontWeight: 500, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: 0 }}>Your Giving</h2>
               <p style={{ fontSize: 15, color: C.textMuted, marginTop: 8 }}>A breakdown of where your contributions go</p>
             </div>
 
             {/* Charts — asymmetric layout */}
+            <ScrollReveal>
             <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : (months.length > 1 ? "58fr 42fr" : "1fr"), gap: 32, marginBottom: 64 }}>
               {months.length > 1 && (
-                <div style={{ ...glass, padding: m ? "24px 16px" : "36px 40px", animation: "fadeSlideUp .4s ease .15s both" }}>
-                  <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, margin: "0 0 32px", fontFamily: "'Playfair Display',Georgia,serif" }}>Monthly overview</h3>
+                <div style={{ ...glass, padding: m ? "24px 16px" : "36px 40px", animation: "fadeSlideUp .4s ease .15s both", transition: "box-shadow .3s" }}
+                  onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 8px 32px rgba(120,100,70,0.22)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; }}>
+                  <h3 style={{ fontSize: 22, fontWeight: 500, color: C.text, margin: "0 0 32px", fontFamily: "'Playfair Display',Georgia,serif" }}>Monthly overview</h3>
                   <BarChart data={monthlyData} />
                   <div style={{ display: "grid", gridTemplateColumns: m ? "1fr 1fr" : "1fr 1fr 1fr", gap: "6px 18px", marginTop: 20, padding: "20px 0 0", borderTop: `1px solid ${C.divider}` }}>
                     {Object.entries(orgTotals).sort((a, b) => b[1] - a[1]).map(([n]) => (
@@ -1959,8 +2148,10 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                   </div>
                 </div>
               )}
-              <div style={{ ...glass, padding: m ? "24px 16px" : "36px 40px", display: "flex", flexDirection: "column", alignItems: "center", animation: "fadeSlideUp .4s ease .2s both" }}>
-                <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, margin: "0 0 32px", alignSelf: "flex-start", fontFamily: "'Playfair Display',Georgia,serif" }}>Allocation breakdown</h3>
+              <div style={{ ...glass, padding: m ? "24px 16px" : "36px 40px", display: "flex", flexDirection: "column", alignItems: "center", animation: "fadeSlideUp .4s ease .2s both", transition: "box-shadow .3s" }}
+                onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 8px 32px rgba(120,100,70,0.22)"; }}
+                onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; }}>
+                <h3 style={{ fontSize: 22, fontWeight: 500, color: C.text, margin: "0 0 32px", alignSelf: "flex-start", fontFamily: "'Playfair Display',Georgia,serif" }}>Allocation breakdown</h3>
                 <DonutChart data={donutData} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 28, width: "100%" }}>
                   {donutData.slice(0, 8).map((d, i) => (
@@ -1981,19 +2172,24 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                 </div>
               </div>
             </div>
+            </ScrollReveal>
 
             {/* Cause areas */}
+            <ScrollReveal>
             <div>
-              <h2 style={{ fontSize: 22, fontWeight: 600, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: "0 0 24px" }}>Cause Areas</h2>
+              <h2 style={{ fontSize: 22, fontWeight: 500, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: "0 0 24px" }}>Cause Areas</h2>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                {Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]).map(([cat, amt]) => (
-                  <div key={cat} style={{ padding: "12px 24px", borderRadius: 4, background: "#fff", border: `1px solid ${C.divider}`, display: "flex", alignItems: "center", gap: 12 }}>
+                {Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]).map(([cat, amt], i) => (
+                  <div key={cat} style={{ padding: "12px 24px", borderRadius: 4, background: i === 0 ? `linear-gradient(90deg, ${C.card} 0%, ${C.accentLight} 50%, ${C.card} 100%)` : C.card, backgroundSize: i === 0 ? "200% 100%" : "auto", animation: i === 0 ? "shimmer 3s ease-in-out infinite" : "none", border: `1px solid ${C.divider}`, display: "flex", alignItems: "center", gap: 12, transition: "all .2s ease", cursor: "default" }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px) scale(1.03)"; e.currentTarget.style.borderColor = C.accent; e.currentTarget.style.boxShadow = "0 6px 18px rgba(120,100,70,0.25), 0 2px 6px rgba(120,100,70,0.12)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.borderColor = C.divider; e.currentTarget.style.boxShadow = "none"; }}>
                     <span style={{ fontSize: 15, fontWeight: 500, color: C.text }}>{cat}</span>
                     <span style={{ fontSize: 14, color: C.textMuted, fontWeight: 600 }}>{fmt(amt)}</span>
                   </div>
                 ))}
               </div>
             </div>
+            </ScrollReveal>
           </>)}
 
           {/* ═══════════════ ORGANIZATIONS ═══════════════ */}
@@ -2006,6 +2202,8 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                   const color = getOrgColor(name);
                   const category = ORG_CATEGORIES[name];
                   const img = ORG_IMAGES[name] || fetchedImages[name];
+                  const overviewFallbackImg = CATEGORY_FALLBACK_IMAGES[ORG_CATEGORIES[name]] || CATEGORY_FALLBACK_IMAGES._default;
+                  const overviewDisplayImg = img && !imgErrors[name] ? img : overviewFallbackImg;
                   const isExpanded = expandedOrgs.has(name);
                   const byMonth = {};
                   od.forEach(d => { byMonth[d.month] = (byMonth[d.month] || 0) + d.allocatedAmount; });
@@ -2017,16 +2215,9 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                       onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; e.currentTarget.style.transform = "translateY(0)"; }}>
                       {/* Photo banner */}
                       <div style={{ height: 180, position: "relative", overflow: "hidden", background: `linear-gradient(135deg, ${color}22, ${color}44)` }}>
-                        {img && !imgErrors[name] ? (
-                          <img src={img} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", objectPosition: ORG_IMAGE_POS[name] || "center 30%" }}
-                            onError={() => setImgErrors(prev => ({ ...prev, [name]: true }))} />
-                        ) : (
-                          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <span style={{ fontSize: 48, fontWeight: 700, color: "rgba(255,255,255,0.6)", fontFamily: "'Playfair Display',Georgia,serif" }}>
-                              {name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
-                            </span>
-                          </div>
-                        )}
+                        <img src={overviewDisplayImg} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", objectPosition: ORG_IMAGE_POS[name] || "center top", opacity: 0, transition: "opacity .4s ease" }}
+                          onLoad={e => { e.target.style.opacity = "1"; }}
+                          onError={(e) => { e.target.style.display = "none"; setImgErrors(prev => ({ ...prev, [name]: true })); }} />
                         <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)` }} />
                         {/* Category badge */}
                         {category && (
@@ -2047,7 +2238,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                               <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ marginLeft: 12, fontSize: 13, color: C.navy, textDecoration: "none", fontWeight: 500 }}>Visit site</a>
                             )}
                           </div>
-                          <div style={{ fontSize: 26, fontWeight: 700, color, fontFamily: "'Playfair Display',Georgia,serif" }}>{fmt(total)}</div>
+                          <div style={{ fontSize: 26, fontWeight: 700, color, fontFamily: "'Playfair Display',Georgia,serif" }}><AnimatedNumber value={total} /></div>
                         </div>
 
                         {/* Expand arrow */}
@@ -2061,8 +2252,8 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                         {isExpanded && (
                           <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${C.divider}`, animation: "fadeSlideUp .3s ease" }}>
                             <div style={{ fontSize: 13, fontWeight: 600, color: C.textSoft, marginBottom: 10, textTransform: "uppercase", letterSpacing: ".06em" }}>Donation History</div>
-                            {Object.entries(byMonth).map(([m, amt]) => (
-                              <div key={m} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${C.divider}` }}>
+                            {Object.entries(byMonth).map(([m, amt], rowIdx) => (
+                              <div key={m} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${C.divider}`, animation: `fadeSlideUp .3s ease ${rowIdx * 0.05}s both` }}>
                                 <span style={{ fontSize: 14, color: C.text, fontWeight: 500 }}>{m}</span>
                                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                                   <div style={{ width: 60, height: 5, borderRadius: 3, background: C.divider, overflow: "hidden" }}>
@@ -2075,7 +2266,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                             {od.length > 0 && (
                               <div style={{ marginTop: 12, display: "flex", gap: 14, flexWrap: "wrap" }}>
                                 {[...new Set(od.map(d => d.cycle))].map(c => (
-                                  <span key={c} style={{ fontSize: 12, color: C.textMuted, background: "rgba(34,37,32,0.06)", padding: "4px 10px", borderRadius: 8 }}>{c}</span>
+                                  <span key={c} style={{ fontSize: 12, color: C.textMuted, background: "rgba(139,119,90,0.08)", padding: "4px 10px", borderRadius: 8 }}>{c}</span>
                                 ))}
                               </div>
                             )}
@@ -2105,7 +2296,9 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
               </div>
 
               {[...monthBreakdowns].reverse().map((mb, ci) => (
-                <div key={mb.month} style={{ ...glass, marginBottom: 28, overflow: "hidden", animation: `fadeSlideUp .4s ease ${ci*.06}s both` }}>
+                <div key={mb.month} style={{ ...glass, marginBottom: 28, overflow: "hidden", animation: `fadeSlideUp .4s ease ${ci*.06}s both`, transition: "box-shadow .3s, transform .3s" }}
+                  onMouseEnter={e => { e.currentTarget.style.boxShadow = C.cardHover; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; e.currentTarget.style.transform = "translateY(0)"; }}>
                   <div style={{ padding: m ? "16px 16px" : "22px 32px", borderBottom: `1px solid ${C.divider}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
                       <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: 0 }}>{mb.month}</h3>
@@ -2146,7 +2339,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
               {/* Team hero */}
               <div style={{ borderRadius: 8, overflow: "hidden", position: "relative", height: m ? 220 : 320, marginBottom: 28, background: C.text }}>
                 <img src="https://assets.evidenceaction.org/web/images/_1280xAUTO_crop_center-center_none/ea-kids.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center bottom", display: "block", filter: "brightness(0.6) saturate(1.1)" }} />
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(0,120,136,0.2) 0%, rgba(34,37,32,0.35) 100%)" }} />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(61,122,106,0.2) 0%, rgba(44,36,22,0.35) 100%)" }} />
                 <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: m ? "28px 20px" : "36px 48px" }}>
                   <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 500, marginBottom: 8 }}>Isara Team Impact</div>
                   <div style={{ fontSize: m ? 32 : 54, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',Georgia,serif", letterSpacing: "-0.03em", lineHeight: 1, textShadow: "0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.25), 0 0 80px rgba(255,255,255,0.15)" }}>
@@ -2165,8 +2358,10 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                   { label: "Organizations", value: teamData.orgCount, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> },
                   { label: "Cause Areas", value: teamData.orgsByCategory.length, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> },
                 ].map((stat, i) => (
-                  <div key={i} style={{ ...glass, padding: "24px 28px", animation: `fadeSlideUp .4s ease ${i*.06}s both` }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 12, background: C.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14, color: C.navy }}>{stat.icon}</div>
+                  <div key={i} style={{ ...glass, padding: "24px 28px", animation: `fadeSlideUp .4s ease ${i*.06}s both`, transition: "box-shadow .3s, transform .3s", cursor: "default" }}
+                    onMouseEnter={e => { e.currentTarget.style.boxShadow = C.cardHover; e.currentTarget.style.transform = "translateY(-3px)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; e.currentTarget.style.transform = "translateY(0)"; }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, background: C.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14, color: C.navy, animation: "gentlePulse 3s ease-in-out infinite" }}>{stat.icon}</div>
                     <div style={{ fontSize: 13, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 8, fontWeight: 500 }}>{stat.label}</div>
                     <div style={{ fontSize: 32, fontWeight: 700, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", lineHeight: 1 }}>{stat.value}</div>
                   </div>
@@ -2175,7 +2370,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
 
               {/* Organizations we support — grouped by category */}
               <div style={{ ...glass, padding: m ? "24px 16px" : "40px 44px", animation: "fadeSlideUp .4s ease .1s both" }}>
-                <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, margin: "0 0 8px", fontFamily: "'Playfair Display',Georgia,serif" }}>Organizations We Support</h3>
+                <h3 style={{ fontSize: 22, fontWeight: 500, color: C.text, margin: "0 0 8px", fontFamily: "'Playfair Display',Georgia,serif" }}>Organizations We Support</h3>
                 <p style={{ fontSize: 15, color: C.textSoft, margin: "0 0 32px" }}>Our team collectively supports these organizations across {teamData.orgsByCategory.length} cause areas.</p>
 
                 {teamData.orgsByCategory.map(([category, orgs], ci) => (
@@ -2185,41 +2380,12 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                       <div style={{ flex: 1, height: 1, background: C.divider }} />
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr", gap: 14 }}>
-                      {orgs.map((orgName) => {
-                        const img = ORG_IMAGES[orgName] || fetchedImages[orgName];
-                        const desc = ORG_DESCRIPTIONS[orgName] || "";
-                        const website = ORG_WEBSITES[orgName] || orgUrls[orgName];
-                        const color = getOrgColor(orgName);
-                        return (
-                          <div key={orgName} style={{ display: "flex", gap: 14, padding: "16px 18px", borderRadius: 8, border: `1px solid ${C.divider}`, transition: "all .2s", background: "#fff" }}
-                            onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,202,10,0.3)"; e.currentTarget.style.background = C.accentSoft; }}
-                            onMouseLeave={e => { e.currentTarget.style.borderColor = C.divider; e.currentTarget.style.background = "rgba(255,255,255,0.4)"; }}>
-                            {/* Org thumbnail */}
-                            <div style={{ width: 52, height: 52, borderRadius: 12, overflow: "hidden", flexShrink: 0, background: `linear-gradient(135deg, ${color}22, ${color}44)` }}>
-                              {img && !imgErrors[orgName] ? (
-                                <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: ORG_IMAGE_POS[orgName] || "center 30%" }}
-                                  onError={() => setImgErrors(prev => ({ ...prev, [orgName]: true }))} />
-                              ) : (
-                                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700, color, fontFamily: "'Playfair Display',Georgia,serif" }}>
-                                  {orgName.charAt(0)}
-                                </div>
-                              )}
-                            </div>
-                            {/* Org info */}
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 4 }}>{orgName}</div>
-                              <div style={{ fontSize: 13, color: C.textSoft, lineHeight: 1.5, marginBottom: 6 }}>{desc}</div>
-                              {website && (
-                                <a href={website} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: C.navy, textDecoration: "none", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 4 }}
-                                  onClick={e => e.stopPropagation()}>
-                                  Visit website
-                                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                                </a>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
+                      {orgs.map((orgName) => (
+                        <TeamOrgCard key={orgName} orgName={orgName} isExpanded={selectedTeamOrg === orgName}
+                          onToggle={() => setSelectedTeamOrg(selectedTeamOrg === orgName ? null : orgName)}
+                          fetchedImages={fetchedImages} fetchedDescs={fetchedDescs} allOrgUrls={allOrgUrls}
+                          imgErrors={imgErrors} setImgErrors={setImgErrors} m={m} />
+                      ))}
                     </div>
                   </div>
                 ))}
@@ -2242,20 +2408,23 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
         </>)}
       </div>
 
-      {/* Photo — only on overview */}
-      {activeTab === "overview" && (
+      {/* Photo — only on overview with donations */}
+      {activeTab === "overview" && donations.length > 0 && (
         <div style={{ display: "flex", justifyContent: "center", padding: m ? "20px 12px 32px" : "20px 0 48px" }}>
-          <img src="/hero.jpg" alt="" style={{ maxWidth: 760, width: "100%", borderRadius: 0, display: "block", filter: "saturate(1.1) contrast(1.08) brightness(1.02)" }} />
+          <img src="/hero.jpg" alt="" style={{ maxWidth: 760, width: "100%", borderRadius: 0, display: "block", filter: "saturate(0.9) contrast(1.05) sepia(0.08) brightness(1.02)" }} />
         </div>
       )}
 
       {/* Footer */}
-      <div style={{ textAlign: "center", padding: m ? "40px 16px 32px" : "60px 0 48px", borderTop: `1px solid ${C.divider}`, background: "#ffffff" }}>
-        <p style={{ color: C.textMuted, fontSize: 15, fontStyle: "italic", fontWeight: 400, letterSpacing: ".01em", lineHeight: 1.7, fontFamily: "'Playfair Display',Georgia,serif", animation: "fadeIn 1.5s ease .3s both" }}>
+      <ScrollReveal>
+      <div style={{ textAlign: "center", padding: m ? "40px 16px 32px" : "60px 0 48px", background: C.card }}>
+        <div style={{ height: 1, background: `linear-gradient(90deg, transparent, ${C.accent}40, ${C.navy}30, transparent)`, margin: "0 auto 32px", maxWidth: 600 }} />
+        <p style={{ color: C.textMuted, fontSize: 15, fontStyle: "italic", fontWeight: 400, letterSpacing: ".01em", lineHeight: 1.7, fontFamily: "'Playfair Display',Georgia,serif" }}>
           "No one has ever become poor by giving." — Anne Frank
         </p>
         <p style={{ color: C.textMuted, fontSize: 12, letterSpacing: ".1em", fontWeight: 500, marginTop: 16, textTransform: "uppercase" }}>GiveTrack · {new Date().getFullYear()}</p>
       </div>
+      </ScrollReveal>
     </div>
   );
 }
