@@ -1466,9 +1466,28 @@ function AdminTracker({ selectedCycleId, onTrackerChange, sheetData, adminLevel 
     currentGroup.rows.push(row);
   });
 
+  // Determine if the cycle deadline has passed — payments can only be marked after
+  const selectedCycle = loadCycles().cycles?.find(c => c.cycleId === selectedCycleId);
+  const deadlineDate = selectedCycle ? new Date(selectedCycle.deadline + "T23:59:59") : null;
+  const now = new Date();
+  const deadlinePassed = deadlineDate ? now > deadlineDate : true;
+  const deadlineLabel = deadlineDate ? deadlineDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "";
+
+  // The effective "can edit" flag: must be editor AND deadline must have passed
+  const canEdit = adminLevel >= 2 && deadlinePassed;
+
   return (
     <div>
       {viewReceipt && <ReceiptModal src={viewReceipt.src} fileName={viewReceipt.name} onClose={() => setViewReceipt(null)} />}
+      {/* Deadline reminder banner */}
+      {!deadlinePassed && rows.length > 0 && (
+        <div style={{ ...glass, padding: "14px 20px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10, borderLeft: `4px solid ${C.warm}`, background: "rgba(217,119,6,0.04)" }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.warm} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span style={{ fontSize: 13, color: C.textSoft, lineHeight: 1.5 }}>
+            Employees may change their allocations until <strong style={{ color: C.text }}>{deadlineLabel}</strong>. Payments can be marked starting the day after the deadline.
+          </span>
+        </div>
+      )}
       <div style={{ ...glass, overflow: "hidden", overflowX: m ? "auto" : "hidden" }}>
         {/* Header */}
         <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 100px 50px 110px 90px", padding: "12px 20px", borderBottom: `1px solid ${C.divider}`, background: "rgba(139,119,90,0.03)" }}>
@@ -1497,12 +1516,12 @@ function AdminTracker({ selectedCycleId, onTrackerChange, sheetData, adminLevel 
               </div>
               <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{fmt(row.amount, row.currency)}</div>
               <div>
-                <input type="checkbox" checked={row.paid} disabled={adminLevel < 2}
-                  onChange={adminLevel >= 2 ? e => updateTrackerField(row.email, row.orgName, "paid", e.target.checked) : undefined}
-                  style={{ width: 18, height: 18, cursor: adminLevel < 2 ? "default" : "pointer", accentColor: C.accent, opacity: adminLevel < 2 ? 0.6 : 1 }} />
+                <input type="checkbox" checked={row.paid} disabled={!canEdit}
+                  onChange={canEdit ? e => updateTrackerField(row.email, row.orgName, "paid", e.target.checked) : undefined}
+                  style={{ width: 18, height: 18, cursor: !canEdit ? "default" : "pointer", accentColor: C.accent, opacity: !canEdit ? 0.6 : 1 }} />
               </div>
               <div>
-                {adminLevel >= 2 ? (
+                {canEdit ? (
                   <input type="date" value={row.datePaid} onChange={e => updateTrackerField(row.email, row.orgName, "datePaid", e.target.value)}
                     style={{ fontSize: 12, padding: "4px 6px", border: `1px solid ${C.cardBorder}`, borderRadius: 4, color: C.text, fontFamily: "'Montserrat',sans-serif" }} />
                 ) : (
@@ -1514,11 +1533,11 @@ function AdminTracker({ selectedCycleId, onTrackerChange, sheetData, adminLevel 
                   <div style={{ display: "flex", gap: 6 }}>
                     <button onClick={() => setViewReceipt({ src: row.receiptData, name: row.receiptFileName })}
                       style={{ fontSize: 12, color: C.navy, background: "none", border: "none", cursor: "pointer", fontWeight: 500, textDecoration: "underline" }}>View</button>
-                    {adminLevel >= 2 && <button onClick={() => { updateTrackerField(row.email, row.orgName, "receiptData", null); updateTrackerField(row.email, row.orgName, "receiptFileName", null); }}
+                    {canEdit && <button onClick={() => { updateTrackerField(row.email, row.orgName, "receiptData", null); updateTrackerField(row.email, row.orgName, "receiptFileName", null); }}
                       style={{ fontSize: 12, color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Remove</button>}
                   </div>
                 ) : (
-                  adminLevel >= 2 ? <label style={{ fontSize: 12, color: C.navy, cursor: "pointer", fontWeight: 500 }}>
+                  canEdit ? <label style={{ fontSize: 12, color: C.navy, cursor: "pointer", fontWeight: 500 }}>
                     Upload
                     <input type="file" accept="image/*,application/pdf" style={{ display: "none" }}
                       onChange={e => { if (e.target.files[0]) handleReceiptUpload(row.email, row.orgName, e.target.files[0]); }} />
@@ -1905,7 +1924,7 @@ function CumulativeUnpaid({ sheetData, onTrackerChange, adminLevel }) {
         const tData = cycleTracker[email]?.[alloc.orgName] || {};
         if (!tData.paid) {
           const amt = (alloc.percentage / 100) * budget.cycleAmount;
-          unpaidRows.push({ email, name: budget.name, orgName: alloc.orgName, paidTo: alloc.paidTo || ORG_WEBSITES[alloc.orgName] || "", amount: Math.round(amt * 100) / 100, currency: budget.currency, cycleId, cycleLabel: cycle.label, receiptData: tData.receiptData || null, receiptFileName: tData.receiptFileName || null, datePaid: tData.datePaid || "" });
+          unpaidRows.push({ email, name: budget.name, orgName: alloc.orgName, paidTo: alloc.paidTo || ORG_WEBSITES[alloc.orgName] || "", amount: Math.round(amt * 100) / 100, currency: budget.currency, cycleId, cycleLabel: cycle.label, cycleDeadline: cycle.deadline, receiptData: tData.receiptData || null, receiptFileName: tData.receiptFileName || null, datePaid: tData.datePaid || "" });
         }
       });
     });
@@ -1914,7 +1933,7 @@ function CumulativeUnpaid({ sheetData, onTrackerChange, adminLevel }) {
       Object.entries(orgs).forEach(([orgName, tData]) => {
         if (!seen.has(`${email}:${orgName}`) && !tData.paid) {
           const budget = budgets[email] || { name: email, currency: "$" };
-          unpaidRows.push({ email, name: budget.name, orgName, paidTo: ORG_WEBSITES[orgName] || "", amount: tData.amount || 0, currency: budget.currency, cycleId, cycleLabel: cycle.label, receiptData: tData.receiptData || null, receiptFileName: tData.receiptFileName || null, datePaid: tData.datePaid || "" });
+          unpaidRows.push({ email, name: budget.name, orgName, paidTo: ORG_WEBSITES[orgName] || "", amount: tData.amount || 0, currency: budget.currency, cycleId, cycleLabel: cycle.label, cycleDeadline: cycle.deadline, receiptData: tData.receiptData || null, receiptFileName: tData.receiptFileName || null, datePaid: tData.datePaid || "" });
         }
       });
     });
@@ -1927,7 +1946,7 @@ function CumulativeUnpaid({ sheetData, onTrackerChange, adminLevel }) {
   let currentGroup = null;
   unpaidRows.forEach(row => {
     if (!currentGroup || currentGroup.cycleId !== row.cycleId) {
-      currentGroup = { cycleId: row.cycleId, cycleLabel: row.cycleLabel, rows: [] };
+      currentGroup = { cycleId: row.cycleId, cycleLabel: row.cycleLabel, cycleDeadline: row.cycleDeadline, rows: [] };
       groups.push(currentGroup);
     }
     currentGroup.rows.push(row);
@@ -1957,11 +1976,17 @@ function CumulativeUnpaid({ sheetData, onTrackerChange, adminLevel }) {
         <div style={{ ...glass, overflow: "hidden", overflowX: m ? "auto" : "hidden" }}>
           {groups.map((group) => {
             const groupTotal = group.rows.reduce((s, r) => s + r.amount, 0);
+            const groupDeadline = group.cycleDeadline ? new Date(group.cycleDeadline + "T23:59:59") : null;
+            const groupDeadlinePassed = groupDeadline ? new Date() > groupDeadline : true;
+            const groupCanEdit = adminLevel >= 2 && groupDeadlinePassed;
             return (
               <div key={group.cycleId}>
                 {/* Cycle header dark bar */}
                 <div style={{ display: "grid", gridTemplateColumns: m ? "1fr 80px" : "1fr 100px 50px 110px 90px", padding: "10px 20px", background: C.text, alignItems: "center" }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", letterSpacing: ".04em" }}>{group.cycleLabel} — {group.rows.length} unpaid</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", letterSpacing: ".04em" }}>
+                    {group.cycleLabel} — {group.rows.length} unpaid
+                    {!groupDeadlinePassed && <span style={{ fontSize: 11, color: C.accent, fontWeight: 500, marginLeft: 10 }}>deadline pending</span>}
+                  </div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: C.accent }}>{fmt(groupTotal)}</div>
                   {!m && <><div /><div /><div /></>}
                 </div>
@@ -1979,14 +2004,14 @@ function CumulativeUnpaid({ sheetData, onTrackerChange, adminLevel }) {
                     </div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: C.warm }}>{fmt(row.amount, row.currency)}</div>
                     <div>
-                      <input type="checkbox" checked={false} disabled={adminLevel < 2}
-                        onChange={adminLevel >= 2 ? () => markPaid(row.cycleId, row.email, row.orgName, "paid", true) : undefined}
-                        style={{ width: 18, height: 18, cursor: adminLevel < 2 ? "default" : "pointer", accentColor: C.accent, opacity: adminLevel < 2 ? 0.6 : 1 }} />
+                      <input type="checkbox" checked={false} disabled={!groupCanEdit}
+                        onChange={groupCanEdit ? () => markPaid(row.cycleId, row.email, row.orgName, "paid", true) : undefined}
+                        style={{ width: 18, height: 18, cursor: !groupCanEdit ? "default" : "pointer", accentColor: C.accent, opacity: !groupCanEdit ? 0.6 : 1 }} />
                     </div>
                     {!m && (
                       <>
                         <div>
-                          {adminLevel >= 2 ? (
+                          {groupCanEdit ? (
                             <input type="date" value={row.datePaid} onChange={e => markPaid(row.cycleId, row.email, row.orgName, "datePaid", e.target.value)}
                               style={{ fontSize: 12, padding: "4px 6px", border: `1px solid ${C.cardBorder}`, borderRadius: 4, color: C.text, fontFamily: "'Montserrat',sans-serif" }} />
                           ) : (
@@ -1998,11 +2023,11 @@ function CumulativeUnpaid({ sheetData, onTrackerChange, adminLevel }) {
                             <div style={{ display: "flex", gap: 6 }}>
                               <button onClick={() => setViewReceipt({ src: row.receiptData, name: row.receiptFileName })}
                                 style={{ fontSize: 12, color: C.navy, background: "none", border: "none", cursor: "pointer", fontWeight: 500, textDecoration: "underline" }}>View</button>
-                              {adminLevel >= 2 && <button onClick={() => { markPaid(row.cycleId, row.email, row.orgName, "receiptData", null); markPaid(row.cycleId, row.email, row.orgName, "receiptFileName", null); }}
+                              {groupCanEdit && <button onClick={() => { markPaid(row.cycleId, row.email, row.orgName, "receiptData", null); markPaid(row.cycleId, row.email, row.orgName, "receiptFileName", null); }}
                                 style={{ fontSize: 12, color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Remove</button>}
                             </div>
                           ) : (
-                            adminLevel >= 2 ? <label style={{ fontSize: 12, color: C.navy, cursor: "pointer", fontWeight: 500 }}>
+                            groupCanEdit ? <label style={{ fontSize: 12, color: C.navy, cursor: "pointer", fontWeight: 500 }}>
                               Upload
                               <input type="file" accept="image/*,application/pdf" style={{ display: "none" }}
                                 onChange={e => { if (e.target.files[0]) handleReceiptUpload(row.cycleId, row.email, row.orgName, e.target.files[0]); }} />
