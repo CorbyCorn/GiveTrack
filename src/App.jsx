@@ -1655,9 +1655,9 @@ function AdminManagement({ currentEmail, sheetData }) {
     setAdmins(updated);
   };
 
-  const toggleLevel = (email) => {
+  const setLevel = (email, lvl) => {
     if (INITIAL_ADMINS[email]) return;
-    const updated = { ...admins, [email]: admins[email] === 2 ? 1 : 2 };
+    const updated = { ...admins, [email]: lvl };
     saveAdmins(updated);
     setAdmins(updated);
   };
@@ -1670,24 +1670,21 @@ function AdminManagement({ currentEmail, sheetData }) {
       </p>
       {Object.entries(admins).sort((a, b) => a[0].localeCompare(b[0])).map(([email, level]) => (
         <div key={email} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${C.divider}` }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ fontSize: 15, color: C.text, fontWeight: 500 }}>{email}</span>
-            <span style={{ fontSize: 11, padding: "2px 10px", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".06em",
-              background: level === 2 ? "rgba(61,122,106,0.12)" : "rgba(139,119,90,0.08)",
-              color: level === 2 ? C.navy : C.textMuted
-            }}>{level === 2 ? "Editor" : "Viewer"}</span>
-          </div>
+          <span style={{ fontSize: 15, color: C.text, fontWeight: 500 }}>{email}</span>
           {email === currentEmail ? (
-            <span style={{ fontSize: 13, color: C.textMuted, fontStyle: "italic" }}>You</span>
-          ) : INITIAL_ADMINS[email] ? (
-            <span style={{ fontSize: 12, color: C.textMuted, fontStyle: "italic" }}>Protected</span>
-          ) : (
-            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-              <button onClick={() => toggleLevel(email)} style={{ fontSize: 12, color: C.navy, background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>
-                {level === 2 ? "Downgrade" : "Upgrade"}
-              </button>
-              <button onClick={() => removeAdmin(email)} style={{ fontSize: 12, color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Remove</button>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 11, padding: "2px 10px", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".06em", background: level === 2 ? "rgba(61,122,106,0.12)" : "rgba(139,119,90,0.08)", color: level === 2 ? C.navy : C.textMuted }}>{level === 2 ? "Editor" : "Viewer"}</span>
+              <span style={{ fontSize: 13, color: C.textMuted, fontStyle: "italic" }}>You</span>
             </div>
+          ) : INITIAL_ADMINS[email] ? (
+            <span style={{ fontSize: 11, padding: "2px 10px", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".06em", background: level === 2 ? "rgba(61,122,106,0.12)" : "rgba(139,119,90,0.08)", color: level === 2 ? C.navy : C.textMuted }}>{level === 2 ? "Editor" : "Viewer"}</span>
+          ) : (
+            <select value={level} onChange={e => { const v = e.target.value; if (v === "remove") removeAdmin(email); else setLevel(email, Number(v)); }}
+              style={{ padding: "5px 10px", fontSize: 13, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif", color: C.text, cursor: "pointer" }}>
+              <option value={1}>Viewer</option>
+              <option value={2}>Editor</option>
+              <option value="remove" style={{ color: "#dc2626" }}>Remove</option>
+            </select>
           )}
         </div>
       ))}
