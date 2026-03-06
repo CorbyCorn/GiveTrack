@@ -533,9 +533,10 @@ const DEMO_DATA = {
 
 // ─── LOCAL STORAGE DATA LAYER ─────────────────────────────────
 
-const INITIAL_ADMINS = [
-  "courtney@isara.io", "ranah@isara.io",
-];
+// Admin levels: 0 = not admin, 1 = viewer (read-only), 2 = editor (full access)
+const INITIAL_ADMINS = {
+  "courtney@isara.io": 2, "ranah@isara.io": 2,
+};
 
 const EMPLOYEE_NAMES = {
   "courtney@isara.io": "Courtney Leung", "edward@isara.io": "Edward Kang",
@@ -555,11 +556,17 @@ function saveStorage(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
 }
 
-function loadAdmins() { return loadStorage("givetrack_admins", INITIAL_ADMINS); }
-function saveAdmins(list) { saveStorage("givetrack_admins", list); syncToSheet("givetrack_admins", list); }
+function loadAdmins() {
+  const raw = loadStorage("givetrack_admins", INITIAL_ADMINS);
+  if (Array.isArray(raw)) { const map = {}; raw.forEach(e => { map[e] = 2; }); return map; }
+  return raw;
+}
+function saveAdmins(map) { saveStorage("givetrack_admins", map); syncToSheet("givetrack_admins", map); }
 function checkIsAdmin(email) {
   const e = email?.toLowerCase();
-  return INITIAL_ADMINS.includes(e) || loadAdmins().includes(e);
+  if (INITIAL_ADMINS[e]) return INITIAL_ADMINS[e];
+  const admins = loadAdmins();
+  return admins[e] || 0;
 }
 
 function loadBudgets() { return loadStorage("givetrack_employee_budgets", {}); }
@@ -1351,7 +1358,7 @@ function ReceiptModal({ src, fileName, onClose }) {
   );
 }
 
-function AdminTracker({ selectedCycleId, onTrackerChange, sheetData }) {
+function AdminTracker({ selectedCycleId, onTrackerChange, sheetData, adminLevel }) {
   const [tracker, setTracker] = useState(loadTracker());
   const m = useIsMobile();
 
@@ -1476,27 +1483,32 @@ function AdminTracker({ selectedCycleId, onTrackerChange, sheetData }) {
               </div>
               <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{fmt(row.amount, row.currency)}</div>
               <div>
-                <input type="checkbox" checked={row.paid} onChange={e => updateTrackerField(row.email, row.orgName, "paid", e.target.checked)}
-                  style={{ width: 18, height: 18, cursor: "pointer", accentColor: C.accent }} />
+                <input type="checkbox" checked={row.paid} disabled={adminLevel < 2}
+                  onChange={adminLevel >= 2 ? e => updateTrackerField(row.email, row.orgName, "paid", e.target.checked) : undefined}
+                  style={{ width: 18, height: 18, cursor: adminLevel < 2 ? "default" : "pointer", accentColor: C.accent, opacity: adminLevel < 2 ? 0.6 : 1 }} />
               </div>
               <div>
-                <input type="date" value={row.datePaid} onChange={e => updateTrackerField(row.email, row.orgName, "datePaid", e.target.value)}
-                  style={{ fontSize: 12, padding: "4px 6px", border: `1px solid ${C.cardBorder}`, borderRadius: 4, color: C.text, fontFamily: "'Montserrat',sans-serif" }} />
+                {adminLevel >= 2 ? (
+                  <input type="date" value={row.datePaid} onChange={e => updateTrackerField(row.email, row.orgName, "datePaid", e.target.value)}
+                    style={{ fontSize: 12, padding: "4px 6px", border: `1px solid ${C.cardBorder}`, borderRadius: 4, color: C.text, fontFamily: "'Montserrat',sans-serif" }} />
+                ) : (
+                  <span style={{ fontSize: 12, color: C.textSoft }}>{row.datePaid || "—"}</span>
+                )}
               </div>
               <div>
                 {row.receiptData ? (
                   <div style={{ display: "flex", gap: 6 }}>
                     <button onClick={() => setViewReceipt({ src: row.receiptData, name: row.receiptFileName })}
                       style={{ fontSize: 12, color: C.navy, background: "none", border: "none", cursor: "pointer", fontWeight: 500, textDecoration: "underline" }}>View</button>
-                    <button onClick={() => { updateTrackerField(row.email, row.orgName, "receiptData", null); updateTrackerField(row.email, row.orgName, "receiptFileName", null); }}
-                      style={{ fontSize: 12, color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Remove</button>
+                    {adminLevel >= 2 && <button onClick={() => { updateTrackerField(row.email, row.orgName, "receiptData", null); updateTrackerField(row.email, row.orgName, "receiptFileName", null); }}
+                      style={{ fontSize: 12, color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Remove</button>}
                   </div>
                 ) : (
-                  <label style={{ fontSize: 12, color: C.navy, cursor: "pointer", fontWeight: 500 }}>
+                  adminLevel >= 2 ? <label style={{ fontSize: 12, color: C.navy, cursor: "pointer", fontWeight: 500 }}>
                     Upload
                     <input type="file" accept="image/*,application/pdf" style={{ display: "none" }}
                       onChange={e => { if (e.target.files[0]) handleReceiptUpload(row.email, row.orgName, e.target.files[0]); }} />
-                  </label>
+                  </label> : <span style={{ fontSize: 12, color: C.textMuted }}>—</span>
                 )}
               </div>
                 </div>
@@ -1533,7 +1545,7 @@ function AdminTracker({ selectedCycleId, onTrackerChange, sheetData }) {
   );
 }
 
-function AdminBudgets() {
+function AdminBudgets({ adminLevel }) {
   const [budgets, setBudgets] = useState(loadBudgets());
   const m = useIsMobile();
   const [newEmail, setNewEmail] = useState("");
@@ -1576,50 +1588,59 @@ function AdminBudgets() {
           <div style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{b.name}</div>
           <div style={{ fontSize: 13, color: C.textMuted }}>{email}</div>
           <div>
-            <input type="number" value={b.cycleAmount} onChange={e => updateBudget(email, "cycleAmount", e.target.value)}
-              style={{ width: 120, padding: "6px 10px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
+            {adminLevel >= 2 ? (
+              <input type="number" value={b.cycleAmount} onChange={e => updateBudget(email, "cycleAmount", e.target.value)}
+                style={{ width: 120, padding: "6px 10px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
+            ) : (
+              <span style={{ fontSize: 14, color: C.text }}>{b.cycleAmount}</span>
+            )}
           </div>
           <div>
-            <select value={b.currency} onChange={e => updateBudget(email, "currency", e.target.value)}
-              style={{ padding: "6px 8px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }}>
-              <option value="$">$</option><option value="£">£</option>
-            </select>
+            {adminLevel >= 2 ? (
+              <select value={b.currency} onChange={e => updateBudget(email, "currency", e.target.value)}
+                style={{ padding: "6px 8px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }}>
+                <option value="$">$</option><option value="£">£</option>
+              </select>
+            ) : (
+              <span style={{ fontSize: 14, color: C.text }}>{b.currency}</span>
+            )}
           </div>
           <div>
-            <button onClick={() => removeEmployee(email)} style={{ fontSize: 12, color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Remove</button>
+            {adminLevel >= 2 && <button onClick={() => removeEmployee(email)} style={{ fontSize: 12, color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Remove</button>}
           </div>
         </div>
       ))}
-      {/* Add employee row */}
-      <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 140px 80px 80px", padding: "12px 20px", background: "rgba(139,119,90,0.03)", alignItems: "center", gap: 8 }}>
-        <input type="text" placeholder="Name" value={newName} onChange={e => setNewName(e.target.value)}
-          style={{ padding: "6px 10px", fontSize: 13, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
-        <input type="email" placeholder="email@isara.io" value={newEmail} onChange={e => setNewEmail(e.target.value)}
-          style={{ padding: "6px 10px", fontSize: 13, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
-        <input type="number" placeholder="Amount" value={newAmount} onChange={e => setNewAmount(e.target.value)}
-          style={{ width: 120, padding: "6px 10px", fontSize: 13, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
-        <select value={newCurrency} onChange={e => setNewCurrency(e.target.value)}
-          style={{ padding: "6px 8px", fontSize: 13, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }}>
-          <option value="$">$</option><option value="£">£</option>
-        </select>
-        <button onClick={addEmployee} style={{ padding: "6px 14px", background: C.accent, color: C.text, border: "none", borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Add</button>
-      </div>
+      {/* Add employee row — editor only */}
+      {adminLevel >= 2 && (
+        <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 140px 80px 80px", padding: "12px 20px", background: "rgba(139,119,90,0.03)", alignItems: "center", gap: 8 }}>
+          <input type="text" placeholder="Name" value={newName} onChange={e => setNewName(e.target.value)}
+            style={{ padding: "6px 10px", fontSize: 13, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
+          <input type="email" placeholder="email@isara.io" value={newEmail} onChange={e => setNewEmail(e.target.value)}
+            style={{ padding: "6px 10px", fontSize: 13, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
+          <input type="number" placeholder="Amount" value={newAmount} onChange={e => setNewAmount(e.target.value)}
+            style={{ width: 120, padding: "6px 10px", fontSize: 13, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
+          <select value={newCurrency} onChange={e => setNewCurrency(e.target.value)}
+            style={{ padding: "6px 8px", fontSize: 13, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }}>
+            <option value="$">$</option><option value="£">£</option>
+          </select>
+          <button onClick={addEmployee} style={{ padding: "6px 14px", background: C.accent, color: C.text, border: "none", borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Add</button>
+        </div>
+      )}
     </div>
   );
 }
 
 function AdminManagement({ currentEmail, sheetData }) {
-  const [admins, setAdmins] = useState(() => [...new Set([...INITIAL_ADMINS, ...loadAdmins()])]);
+  const mergeAdmins = () => ({ ...INITIAL_ADMINS, ...loadAdmins() });
+  const [admins, setAdmins] = useState(mergeAdmins);
   const [newAdmin, setNewAdmin] = useState("");
+  const [newLevel, setNewLevel] = useState(1);
 
-  // Re-sync admin list when sheet data updates (live updates from other admins)
-  useEffect(() => {
-    setAdmins([...new Set([...INITIAL_ADMINS, ...loadAdmins()])]);
-  }, [sheetData]);
+  useEffect(() => { setAdmins(mergeAdmins()); }, [sheetData]);
 
   const addAdmin = () => {
     if (!newAdmin || !newAdmin.includes("@")) return;
-    const updated = [...new Set([...admins, newAdmin.toLowerCase()])];
+    const updated = { ...admins, [newAdmin.toLowerCase()]: newLevel };
     saveAdmins(updated);
     setAdmins(updated);
     setNewAdmin("");
@@ -1627,8 +1648,16 @@ function AdminManagement({ currentEmail, sheetData }) {
 
   const removeAdmin = (email) => {
     if (email === currentEmail) return;
-    if (INITIAL_ADMINS.includes(email)) return; // can't remove hardcoded admins
-    const updated = admins.filter(a => a !== email);
+    if (INITIAL_ADMINS[email]) return;
+    const updated = { ...admins };
+    delete updated[email];
+    saveAdmins(updated);
+    setAdmins(updated);
+  };
+
+  const toggleLevel = (email) => {
+    if (INITIAL_ADMINS[email]) return;
+    const updated = { ...admins, [email]: admins[email] === 2 ? 1 : 2 };
     saveAdmins(updated);
     setAdmins(updated);
   };
@@ -1636,13 +1665,29 @@ function AdminManagement({ currentEmail, sheetData }) {
   return (
     <div style={{ ...glass, padding: "32px 36px" }}>
       <h3 style={{ fontSize: 16, fontWeight: 600, color: C.text, margin: "0 0 20px", textTransform: "uppercase", letterSpacing: ".06em" }}>Current Admins</h3>
-      {admins.map(email => (
+      <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 20, lineHeight: 1.6 }}>
+        <strong style={{ color: C.text }}>Viewer</strong> — can view tracker, unpaid, and budgets (read-only). <strong style={{ color: C.text }}>Editor</strong> — can also mark payments, upload receipts, and change budgets.
+      </p>
+      {Object.entries(admins).sort((a, b) => a[0].localeCompare(b[0])).map(([email, level]) => (
         <div key={email} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${C.divider}` }}>
-          <span style={{ fontSize: 15, color: C.text, fontWeight: 500 }}>{email}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 15, color: C.text, fontWeight: 500 }}>{email}</span>
+            <span style={{ fontSize: 11, padding: "2px 10px", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".06em",
+              background: level === 2 ? "rgba(61,122,106,0.12)" : "rgba(139,119,90,0.08)",
+              color: level === 2 ? C.navy : C.textMuted
+            }}>{level === 2 ? "Editor" : "Viewer"}</span>
+          </div>
           {email === currentEmail ? (
             <span style={{ fontSize: 13, color: C.textMuted, fontStyle: "italic" }}>You</span>
+          ) : INITIAL_ADMINS[email] ? (
+            <span style={{ fontSize: 12, color: C.textMuted, fontStyle: "italic" }}>Protected</span>
           ) : (
-            <button onClick={() => removeAdmin(email)} style={{ fontSize: 13, color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Remove</button>
+            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <button onClick={() => toggleLevel(email)} style={{ fontSize: 12, color: C.navy, background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>
+                {level === 2 ? "Downgrade" : "Upgrade"}
+              </button>
+              <button onClick={() => removeAdmin(email)} style={{ fontSize: 12, color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Remove</button>
+            </div>
           )}
         </div>
       ))}
@@ -1650,9 +1695,13 @@ function AdminManagement({ currentEmail, sheetData }) {
         <input type="email" placeholder="email@isara.io" value={newAdmin} onChange={e => setNewAdmin(e.target.value)}
           onKeyDown={e => e.key === "Enter" && addAdmin()}
           style={{ flex: 1, padding: "10px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }} />
+        <select value={newLevel} onChange={e => setNewLevel(Number(e.target.value))}
+          style={{ padding: "10px 12px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, fontFamily: "'Montserrat',sans-serif" }}>
+          <option value={1}>Viewer</option>
+          <option value={2}>Editor</option>
+        </select>
         <button onClick={addAdmin} style={{ padding: "10px 24px", background: C.accent, color: C.text, border: "none", borderRadius: 4, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Add Admin</button>
       </div>
-      <p style={{ fontSize: 13, color: C.textMuted, marginTop: 16, lineHeight: 1.6 }}>Admins can view all employee submissions, manage budgets, and track donation payments.</p>
     </div>
   );
 }
@@ -1692,7 +1741,7 @@ function exportTrackerCSV(cycleId, cycleLabel) {
   a.click(); URL.revokeObjectURL(url);
 }
 
-function AdminTab({ currentEmail, sheetData }) {
+function AdminTab({ currentEmail, sheetData, adminLevel }) {
   const [subTab, setSubTab] = useState("tracker");
   const cycles = loadCycles();
   const [selectedCycleId, setSelectedCycleId] = useState(cycles.currentCycleId || "");
@@ -1764,17 +1813,17 @@ function AdminTab({ currentEmail, sheetData }) {
               Export CSV
             </button>
           </div>
-          <AdminTracker selectedCycleId={selectedCycleId} onTrackerChange={() => refreshStatus(v => v + 1)} sheetData={sheetData} />
+          <AdminTracker selectedCycleId={selectedCycleId} onTrackerChange={() => refreshStatus(v => v + 1)} sheetData={sheetData} adminLevel={adminLevel} />
         </div>
       )}
-      {subTab === "unpaid" && <CumulativeUnpaid sheetData={sheetData} onTrackerChange={() => refreshStatus(v => v + 1)} />}
-      {subTab === "budgets" && <AdminBudgets />}
+      {subTab === "unpaid" && <CumulativeUnpaid sheetData={sheetData} onTrackerChange={() => refreshStatus(v => v + 1)} adminLevel={adminLevel} />}
+      {subTab === "budgets" && <AdminBudgets adminLevel={adminLevel} />}
       {subTab === "admins" && <AdminManagement currentEmail={currentEmail} sheetData={sheetData} />}
     </div>
   );
 }
 
-function CumulativeUnpaid({ sheetData, onTrackerChange }) {
+function CumulativeUnpaid({ sheetData, onTrackerChange, adminLevel }) {
   const m = useIsMobile();
   const [tracker, setTracker] = useState(loadTracker());
   const [viewReceipt, setViewReceipt] = useState(null);
@@ -1919,29 +1968,34 @@ function CumulativeUnpaid({ sheetData, onTrackerChange }) {
                     </div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: C.warm }}>{fmt(row.amount, row.currency)}</div>
                     <div>
-                      <input type="checkbox" checked={false} onChange={() => markPaid(row.cycleId, row.email, row.orgName, "paid", true)}
-                        style={{ width: 18, height: 18, cursor: "pointer", accentColor: C.accent }} />
+                      <input type="checkbox" checked={false} disabled={adminLevel < 2}
+                        onChange={adminLevel >= 2 ? () => markPaid(row.cycleId, row.email, row.orgName, "paid", true) : undefined}
+                        style={{ width: 18, height: 18, cursor: adminLevel < 2 ? "default" : "pointer", accentColor: C.accent, opacity: adminLevel < 2 ? 0.6 : 1 }} />
                     </div>
                     {!m && (
                       <>
                         <div>
-                          <input type="date" value={row.datePaid} onChange={e => markPaid(row.cycleId, row.email, row.orgName, "datePaid", e.target.value)}
-                            style={{ fontSize: 12, padding: "4px 6px", border: `1px solid ${C.cardBorder}`, borderRadius: 4, color: C.text, fontFamily: "'Montserrat',sans-serif" }} />
+                          {adminLevel >= 2 ? (
+                            <input type="date" value={row.datePaid} onChange={e => markPaid(row.cycleId, row.email, row.orgName, "datePaid", e.target.value)}
+                              style={{ fontSize: 12, padding: "4px 6px", border: `1px solid ${C.cardBorder}`, borderRadius: 4, color: C.text, fontFamily: "'Montserrat',sans-serif" }} />
+                          ) : (
+                            <span style={{ fontSize: 12, color: C.textSoft }}>{row.datePaid || "—"}</span>
+                          )}
                         </div>
                         <div>
                           {row.receiptData ? (
                             <div style={{ display: "flex", gap: 6 }}>
                               <button onClick={() => setViewReceipt({ src: row.receiptData, name: row.receiptFileName })}
                                 style={{ fontSize: 12, color: C.navy, background: "none", border: "none", cursor: "pointer", fontWeight: 500, textDecoration: "underline" }}>View</button>
-                              <button onClick={() => { markPaid(row.cycleId, row.email, row.orgName, "receiptData", null); markPaid(row.cycleId, row.email, row.orgName, "receiptFileName", null); }}
-                                style={{ fontSize: 12, color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Remove</button>
+                              {adminLevel >= 2 && <button onClick={() => { markPaid(row.cycleId, row.email, row.orgName, "receiptData", null); markPaid(row.cycleId, row.email, row.orgName, "receiptFileName", null); }}
+                                style={{ fontSize: 12, color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Remove</button>}
                             </div>
                           ) : (
-                            <label style={{ fontSize: 12, color: C.navy, cursor: "pointer", fontWeight: 500 }}>
+                            adminLevel >= 2 ? <label style={{ fontSize: 12, color: C.navy, cursor: "pointer", fontWeight: 500 }}>
                               Upload
                               <input type="file" accept="image/*,application/pdf" style={{ display: "none" }}
                                 onChange={e => { if (e.target.files[0]) handleReceiptUpload(row.cycleId, row.email, row.orgName, e.target.files[0]); }} />
-                            </label>
+                            </label> : <span style={{ fontSize: 12, color: C.textMuted }}>—</span>
                           )}
                         </div>
                       </>
@@ -2310,7 +2364,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [dataError, setDataError] = useState("");
-  const [isUserAdmin, setIsUserAdmin] = useState(false);
+  const [isUserAdmin, setIsUserAdmin] = useState(0);
   const [sheetData, setSheetData] = useState(null);
   const userRef = useRef(null);
 
@@ -2630,7 +2684,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
     { id: "donate", label: "Donate", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> },
     { id: "team", label: "Team", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
     { id: "impact", label: "Impact", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> },
-    ...(isUserAdmin ? [{ id: "admin", label: "Admin", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> }] : []),
+    ...(isUserAdmin > 0 ? [{ id: "admin", label: "Admin", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> }] : []),
   ];
 
   return (
@@ -3136,8 +3190,8 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
             <GlobeTab donations={donations} userEmail={user.email} sheetData={sheetData} />
           )}
 
-          {activeTab === "admin" && isUserAdmin && (
-            <AdminTab currentEmail={user.email} sheetData={sheetData} />
+          {activeTab === "admin" && isUserAdmin > 0 && (
+            <AdminTab currentEmail={user.email} sheetData={sheetData} adminLevel={isUserAdmin} />
           )}
         </>)}
       </div>
