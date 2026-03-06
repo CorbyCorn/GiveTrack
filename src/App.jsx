@@ -956,6 +956,8 @@ const GLOBAL_CSS = `
   ::-webkit-scrollbar-thumb { background:rgba(139,119,90,0.20); border-radius:3px; }
   ::selection { background:rgba(212,168,83,0.25); }
   img { -webkit-user-drag:none; }
+  .hide-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
+  .hide-scrollbar::-webkit-scrollbar { display:none; }
 `;
 
 const C = {
@@ -2655,7 +2657,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
       {/* STICKY TAB BAR — full width, below header */}
       {(
         <nav style={{ position: "sticky", top: m ? 53 : 67, zIndex: 99, background: C.bg, borderBottom: `1px solid ${C.divider}`, boxShadow: "0 1px 3px rgba(139,119,90,0.08)" }}>
-          <div style={{ maxWidth: 1100, margin: "0 auto", padding: m ? "0 8px" : "0 32px", display: "flex", gap: 0, overflowX: "auto" }}>
+          <div className="hide-scrollbar" style={{ maxWidth: 1100, margin: "0 auto", padding: m ? "0 8px" : "0 32px", display: "flex", gap: 0, overflowX: "auto" }}>
             {tabs.map(t => (
               <button key={t.id} onClick={() => { setActiveTab(t.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
                 padding: m ? "12px 12px" : "14px 28px", background: "transparent", border: "none",
