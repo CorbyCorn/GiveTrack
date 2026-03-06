@@ -2553,6 +2553,25 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
   const topCategory = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0];
   const categoryCount = Object.keys(categoryTotals).length;
 
+  // Upcoming deadline data
+  const allCycles = loadCycles();
+  const now = new Date();
+  const upcomingCycle = allCycles.cycles?.find(c => new Date(c.payDate + "T00:00:00") >= now) || allCycles.cycles?.find(c => c.cycleId === allCycles.currentCycleId);
+  const daysUntilDeadline = upcomingCycle ? Math.max(0, Math.ceil((new Date(upcomingCycle.deadline + "T00:00:00") - now) / 86400000)) : null;
+  const userSubs = loadSubmissions();
+  const hasSubmitted = upcomingCycle && userSubs[upcomingCycle.cycleId]?.[user.email]?.submittedAt;
+
+  // Impact quotes — rotate through user's orgs
+  const userOrgNames = Object.keys(orgTotals);
+  const [quoteIdx, setQuoteIdx] = useState(0);
+  useEffect(() => {
+    if (userOrgNames.length <= 1) return;
+    const t = setInterval(() => setQuoteIdx(i => (i + 1) % userOrgNames.length), 8000);
+    return () => clearInterval(t);
+  }, [userOrgNames.length]);
+  const spotlightOrg = userOrgNames[quoteIdx % userOrgNames.length];
+  const spotlightDesc = ORG_LONG_DESCRIPTIONS[spotlightOrg] || ORG_DESCRIPTIONS[spotlightOrg] || "";
+
   const monthBreakdowns = months.map((m) => {
     const md = donations.filter(d => d.month === m);
     const total = md.reduce((s, d) => s + d.allocatedAmount, 0);
@@ -2701,6 +2720,33 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
         {(donations.length > 0 || activeTab === "team" || activeTab === "impact" || activeTab === "donate" || activeTab === "admin") && (<>
           {/* ═══════════════ OVERVIEW ═══════════════ */}
           {activeTab === "overview" && (<>
+            {/* Upcoming deadline banner */}
+            {upcomingCycle && daysUntilDeadline !== null && (
+              <div style={{ ...glass, padding: m ? "16px 16px" : "18px 32px", marginBottom: 32, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, borderLeft: `4px solid ${hasSubmitted ? "#16a34a" : daysUntilDeadline <= 3 ? C.warm : C.accent}` }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={hasSubmitted ? "#16a34a" : daysUntilDeadline <= 3 ? C.warm : C.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{upcomingCycle.label}</div>
+                    <div style={{ fontSize: 13, color: C.textMuted, marginTop: 2 }}>
+                      {daysUntilDeadline === 0 ? "Due today" : daysUntilDeadline === 1 ? "Due tomorrow" : `${daysUntilDeadline} days remaining`}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  {hasSubmitted ? (
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#16a34a", display: "flex", alignItems: "center", gap: 6 }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      Submitted
+                    </span>
+                  ) : (
+                    <button onClick={() => setActiveTab("donate")} style={{ padding: "8px 20px", background: daysUntilDeadline <= 3 ? C.warm : C.accent, color: daysUntilDeadline <= 3 ? "#fff" : C.text, border: "none", borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                      Submit Allocations
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Section heading */}
             <div style={{ marginBottom: 40 }}>
               <h2 style={{ fontSize: 28, fontWeight: 500, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: 0 }}>Your Giving</h2>
@@ -2801,6 +2847,43 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
               </div>
             </div>
             </ScrollReveal>
+
+            {/* Organization spotlight / impact quote */}
+            {spotlightOrg && spotlightDesc && (
+              <ScrollReveal>
+              <div style={{ marginTop: 64 }}>
+                <h2 style={{ fontSize: 22, fontWeight: 500, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: "0 0 24px" }}>Organization Spotlight</h2>
+                <div style={{ ...glass, padding: m ? "28px 20px" : "36px 44px", position: "relative", overflow: "hidden" }}>
+                  <div style={{ position: "absolute", top: 20, right: 28, fontSize: 80, fontFamily: "'Playfair Display',Georgia,serif", color: C.divider, lineHeight: 1, pointerEvents: "none", userSelect: "none" }}>"</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: getOrgColor(spotlightOrg) }} />
+                    <span style={{ fontSize: 18, fontWeight: 600, color: C.text, fontFamily: "'Playfair Display',Georgia,serif" }}>{spotlightOrg}</span>
+                    {ORG_CATEGORIES[spotlightOrg] && (
+                      <span style={{ fontSize: 11, color: C.textMuted, background: "rgba(139,119,90,0.08)", padding: "3px 10px", borderRadius: 4, textTransform: "uppercase", letterSpacing: ".06em", fontWeight: 600 }}>{ORG_CATEGORIES[spotlightOrg]}</span>
+                    )}
+                  </div>
+                  <p style={{ fontSize: 15, color: C.textSoft, lineHeight: 1.75, margin: "0 0 20px", maxWidth: 700 }}>{spotlightDesc}</p>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+                    <div style={{ fontSize: 14, color: C.textMuted }}>
+                      Your total: <strong style={{ color: C.text, fontFamily: "'Playfair Display',Georgia,serif" }}>{fmt(orgTotals[spotlightOrg] || 0)}</strong>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                      {ORG_WEBSITES[spotlightOrg] && (
+                        <a href={ORG_WEBSITES[spotlightOrg]} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: C.navy, fontWeight: 500, textDecoration: "none" }}>Visit site</a>
+                      )}
+                      {userOrgNames.length > 1 && (
+                        <div style={{ display: "flex", gap: 6 }}>
+                          {userOrgNames.map((_, i) => (
+                            <div key={i} onClick={() => setQuoteIdx(i)} style={{ width: 6, height: 6, borderRadius: "50%", background: i === quoteIdx % userOrgNames.length ? C.accent : C.divider, cursor: "pointer", transition: "background .2s" }} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              </ScrollReveal>
+            )}
           </>)}
 
           {/* ═══════════════ ORGANIZATIONS ═══════════════ */}
