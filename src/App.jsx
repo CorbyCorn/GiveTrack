@@ -2571,6 +2571,10 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
   }, [userOrgNames.length]);
   const spotlightOrg = userOrgNames[quoteIdx % userOrgNames.length];
   const spotlightDesc = ORG_LONG_DESCRIPTIONS[spotlightOrg] || ORG_DESCRIPTIONS[spotlightOrg] || "";
+  const spotlightImg = ORG_IMAGES[spotlightOrg] || fetchedImages[spotlightOrg];
+  const spotlightFallbackImg = CATEGORY_FALLBACK_IMAGES[ORG_CATEGORIES[spotlightOrg]] || CATEGORY_FALLBACK_IMAGES._default;
+  const spotlightDisplayImg = spotlightImg && !imgErrors[spotlightOrg] ? spotlightImg : spotlightFallbackImg;
+  const spotlightImgPos = useFacePosition(spotlightDisplayImg, ORG_IMAGE_POS[spotlightOrg]);
 
   const monthBreakdowns = months.map((m) => {
     const md = donations.filter(d => d.month === m);
@@ -2853,31 +2857,45 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
               <ScrollReveal>
               <div style={{ marginTop: 64 }}>
                 <h2 style={{ fontSize: 22, fontWeight: 500, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: "0 0 24px" }}>Organization Spotlight</h2>
-                <div style={{ ...glass, padding: m ? "28px 20px" : "36px 44px", position: "relative", overflow: "hidden" }}>
-                  <div style={{ position: "absolute", top: 20, right: 28, fontSize: 80, fontFamily: "'Playfair Display',Georgia,serif", color: C.divider, lineHeight: 1, pointerEvents: "none", userSelect: "none" }}>"</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: getOrgColor(spotlightOrg) }} />
-                    <span style={{ fontSize: 18, fontWeight: 600, color: C.text, fontFamily: "'Playfair Display',Georgia,serif" }}>{spotlightOrg}</span>
-                    {ORG_CATEGORIES[spotlightOrg] && (
-                      <span style={{ fontSize: 11, color: C.textMuted, background: "rgba(139,119,90,0.08)", padding: "3px 10px", borderRadius: 4, textTransform: "uppercase", letterSpacing: ".06em", fontWeight: 600 }}>{ORG_CATEGORIES[spotlightOrg]}</span>
-                    )}
+                <div style={{ ...glass, padding: 0, position: "relative", overflow: "hidden" }}>
+                  {/* Banner image */}
+                  <div style={{ position: "relative", width: "100%", height: m ? 160 : 220 }}>
+                    <img
+                      key={spotlightOrg}
+                      src={spotlightDisplayImg}
+                      alt={spotlightOrg}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: spotlightImgPos, display: "block", animation: "fadeIn .6s ease" }}
+                      onError={(e) => { e.target.src = spotlightFallbackImg; setImgErrors(prev => ({ ...prev, [spotlightOrg]: true })); }}
+                    />
+                    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: `linear-gradient(to bottom, transparent, #FFFDF8)`, pointerEvents: "none" }} />
                   </div>
-                  <p style={{ fontSize: 15, color: C.textSoft, lineHeight: 1.75, margin: "0 0 20px", maxWidth: 700 }}>{spotlightDesc}</p>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-                    <div style={{ fontSize: 14, color: C.textMuted }}>
-                      Your total: <strong style={{ color: C.text, fontFamily: "'Playfair Display',Georgia,serif" }}>{fmt(orgTotals[spotlightOrg] || 0)}</strong>
+                  {/* Text content */}
+                  <div style={{ padding: m ? "16px 20px 28px" : "20px 44px 36px", position: "relative" }}>
+                    <div style={{ position: "absolute", top: -8, right: 28, fontSize: 80, fontFamily: "'Playfair Display',Georgia,serif", color: C.divider, lineHeight: 1, pointerEvents: "none", userSelect: "none" }}>"</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: getOrgColor(spotlightOrg) }} />
+                      <span style={{ fontSize: 18, fontWeight: 600, color: C.text, fontFamily: "'Playfair Display',Georgia,serif" }}>{spotlightOrg}</span>
+                      {ORG_CATEGORIES[spotlightOrg] && (
+                        <span style={{ fontSize: 11, color: C.textMuted, background: "rgba(139,119,90,0.08)", padding: "3px 10px", borderRadius: 4, textTransform: "uppercase", letterSpacing: ".06em", fontWeight: 600 }}>{ORG_CATEGORIES[spotlightOrg]}</span>
+                      )}
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                      {ORG_WEBSITES[spotlightOrg] && (
-                        <a href={ORG_WEBSITES[spotlightOrg]} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: C.navy, fontWeight: 500, textDecoration: "none" }}>Visit site</a>
-                      )}
-                      {userOrgNames.length > 1 && (
-                        <div style={{ display: "flex", gap: 6 }}>
-                          {userOrgNames.map((_, i) => (
-                            <div key={i} onClick={() => setQuoteIdx(i)} style={{ width: 6, height: 6, borderRadius: "50%", background: i === quoteIdx % userOrgNames.length ? C.accent : C.divider, cursor: "pointer", transition: "background .2s" }} />
-                          ))}
-                        </div>
-                      )}
+                    <p style={{ fontSize: 15, color: C.textSoft, lineHeight: 1.75, margin: "0 0 20px", maxWidth: 700 }}>{spotlightDesc}</p>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+                      <div style={{ fontSize: 14, color: C.textMuted }}>
+                        Your total: <strong style={{ color: C.text, fontFamily: "'Playfair Display',Georgia,serif" }}>{fmt(orgTotals[spotlightOrg] || 0)}</strong>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                        {ORG_WEBSITES[spotlightOrg] && (
+                          <a href={ORG_WEBSITES[spotlightOrg]} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: C.navy, fontWeight: 500, textDecoration: "none" }}>Visit site</a>
+                        )}
+                        {userOrgNames.length > 1 && (
+                          <div style={{ display: "flex", gap: 6 }}>
+                            {userOrgNames.map((_, i) => (
+                              <div key={i} onClick={() => setQuoteIdx(i)} style={{ width: 6, height: 6, borderRadius: "50%", background: i === quoteIdx % userOrgNames.length ? C.accent : C.divider, cursor: "pointer", transition: "background .2s" }} />
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
