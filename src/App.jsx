@@ -1376,9 +1376,14 @@ function AdminBudgets() {
   );
 }
 
-function AdminManagement({ currentEmail }) {
+function AdminManagement({ currentEmail, sheetData }) {
   const [admins, setAdmins] = useState(() => [...new Set([...INITIAL_ADMINS, ...loadAdmins()])]);
   const [newAdmin, setNewAdmin] = useState("");
+
+  // Re-sync admin list when sheet data updates (live updates from other admins)
+  useEffect(() => {
+    setAdmins([...new Set([...INITIAL_ADMINS, ...loadAdmins()])]);
+  }, [sheetData]);
 
   const addAdmin = () => {
     if (!newAdmin || !newAdmin.includes("@")) return;
@@ -1455,7 +1460,7 @@ function exportTrackerCSV(cycleId, cycleLabel) {
   a.click(); URL.revokeObjectURL(url);
 }
 
-function AdminTab({ currentEmail }) {
+function AdminTab({ currentEmail, sheetData }) {
   const [subTab, setSubTab] = useState("tracker");
   const cycles = loadCycles();
   const [selectedCycleId, setSelectedCycleId] = useState(cycles.currentCycleId || "");
@@ -1532,7 +1537,7 @@ function AdminTab({ currentEmail }) {
       )}
       {subTab === "unpaid" && <CumulativeUnpaid />}
       {subTab === "budgets" && <AdminBudgets />}
-      {subTab === "admins" && <AdminManagement currentEmail={currentEmail} />}
+      {subTab === "admins" && <AdminManagement currentEmail={currentEmail} sheetData={sheetData} />}
     </div>
   );
 }
@@ -2013,12 +2018,13 @@ export default function App() {
       const data = await fetchFromSheet();
       if (data) {
         setSheetData(data);
-        // If user is logged in, refresh their donations from sheet data
+        // If user is logged in, refresh their donations + admin status from sheet data
         if (userRef.current) {
           const sheetDons = loadDonations();
           if (sheetDons) {
             setDonations(sheetDons.filter(d => d.email === userRef.current.email.toLowerCase()));
           }
+          setIsUserAdmin(checkIsAdmin(userRef.current.email));
         }
       }
     }, 30000);
@@ -2033,6 +2039,7 @@ export default function App() {
           if (sheetDons) {
             setDonations(sheetDons.filter(d => d.email === userRef.current.email.toLowerCase()));
           }
+          setIsUserAdmin(checkIsAdmin(userRef.current.email));
         }
       }
     };
@@ -2634,7 +2641,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
           )}
 
           {activeTab === "admin" && isUserAdmin && (
-            <AdminTab currentEmail={user.email} />
+            <AdminTab currentEmail={user.email} sheetData={sheetData} />
           )}
         </>)}
       </div>
