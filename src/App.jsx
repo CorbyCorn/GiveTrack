@@ -1302,9 +1302,15 @@ function ReceiptModal({ src, fileName, onClose }) {
   );
 }
 
-function AdminTracker({ selectedCycleId, onTrackerChange }) {
+function AdminTracker({ selectedCycleId, onTrackerChange, sheetData }) {
   const [tracker, setTracker] = useState(loadTracker());
   const m = useIsMobile();
+
+  // Re-sync tracker when sheet data updates from another admin
+  useEffect(() => {
+    setTracker(loadTracker());
+  }, [sheetData]);
+
   const subs = loadSubmissions();
   const budgets = loadBudgets();
   const cycleSubs = subs[selectedCycleId] || {};
@@ -1709,22 +1715,70 @@ function AdminTab({ currentEmail, sheetData }) {
               Export CSV
             </button>
           </div>
-          <AdminTracker selectedCycleId={selectedCycleId} onTrackerChange={() => refreshStatus(v => v + 1)} />
+          <AdminTracker selectedCycleId={selectedCycleId} onTrackerChange={() => refreshStatus(v => v + 1)} sheetData={sheetData} />
         </div>
       )}
-      {subTab === "unpaid" && <CumulativeUnpaid />}
+      {subTab === "unpaid" && <CumulativeUnpaid sheetData={sheetData} onTrackerChange={() => refreshStatus(v => v + 1)} />}
       {subTab === "budgets" && <AdminBudgets />}
       {subTab === "admins" && <AdminManagement currentEmail={currentEmail} sheetData={sheetData} />}
     </div>
   );
 }
 
-function CumulativeUnpaid() {
+function CumulativeUnpaid({ sheetData, onTrackerChange }) {
   const m = useIsMobile();
-  const tracker = loadTracker();
+  const [tracker, setTracker] = useState(loadTracker());
+  const [viewReceipt, setViewReceipt] = useState(null);
+
+  // Re-sync tracker when sheet data updates from another admin
+  useEffect(() => {
+    setTracker(loadTracker());
+  }, [sheetData]);
+
   const subs = loadSubmissions();
   const budgets = loadBudgets();
   const cycles = loadCycles();
+
+  // Shared update function — writes to tracker, syncs to sheet, updates local state
+  const markPaid = (cycleId, email, orgName, field, value) => {
+    const t = loadTracker(); // always read fresh to avoid stale overwrites
+    if (!t[cycleId]) t[cycleId] = {};
+    if (!t[cycleId][email]) t[cycleId][email] = {};
+    if (!t[cycleId][email][orgName]) t[cycleId][email][orgName] = { paid: false, datePaid: "", receiptData: null, receiptFileName: null, amount: 0 };
+    t[cycleId][email][orgName][field] = value;
+    if (field === "paid" && value && !t[cycleId][email][orgName].datePaid) {
+      t[cycleId][email][orgName].datePaid = new Date().toISOString().split("T")[0];
+    }
+    saveTracker(t);
+    setTracker({ ...t });
+    if (onTrackerChange) onTrackerChange();
+  };
+
+  const handleReceiptUpload = (cycleId, email, orgName, file) => {
+    if (file.size > 2 * 1024 * 1024) { alert("File too large. Please upload under 2MB."); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (file.type.startsWith("image/")) {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let w = img.width, h = img.height;
+          const max = 800;
+          if (w > max || h > max) { const r = Math.min(max / w, max / h); w *= r; h *= r; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          const compressed = canvas.toDataURL("image/jpeg", 0.6);
+          markPaid(cycleId, email, orgName, "receiptData", compressed);
+          markPaid(cycleId, email, orgName, "receiptFileName", file.name);
+        };
+        img.src = e.target.result;
+      } else {
+        markPaid(cycleId, email, orgName, "receiptData", e.target.result);
+        markPaid(cycleId, email, orgName, "receiptFileName", file.name);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Build ALL unpaid rows across ALL cycles
   const unpaidRows = [];
@@ -1742,7 +1796,7 @@ function CumulativeUnpaid() {
         const tData = cycleTracker[email]?.[alloc.orgName] || {};
         if (!tData.paid) {
           const amt = (alloc.percentage / 100) * budget.cycleAmount;
-          unpaidRows.push({ email, name: budget.name, orgName: alloc.orgName, paidTo: alloc.paidTo || ORG_WEBSITES[alloc.orgName] || "", amount: Math.round(amt * 100) / 100, currency: budget.currency, cycleId, cycleLabel: cycle.label });
+          unpaidRows.push({ email, name: budget.name, orgName: alloc.orgName, paidTo: alloc.paidTo || ORG_WEBSITES[alloc.orgName] || "", amount: Math.round(amt * 100) / 100, currency: budget.currency, cycleId, cycleLabel: cycle.label, receiptData: tData.receiptData || null, receiptFileName: tData.receiptFileName || null, datePaid: tData.datePaid || "" });
         }
       });
     });
@@ -1751,13 +1805,12 @@ function CumulativeUnpaid() {
       Object.entries(orgs).forEach(([orgName, tData]) => {
         if (!seen.has(`${email}:${orgName}`) && !tData.paid) {
           const budget = budgets[email] || { name: email, currency: "$" };
-          unpaidRows.push({ email, name: budget.name, orgName, paidTo: ORG_WEBSITES[orgName] || "", amount: tData.amount || 0, currency: budget.currency, cycleId, cycleLabel: cycle.label });
+          unpaidRows.push({ email, name: budget.name, orgName, paidTo: ORG_WEBSITES[orgName] || "", amount: tData.amount || 0, currency: budget.currency, cycleId, cycleLabel: cycle.label, receiptData: tData.receiptData || null, receiptFileName: tData.receiptFileName || null, datePaid: tData.datePaid || "" });
         }
       });
     });
   });
 
-  // Sort by cycle chronologically (cycleId is date-sortable), then employee, then org
   unpaidRows.sort((a, b) => a.cycleId.localeCompare(b.cycleId) || a.name.localeCompare(b.name) || a.orgName.localeCompare(b.orgName));
 
   // Group by pay cycle
@@ -1775,6 +1828,7 @@ function CumulativeUnpaid() {
 
   return (
     <div>
+      {viewReceipt && <ReceiptModal src={viewReceipt.src} fileName={viewReceipt.name} onClose={() => setViewReceipt(null)} />}
       <div style={{ ...glass, padding: "20px 28px", marginBottom: 24, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <div style={{ fontSize: 14, fontWeight: 600, color: C.warm, textTransform: "uppercase", letterSpacing: ".06em" }}>Cumulative Unpaid</div>
@@ -1792,28 +1846,57 @@ function CumulativeUnpaid() {
         </div>
       ) : (
         <div style={{ ...glass, overflow: "hidden", overflowX: m ? "auto" : "hidden" }}>
-          {groups.map((group, gi) => {
+          {groups.map((group) => {
             const groupTotal = group.rows.reduce((s, r) => s + r.amount, 0);
             return (
               <div key={group.cycleId}>
                 {/* Cycle header dark bar */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 100px", padding: "10px 20px", background: C.text, alignItems: "center" }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", letterSpacing: ".04em" }}>{group.cycleLabel}</div>
+                <div style={{ display: "grid", gridTemplateColumns: m ? "1fr 80px" : "1fr 100px 50px 110px 90px", padding: "10px 20px", background: C.text, alignItems: "center" }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", letterSpacing: ".04em" }}>{group.cycleLabel} — {group.rows.length} unpaid</div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: C.accent }}>{fmt(groupTotal)}</div>
+                  {!m && <><div /><div /><div /></>}
                 </div>
                 {/* Column headers */}
-                <div style={{ display: "grid", gridTemplateColumns: "140px 1fr 100px", padding: "10px 20px", borderBottom: `1px solid ${C.divider}`, background: "rgba(139,119,90,0.03)" }}>
-                  {["Employee", "Organization", "Amount"].map(h => (
-                    <div key={h} style={{ fontSize: 11, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600 }}>{h}</div>
+                <div style={{ display: "grid", gridTemplateColumns: m ? "100px 1fr 80px 40px" : "140px 1fr 100px 50px 110px 90px", padding: "10px 20px", borderBottom: `1px solid ${C.divider}`, background: "rgba(139,119,90,0.03)" }}>
+                  {(m ? ["Name", "Org", "Amt", ""] : ["Employee", "Organization", "Amount", "Paid", "Date Paid", "Receipt"]).map(h => (
+                    <div key={h || "spacer"} style={{ fontSize: 11, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600 }}>{h}</div>
                   ))}
                 </div>
                 {group.rows.map((row, ri) => (
-                  <div key={`${row.email}-${row.orgName}`} style={{ display: "grid", gridTemplateColumns: "140px 1fr 100px", padding: "12px 20px", borderBottom: ri === group.rows.length - 1 ? "none" : `1px solid ${C.divider}`, alignItems: "center" }}>
+                  <div key={`${row.cycleId}-${row.email}-${row.orgName}`} style={{ display: "grid", gridTemplateColumns: m ? "100px 1fr 80px 40px" : "140px 1fr 100px 50px 110px 90px", padding: "12px 20px", borderBottom: ri === group.rows.length - 1 ? "none" : `1px solid ${C.divider}`, alignItems: "center" }}>
                     <div style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{row.name}</div>
                     <div style={{ fontSize: 14, color: C.textSoft }}>
                       {row.paidTo ? <a href={row.paidTo} target="_blank" rel="noopener noreferrer" style={{ color: C.navy, textDecoration: "underline", fontWeight: 500 }}>{row.orgName}</a> : row.orgName}
                     </div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: C.warm }}>{fmt(row.amount, row.currency)}</div>
+                    <div>
+                      <input type="checkbox" checked={false} onChange={() => markPaid(row.cycleId, row.email, row.orgName, "paid", true)}
+                        style={{ width: 18, height: 18, cursor: "pointer", accentColor: C.accent }} />
+                    </div>
+                    {!m && (
+                      <>
+                        <div>
+                          <input type="date" value={row.datePaid} onChange={e => markPaid(row.cycleId, row.email, row.orgName, "datePaid", e.target.value)}
+                            style={{ fontSize: 12, padding: "4px 6px", border: `1px solid ${C.cardBorder}`, borderRadius: 4, color: C.text, fontFamily: "'Montserrat',sans-serif" }} />
+                        </div>
+                        <div>
+                          {row.receiptData ? (
+                            <div style={{ display: "flex", gap: 6 }}>
+                              <button onClick={() => setViewReceipt({ src: row.receiptData, name: row.receiptFileName })}
+                                style={{ fontSize: 12, color: C.navy, background: "none", border: "none", cursor: "pointer", fontWeight: 500, textDecoration: "underline" }}>View</button>
+                              <button onClick={() => { markPaid(row.cycleId, row.email, row.orgName, "receiptData", null); markPaid(row.cycleId, row.email, row.orgName, "receiptFileName", null); }}
+                                style={{ fontSize: 12, color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Remove</button>
+                            </div>
+                          ) : (
+                            <label style={{ fontSize: 12, color: C.navy, cursor: "pointer", fontWeight: 500 }}>
+                              Upload
+                              <input type="file" accept="image/*,application/pdf" style={{ display: "none" }}
+                                onChange={e => { if (e.target.files[0]) handleReceiptUpload(row.cycleId, row.email, row.orgName, e.target.files[0]); }} />
+                            </label>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
