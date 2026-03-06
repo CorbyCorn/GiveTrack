@@ -1092,7 +1092,8 @@ function DonateTab({ userEmail, sheetData }) {
   const [saved, setSaved] = useState(false);
   const [submitted, setSubmitted] = useState(!!mySub.submittedAt);
 
-  const isLocked = currentCycle && currentCycle.status === "closed";
+  const isCycleLocked = currentCycle && currentCycle.status === "closed";
+  const isLocked = isCycleLocked || submitted;
   const totalPct = allocations.reduce((s, a) => s + (a.percentage || 0), 0);
   const totalAmt = (totalPct / 100) * budget.cycleAmount;
   const sym = budget.currency === "£" ? "£" : "$";
@@ -1191,7 +1192,7 @@ function DonateTab({ userEmail, sheetData }) {
             <div style={{ fontSize: 28, fontWeight: 700, color: C.navy, fontFamily: "'Playfair Display',Georgia,serif" }}>{sym}{budget.cycleAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</div>
           </div>
         </div>
-        {isLocked && (
+        {isCycleLocked && (
           <div style={{ marginTop: 16, padding: "12px 16px", background: "rgba(139,119,90,0.08)", borderRadius: 4, display: "flex", alignItems: "center", gap: 10 }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.textMuted} strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             <span style={{ fontSize: 14, color: C.textSoft }}>This cycle's deadline has passed. Your allocations are locked.</span>
@@ -1315,7 +1316,7 @@ function DonateTab({ userEmail, sheetData }) {
         {totalPct === 100 && (
           <div style={{ color: "#16a34a", fontSize: 14, fontWeight: 500, marginBottom: 16, animation: "breathe 2s ease-in-out" }}>Fully allocated!</div>
         )}
-        {!isLocked && (
+        {!isLocked && !submitted && (
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
             <button onClick={() => saveAllocations(false)} style={{ padding: "10px 24px", background: "transparent", border: `1px solid ${C.cardBorder}`, borderRadius: 4, color: C.textSoft, fontSize: 14, fontWeight: 500, cursor: "pointer", transition: "all .15s" }}>
               Save Draft
@@ -1330,7 +1331,20 @@ function DonateTab({ userEmail, sheetData }) {
           </div>
         )}
         {saved && <div style={{ marginTop: 14, fontSize: 14, color: C.textSoft, textAlign: "center" }}>Draft saved.</div>}
-        {submitted && <div style={{ marginTop: 14, fontSize: 14, color: "#16a34a", fontWeight: 500, textAlign: "center" }}>Allocations submitted!</div>}
+        {submitted && (
+          <div style={{ marginTop: 14, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#16a34a", fontWeight: 500, fontSize: 14 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Allocations submitted!
+            </div>
+            {!isCycleLocked && (
+              <button onClick={() => setSubmitted(false)}
+                style={{ padding: "8px 22px", background: "transparent", border: `1px solid ${C.cardBorder}`, borderRadius: 4, color: C.textSoft, fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all .15s" }}>
+                Edit Allocations
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
