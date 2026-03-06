@@ -711,6 +711,183 @@ function seedFromDemoData() {
   );
 }
 
+// ─── AUTO CYCLE GENERATOR ─────────────────────────────────────
+
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function getLastDay(year, month) { return new Date(year, month + 1, 0).getDate(); }
+
+function generateAllCycleDates(startDate, endDate) {
+  const dates = [];
+  const d = new Date(startDate);
+  d.setDate(1); // start at 1st of start month
+  while (d <= endDate) {
+    const y = d.getFullYear(), m = d.getMonth();
+    // 15th of this month
+    const mid = new Date(y, m, 15);
+    if (mid >= startDate && mid <= endDate) dates.push(mid);
+    // Last day of this month
+    const last = new Date(y, m, getLastDay(y, m));
+    if (last >= startDate && last <= endDate) dates.push(last);
+    d.setMonth(d.getMonth() + 1);
+  }
+  return dates;
+}
+
+function cycleIdFromDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function cycleLabelFromDate(d) {
+  const day = d.getDate();
+  return `${MONTH_NAMES[d.getMonth()]}-${day} Payroll Cycle`;
+}
+
+function cycleMonthLabel(d) {
+  // 15th cycles → same month, last-day cycles → next month (matching existing data pattern)
+  const day = d.getDate();
+  const lastDay = getLastDay(d.getFullYear(), d.getMonth());
+  if (day === lastDay) {
+    const next = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+    return `${MONTH_NAMES[next.getMonth()]} ${next.getFullYear()}`;
+  }
+  return `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function ensureCyclesUpToDate() {
+  const cycles = loadCycles();
+  if (!cycles.cycles || cycles.cycles.length === 0) return; // not yet seeded
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Find the earliest existing cycle date
+  const existingIds = new Set(cycles.cycles.map(c => c.cycleId));
+  const earliest = new Date(cycles.cycles[0].cycleId + "T00:00:00");
+
+  // Generate all cycle dates from earliest through tomorrow (include today's cycle if it's a cycle day)
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const allDates = generateAllCycleDates(earliest, tomorrow);
+
+  let changed = false;
+  const subs = loadSubmissions();
+  const budgets = loadBudgets();
+  const donations = loadDonations() || [];
+  const tracker = loadTracker();
+
+  // Sort existing cycles by date to find the previous cycle for roll-forward
+  const sortedExisting = [...cycles.cycles].sort((a, b) => a.cycleId.localeCompare(b.cycleId));
+
+  for (const d of allDates) {
+    const id = cycleIdFromDate(d);
+    if (existingIds.has(id)) continue; // already exists
+
+    // Determine status
+    const cycleDate = new Date(d);
+    cycleDate.setHours(0, 0, 0, 0);
+    let status;
+    if (cycleDate > today) status = "upcoming";
+    else status = "closed";
+
+    const newCycle = {
+      cycleId: id,
+      label: cycleLabelFromDate(d),
+      deadline: id,
+      payDate: id,
+      status,
+    };
+    cycles.cycles.push(newCycle);
+    existingIds.add(id);
+    sortedExisting.push(newCycle);
+    sortedExisting.sort((a, b) => a.cycleId.localeCompare(b.cycleId));
+    changed = true;
+
+    // Roll forward allocations from previous cycle
+    const prevIdx = sortedExisting.findIndex(c => c.cycleId === id) - 1;
+    if (prevIdx >= 0) {
+      const prevId = sortedExisting[prevIdx].cycleId;
+      const prevSubs = subs[prevId] || {};
+      if (!subs[id]) subs[id] = {};
+      if (!tracker[id]) tracker[id] = {};
+
+      Object.entries(prevSubs).forEach(([email, sub]) => {
+        if (subs[id][email]) return; // already has submission for this cycle
+        if (!sub.allocations || sub.allocations.length === 0) return;
+        // Roll forward
+        subs[id][email] = {
+          submittedAt: null,
+          rolledForward: true,
+          allocations: sub.allocations.map(a => ({ orgName: a.orgName, paidTo: a.paidTo, percentage: a.percentage })),
+        };
+        // Create donation entries
+        const budget = budgets[email] || { cycleAmount: 0, currency: "$" };
+        const monthLabel = cycleMonthLabel(d);
+        sub.allocations.forEach(a => {
+          if (a.percentage <= 0) return;
+          const amt = Math.round((a.percentage / 100) * budget.cycleAmount * 100) / 100;
+          donations.push({
+            orgName: a.orgName,
+            paidTo: a.paidTo || ORG_WEBSITES[a.orgName] || "",
+            allocatedAmount: amt,
+            month: monthLabel,
+            currency: budget.currency || "$",
+            paidDate: "",
+            cycle: newCycle.label,
+            percentage: a.percentage,
+            email,
+          });
+          // Tracker entry (unpaid)
+          if (!tracker[id][email]) tracker[id][email] = {};
+          tracker[id][email][a.orgName] = { paid: false, datePaid: "", receiptData: null, receiptFileName: null, amount: amt };
+        });
+      });
+    }
+  }
+
+  if (!changed) return;
+
+  // Re-sort cycles chronologically
+  cycles.cycles.sort((a, b) => a.cycleId.localeCompare(b.cycleId));
+
+  // Set currentCycleId to most recent cycle on or before today
+  const todayStr = cycleIdFromDate(today);
+  const pastCycles = cycles.cycles.filter(c => c.cycleId <= todayStr);
+  if (pastCycles.length > 0) {
+    cycles.currentCycleId = pastCycles[pastCycles.length - 1].cycleId;
+    // Mark the current one as "open", future as "upcoming", older as "closed"
+    cycles.cycles.forEach(c => {
+      if (c.cycleId === cycles.currentCycleId) c.status = "open";
+      else if (c.cycleId > todayStr) c.status = "upcoming";
+      else c.status = "closed";
+    });
+  }
+
+  // Add one upcoming cycle (next cycle date after today)
+  const futureDate = new Date(today);
+  futureDate.setDate(futureDate.getDate() + 60); // look 60 days ahead
+  const futureDates = generateAllCycleDates(tomorrow, futureDate);
+  if (futureDates.length > 0) {
+    const nextD = futureDates[0];
+    const nextId = cycleIdFromDate(nextD);
+    if (!existingIds.has(nextId)) {
+      cycles.cycles.push({
+        cycleId: nextId,
+        label: cycleLabelFromDate(nextD),
+        deadline: nextId,
+        payDate: nextId,
+        status: "upcoming",
+      });
+    }
+  }
+
+  cycles.cycles.sort((a, b) => a.cycleId.localeCompare(b.cycleId));
+  saveCycles(cycles);
+  saveSubmissions(subs);
+  saveDonations(donations);
+  saveTracker(tracker);
+}
+
 // ─── PARSE LIVE DATA ──────────────────────────────────────────
 
 function parseSpreadsheetData(rows, userEmail) {
@@ -2006,7 +2183,7 @@ export default function App() {
   const userRef = useRef(null);
 
   // Seed localStorage on first load
-  useEffect(() => { seedFromDemoData(); }, []);
+  useEffect(() => { seedFromDemoData(); ensureCyclesUpToDate(); }, []);
 
   // Google Sheets polling for live updates
   useEffect(() => {
@@ -2153,6 +2330,9 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
   const [fetchedImages, setFetchedImages] = useState({});
   const [fetchedDescs, setFetchedDescs] = useState({});
   const [selectedTeamOrg, setSelectedTeamOrg] = useState(null);
+  const [barOffset, setBarOffset] = useState(-1); // -1 = "most recent 5"
+  const [allocTimeframe, setAllocTimeframe] = useState("all");
+  const [monthPage, setMonthPage] = useState(1);
   const m = useIsMobile();
 
   const totalDonated = donations.reduce((s, d) => s + d.allocatedAmount, 0);
@@ -2205,6 +2385,36 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
     const og = {}; md.forEach(d => { og[d.orgName] = (og[d.orgName] || 0) + d.allocatedAmount; });
     return { label: m.replace(" 20", "'"), total, segments: Object.entries(og).map(([n, v]) => ({ value: v, color: getOrgColor(n) })) };
   });
+  // Bar chart: max 5 bars, default to most recent
+  const MAX_BARS = 5;
+  const displayMonthlyData = monthlyData.length <= MAX_BARS
+    ? monthlyData
+    : barOffset < 0
+      ? monthlyData.slice(-MAX_BARS)
+      : monthlyData.slice(barOffset, barOffset + MAX_BARS);
+  const canBarPrev = monthlyData.length > MAX_BARS && (barOffset < 0 ? monthlyData.length - MAX_BARS > 0 : barOffset > 0);
+  const canBarNext = monthlyData.length > MAX_BARS && barOffset >= 0 && barOffset + MAX_BARS < monthlyData.length;
+
+  // Allocation breakdown: filter by timeframe
+  const filteredDonations = useMemo(() => {
+    if (allocTimeframe === "all") return donations;
+    const now = new Date();
+    const cutoff = new Date(now);
+    if (allocTimeframe === "6m") cutoff.setMonth(now.getMonth() - 6);
+    else if (allocTimeframe === "1y") cutoff.setFullYear(now.getFullYear() - 1);
+    else if (allocTimeframe === "3y") cutoff.setFullYear(now.getFullYear() - 3);
+    return donations.filter(d => {
+      const parts = d.month?.split(" ");
+      if (!parts || parts.length < 2) return true;
+      const monthDate = new Date(`${parts[0]} 1, ${parts[1]}`);
+      return monthDate >= cutoff;
+    });
+  }, [donations, allocTimeframe]);
+  const filteredOrgTotals = {};
+  filteredDonations.forEach(d => { filteredOrgTotals[d.orgName] = (filteredOrgTotals[d.orgName] || 0) + d.allocatedAmount; });
+  const filteredDonutData = Object.entries(filteredOrgTotals).sort((a, b) => b[1] - a[1]).map(([n, v]) => ({ label: n, value: v, color: getOrgColor(n) }));
+  const filteredTotal = filteredDonations.reduce((s, d) => s + d.allocatedAmount, 0);
+
   const donutData = Object.entries(orgTotals).sort((a, b) => b[1] - a[1]).map(([n, v]) => ({ label: n, value: v, color: getOrgColor(n) }));
   const avgCycle = cycles.length > 0 ? totalDonated / cycles.length : 0;
   const countriesReached = [...new Set(donations.map(d => ORG_COUNTRY_MAP[d.orgName]).filter(Boolean))].length;
@@ -2374,8 +2584,28 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                 <div style={{ ...glass, padding: m ? "24px 16px" : "36px 40px", animation: "fadeSlideUp .4s ease .15s both", transition: "box-shadow .3s" }}
                   onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 8px 32px rgba(120,100,70,0.22)"; }}
                   onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; }}>
-                  <h3 style={{ fontSize: 22, fontWeight: 500, color: C.text, margin: "0 0 32px", fontFamily: "'Playfair Display',Georgia,serif" }}>Monthly overview</h3>
-                  <BarChart data={monthlyData} />
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "0 0 32px" }}>
+                    <h3 style={{ fontSize: 22, fontWeight: 500, color: C.text, margin: 0, fontFamily: "'Playfair Display',Georgia,serif" }}>Monthly overview</h3>
+                    {monthlyData.length > MAX_BARS && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <button onClick={() => setBarOffset(prev => prev < 0 ? Math.max(0, monthlyData.length - MAX_BARS - 1) : Math.max(0, prev - 1))} disabled={!canBarPrev}
+                          style={{ width: 28, height: 28, borderRadius: 4, border: `1px solid ${C.cardBorder}`, background: "transparent", cursor: canBarPrev ? "pointer" : "default", opacity: canBarPrev ? 1 : 0.3, display: "flex", alignItems: "center", justifyContent: "center", color: C.textSoft }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
+                        </button>
+                        <span style={{ fontSize: 12, color: C.textMuted, minWidth: 80, textAlign: "center" }}>
+                          {displayMonthlyData[0]?.label} – {displayMonthlyData[displayMonthlyData.length - 1]?.label}
+                        </span>
+                        <button onClick={() => setBarOffset(prev => prev < 0 ? -1 : Math.min(monthlyData.length - MAX_BARS, prev + 1))} disabled={!canBarNext}
+                          style={{ width: 28, height: 28, borderRadius: 4, border: `1px solid ${C.cardBorder}`, background: "transparent", cursor: canBarNext ? "pointer" : "default", opacity: canBarNext ? 1 : 0.3, display: "flex", alignItems: "center", justifyContent: "center", color: C.textSoft }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                        {barOffset >= 0 && (
+                          <button onClick={() => setBarOffset(-1)} style={{ fontSize: 11, color: C.accent, background: "none", border: "none", cursor: "pointer", fontWeight: 600, marginLeft: 4 }}>Latest</button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <BarChart data={displayMonthlyData} />
                   <div style={{ display: "grid", gridTemplateColumns: m ? "1fr 1fr" : "1fr 1fr 1fr", gap: "6px 18px", marginTop: 20, padding: "20px 0 0", borderTop: `1px solid ${C.divider}` }}>
                     {Object.entries(orgTotals).sort((a, b) => b[1] - a[1]).map(([n]) => (
                       <div key={n} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: C.textSoft, minWidth: 0, padding: "4px 0" }}>
@@ -2389,23 +2619,36 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
               <div style={{ ...glass, padding: m ? "24px 16px" : "36px 40px", display: "flex", flexDirection: "column", alignItems: "center", animation: "fadeSlideUp .4s ease .2s both", transition: "box-shadow .3s" }}
                 onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 8px 32px rgba(120,100,70,0.22)"; }}
                 onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; }}>
-                <h3 style={{ fontSize: 22, fontWeight: 500, color: C.text, margin: "0 0 32px", alignSelf: "flex-start", fontFamily: "'Playfair Display',Georgia,serif" }}>Allocation breakdown</h3>
-                <DonutChart data={donutData} />
+                <h3 style={{ fontSize: 22, fontWeight: 500, color: C.text, margin: "0 0 16px", alignSelf: "flex-start", fontFamily: "'Playfair Display',Georgia,serif" }}>Allocation breakdown</h3>
+                <div style={{ display: "flex", gap: 6, alignSelf: "flex-start", marginBottom: 28 }}>
+                  {[{ id: "all", label: "All Time" }, { id: "6m", label: "6 Months" }, { id: "1y", label: "1 Year" }, { id: "3y", label: "3 Years" }].map(tf => (
+                    <button key={tf.id} onClick={() => setAllocTimeframe(tf.id)} style={{
+                      padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 600, cursor: "pointer", border: "none", letterSpacing: ".04em",
+                      background: allocTimeframe === tf.id ? C.accent : "transparent",
+                      color: allocTimeframe === tf.id ? C.text : C.textMuted,
+                      transition: "all .2s",
+                    }}>{tf.label}</button>
+                  ))}
+                </div>
+                <DonutChart data={filteredDonutData.length > 0 ? filteredDonutData : donutData} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 28, width: "100%" }}>
-                  {donutData.slice(0, 8).map((d, i) => (
+                  {(filteredDonutData.length > 0 ? filteredDonutData : donutData).slice(0, 8).map((d, i) => {
+                    const total = filteredDonutData.length > 0 ? filteredTotal : totalDonated;
+                    return (
                     <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 14 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
                         <div style={{ width: 8, height: 8, borderRadius: "50%", background: d.color, flexShrink: 0 }} />
                         <span style={{ color: C.textSoft, fontWeight: 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.label}</span>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-                        <span style={{ fontSize: 13, color: C.textMuted, fontWeight: 500, width: 32, textAlign: "right" }}>{((d.value / totalDonated) * 100).toFixed(0)}%</span>
+                        <span style={{ fontSize: 13, color: C.textMuted, fontWeight: 500, width: 32, textAlign: "right" }}>{total > 0 ? ((d.value / total) * 100).toFixed(0) : 0}%</span>
                         <span style={{ fontWeight: 600, color: C.text, minWidth: 68, textAlign: "right" }}>{fmt(d.value)}</span>
                       </div>
                     </div>
-                  ))}
-                  {donutData.length > 8 && (
-                    <div style={{ fontSize: 13, color: C.textMuted, textAlign: "center", padding: "6px 0" }}>+{donutData.length - 8} more organizations</div>
+                    );
+                  })}
+                  {(filteredDonutData.length > 0 ? filteredDonutData : donutData).length > 8 && (
+                    <div style={{ fontSize: 13, color: C.textMuted, textAlign: "center", padding: "6px 0" }}>+{(filteredDonutData.length > 0 ? filteredDonutData : donutData).length - 8} more organizations</div>
                   )}
                 </div>
               </div>
@@ -2533,41 +2776,61 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                 </div>
               </div>
 
-              {[...monthBreakdowns].reverse().map((mb, ci) => (
-                <div key={mb.month} style={{ ...glass, marginBottom: 28, overflow: "hidden", animation: `fadeSlideUp .4s ease ${ci*.06}s both`, transition: "box-shadow .3s, transform .3s" }}
-                  onMouseEnter={e => { e.currentTarget.style.boxShadow = C.cardHover; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; e.currentTarget.style.transform = "translateY(0)"; }}>
-                  <div style={{ padding: m ? "16px 16px" : "22px 32px", borderBottom: `1px solid ${C.divider}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div>
-                      <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: 0 }}>{mb.month}</h3>
-                      <span style={{ fontSize: 14, color: C.textSoft, marginTop: 4, display: "block" }}>{mb.donationCount} transaction{mb.donationCount !== 1 ? "s" : ""}</span>
+              {(() => {
+                const MONTHS_PER_PAGE = 15;
+                const reversed = [...monthBreakdowns].reverse();
+                const totalPages = Math.ceil(reversed.length / MONTHS_PER_PAGE);
+                const page = Math.min(monthPage, totalPages || 1);
+                const paged = reversed.slice((page - 1) * MONTHS_PER_PAGE, page * MONTHS_PER_PAGE);
+                return (<>
+                  {paged.map((mb, ci) => (
+                    <div key={mb.month} style={{ ...glass, marginBottom: 28, overflow: "hidden", animation: `fadeSlideUp .4s ease ${ci*.06}s both`, transition: "box-shadow .3s, transform .3s" }}
+                      onMouseEnter={e => { e.currentTarget.style.boxShadow = C.cardHover; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.boxShadow = C.cardShadow; e.currentTarget.style.transform = "translateY(0)"; }}>
+                      <div style={{ padding: m ? "16px 16px" : "22px 32px", borderBottom: `1px solid ${C.divider}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div>
+                          <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: 0 }}>{mb.month}</h3>
+                          <span style={{ fontSize: 14, color: C.textSoft, marginTop: 4, display: "block" }}>{mb.donationCount} transaction{mb.donationCount !== 1 ? "s" : ""}</span>
+                        </div>
+                        <div style={{ fontSize: 28, fontWeight: 700, color: C.navy, fontFamily: "'Playfair Display',Georgia,serif" }}>{fmt(mb.total, primaryCurrency)}</div>
+                      </div>
+                      <div style={{ padding: "26px 32px", display: "flex", flexDirection: m ? "column" : "row", gap: m ? 20 : 36, alignItems: m ? "center" : "flex-start" }}>
+                        <div style={{ flexShrink: 0 }}>
+                          <DonutChart data={mb.donutData} size={170} />
+                        </div>
+                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 0 }}>
+                          {mb.donutData.map((d, i) => {
+                            const pct = (d.value / mb.total) * 100;
+                            return (
+                              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: i < mb.donutData.length - 1 ? `1px solid ${C.divider}` : "none" }}>
+                                <div style={{ width: 10, height: 10, borderRadius: 4, background: d.color, flexShrink: 0 }} />
+                                <span style={{ fontSize: 14, color: C.text, fontWeight: 500, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.label}</span>
+                                <div style={{ width: 52, height: 5, borderRadius: 3, background: C.divider, overflow: "hidden", flexShrink: 0 }}>
+                                  <div style={{ width: `${pct}%`, height: "100%", background: d.color, borderRadius: 3 }} />
+                                </div>
+                                <span style={{ fontSize: 13, color: C.textMuted, fontWeight: 500, width: 36, textAlign: "right", flexShrink: 0 }}>{pct.toFixed(0)}%</span>
+                                <span style={{ fontSize: 14, fontWeight: 600, color: C.text, width: 80, textAlign: "right", flexShrink: 0 }}>{fmt(d.value, primaryCurrency)}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
                     </div>
-                    <div style={{ fontSize: 28, fontWeight: 700, color: C.navy, fontFamily: "'Playfair Display',Georgia,serif" }}>{fmt(mb.total, primaryCurrency)}</div>
-                  </div>
-
-                  <div style={{ padding: "26px 32px", display: "flex", flexDirection: m ? "column" : "row", gap: m ? 20 : 36, alignItems: m ? "center" : "flex-start" }}>
-                    <div style={{ flexShrink: 0 }}>
-                      <DonutChart data={mb.donutData} size={170} />
+                  ))}
+                  {totalPages > 1 && (
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, padding: "20px 0 12px" }}>
+                      <button onClick={() => { setMonthPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }} disabled={page <= 1}
+                        style={{ padding: "8px 16px", borderRadius: 4, border: `1px solid ${C.cardBorder}`, background: "transparent", color: page <= 1 ? C.textMuted : C.textSoft, cursor: page <= 1 ? "default" : "pointer", fontSize: 13, fontWeight: 500, opacity: page <= 1 ? 0.4 : 1 }}>Prev</button>
+                      {Array.from({ length: totalPages }, (_, i) => (
+                        <button key={i + 1} onClick={() => { setMonthPage(i + 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                          style={{ width: 34, height: 34, borderRadius: 4, border: "none", background: page === i + 1 ? C.accent : "transparent", color: page === i + 1 ? C.text : C.textMuted, cursor: "pointer", fontSize: 13, fontWeight: page === i + 1 ? 700 : 500 }}>{i + 1}</button>
+                      ))}
+                      <button onClick={() => { setMonthPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }} disabled={page >= totalPages}
+                        style={{ padding: "8px 16px", borderRadius: 4, border: `1px solid ${C.cardBorder}`, background: "transparent", color: page >= totalPages ? C.textMuted : C.textSoft, cursor: page >= totalPages ? "default" : "pointer", fontSize: 13, fontWeight: 500, opacity: page >= totalPages ? 0.4 : 1 }}>Next</button>
                     </div>
-                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 0 }}>
-                      {mb.donutData.map((d, i) => {
-                        const pct = (d.value / mb.total) * 100;
-                        return (
-                          <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: i < mb.donutData.length - 1 ? `1px solid ${C.divider}` : "none" }}>
-                            <div style={{ width: 10, height: 10, borderRadius: 4, background: d.color, flexShrink: 0 }} />
-                            <span style={{ fontSize: 14, color: C.text, fontWeight: 500, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.label}</span>
-                            <div style={{ width: 52, height: 5, borderRadius: 3, background: C.divider, overflow: "hidden", flexShrink: 0 }}>
-                              <div style={{ width: `${pct}%`, height: "100%", background: d.color, borderRadius: 3 }} />
-                            </div>
-                            <span style={{ fontSize: 13, color: C.textMuted, fontWeight: 500, width: 36, textAlign: "right", flexShrink: 0 }}>{pct.toFixed(0)}%</span>
-                            <span style={{ fontSize: 14, fontWeight: 600, color: C.text, width: 80, textAlign: "right", flexShrink: 0 }}>{fmt(d.value, primaryCurrency)}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  )}
+                </>);
+              })()}
             </div>
           )}
 
