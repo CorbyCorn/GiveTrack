@@ -627,10 +627,25 @@ const CYCLE_MAP = {
 
 // All known org names for the dropdown
 // All orgs: from ORG_WEBSITES + every org anyone has ever donated to in DEMO_DATA
-const ALL_KNOWN_ORGS = [...new Set([
+// Base set of known orgs (from hardcoded data)
+const _BASE_ORGS = [...new Set([
   ...Object.keys(ORG_WEBSITES),
   ...Object.values(DEMO_DATA).flatMap(dons => dons.map(d => d.orgName)),
-])].sort();
+])];
+
+// Dynamic: includes orgs from shared donations + submissions (new orgs added by other users)
+function getAllKnownOrgs() {
+  const orgs = new Set(_BASE_ORGS);
+  const dons = loadDonations();
+  if (dons) dons.forEach(d => { if (d.orgName) orgs.add(d.orgName); });
+  const subs = loadSubmissions();
+  Object.values(subs).forEach(cycleSubs => {
+    Object.values(cycleSubs).forEach(sub => {
+      (sub.allocations || []).forEach(a => { if (a.orgName) orgs.add(a.orgName); });
+    });
+  });
+  return [...orgs].sort();
+}
 
 function seedFromDemoData() {
   if (localStorage.getItem("givetrack_pay_cycles")) return; // already seeded
@@ -1051,7 +1066,8 @@ function BarChart({ data, height = 220 }) {
 
 // ─── DONATE TAB ──────────────────────────────────────────────
 
-function DonateTab({ userEmail }) {
+function DonateTab({ userEmail, sheetData }) {
+  const knownOrgs = useMemo(() => getAllKnownOrgs(), [sheetData]);
   const cycles = loadCycles();
   const currentCycle = cycles.cycles.find(c => c.cycleId === cycles.currentCycleId);
   const budgets = loadBudgets();
@@ -1089,12 +1105,43 @@ function DonateTab({ userEmail }) {
   const saveAllocations = (isSubmit) => {
     const subs = loadSubmissions();
     if (!subs[cycles.currentCycleId]) subs[cycles.currentCycleId] = {};
+    const finalAllocations = allocations.filter(a => a.percentage > 0).map(a => ({ orgName: a.orgName === "__other" ? extractOrgName(a.paidTo) : a.orgName, paidTo: a.paidTo, percentage: a.percentage, fund: a.fund || "" }));
     subs[cycles.currentCycleId][userEmail] = {
       submittedAt: isSubmit ? new Date().toISOString() : null,
       rolledForward: false,
-      allocations: allocations.filter(a => a.percentage > 0).map(a => ({ orgName: a.orgName === "__other" ? extractOrgName(a.paidTo) : a.orgName, paidTo: a.paidTo, percentage: a.percentage, fund: a.fund || "" })),
+      allocations: finalAllocations,
     };
     saveSubmissions(subs);
+
+    // Also create/update donation entries so new orgs appear on Team/Impact/Overview immediately
+    if (isSubmit) {
+      const donations = loadDonations() || [];
+      const cycleLabel = currentCycle?.label || "";
+      // Compute month label from cycle date
+      let monthLabel = "";
+      if (cycles.currentCycleId) {
+        const d = new Date(cycles.currentCycleId + "T00:00:00");
+        const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+        if (d.getDate() === lastDay) {
+          const next = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+          monthLabel = `${MONTH_NAMES[next.getMonth()]} ${next.getFullYear()}`;
+        } else {
+          monthLabel = `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+        }
+      }
+      // Remove this user's existing entries for this cycle, then add fresh ones
+      const filtered = donations.filter(d => !(d.email === userEmail.toLowerCase() && d.cycle === cycleLabel));
+      finalAllocations.forEach(a => {
+        const amt = Math.round((a.percentage / 100) * budget.cycleAmount * 100) / 100;
+        filtered.push({
+          orgName: a.orgName, paidTo: a.paidTo || ORG_WEBSITES[a.orgName] || "",
+          allocatedAmount: amt, month: monthLabel, currency: budget.currency || "$",
+          paidDate: "", cycle: cycleLabel, percentage: a.percentage, email: userEmail.toLowerCase(),
+        });
+      });
+      saveDonations(filtered);
+    }
+
     if (isSubmit) setSubmitted(true); else setSaved(true);
     setShowRollforward(false);
   };
@@ -1173,7 +1220,7 @@ function DonateTab({ userEmail }) {
                   disabled={isLocked}
                   style={{ width: m ? "100%" : 320, padding: "10px 14px", fontSize: 14, border: `1px solid ${C.cardBorder}`, borderRadius: 4, background: C.card, color: C.text, fontFamily: "'Montserrat',sans-serif", cursor: isLocked ? "not-allowed" : "pointer" }}>
                   <option value="">Select an organization...</option>
-                  {ALL_KNOWN_ORGS.map(name => (
+                  {knownOrgs.map(name => (
                     <option key={name} value={name}>{name}</option>
                   ))}
                   <option value="__other">Other (enter manually)</option>
@@ -1910,7 +1957,7 @@ function CumulativeUnpaid({ sheetData, onTrackerChange }) {
 
 // ─── GLOBE ────────────────────────────────────────────────────
 
-function GlobeTab({ donations, userEmail }) {
+function GlobeTab({ donations, userEmail, sheetData }) {
   const globeRef = useRef();
   const containerRef = useRef();
   const [countries, setCountries] = useState([]);
@@ -1944,7 +1991,7 @@ function GlobeTab({ donations, userEmail }) {
       });
     });
     return all;
-  }, []);
+  }, [sheetData]);
 
   // User's org names for highlighting
   const userOrgNames = useMemo(() => {
@@ -2979,11 +3026,11 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
 
           {/* ═══════════════ IMPACT GLOBE ═══════════════ */}
           {activeTab === "donate" && (
-            <DonateTab userEmail={user.email} />
+            <DonateTab userEmail={user.email} sheetData={sheetData} />
           )}
 
           {activeTab === "impact" && (
-            <GlobeTab donations={donations} userEmail={user.email} />
+            <GlobeTab donations={donations} userEmail={user.email} sheetData={sheetData} />
           )}
 
           {activeTab === "admin" && isUserAdmin && (
