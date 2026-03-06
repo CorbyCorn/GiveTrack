@@ -534,10 +534,7 @@ const DEMO_DATA = {
 // ─── LOCAL STORAGE DATA LAYER ─────────────────────────────────
 
 const INITIAL_ADMINS = [
-  "courtney@isara.io", "edward@isara.io", "amy@isara.io", "ben@isara.io",
-  "bernie@isara.io", "ed@isara.io", "peter@isara.io", "jerry@isara.io",
-  "rowan@isara.io", "sam@isara.io", "artur@isara.io", "lily@isara.io",
-  "ranah@isara.io",
+  "courtney@isara.io", "ranah@isara.io",
 ];
 
 const EMPLOYEE_NAMES = {
