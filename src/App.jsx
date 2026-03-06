@@ -1719,7 +1719,7 @@ function AdminTab({ currentEmail, sheetData }) {
   ];
 
   return (
-    <div style={{ animation: "fadeSlideUp .3s ease" }}>
+    <div style={{ animation: "fadeSlideUp .3s ease", overflowX: "hidden" }}>
       {/* Sub-nav */}
       <div style={{ display: "flex", gap: 0, marginBottom: 28, borderBottom: `1px solid ${C.divider}` }}>
         {subTabs.map(t => (
@@ -2859,7 +2859,7 @@ function Dashboard({ user, donations, activeTab, setActiveTab, onLogout, dataErr
                 <h2 style={{ fontSize: 22, fontWeight: 500, color: C.text, fontFamily: "'Playfair Display',Georgia,serif", margin: "0 0 24px" }}>Organization Spotlight</h2>
                 <div style={{ ...glass, padding: 0, position: "relative", overflow: "hidden" }}>
                   {/* Banner image */}
-                  <div style={{ position: "relative", width: "100%", height: m ? 160 : 220 }}>
+                  <div style={{ position: "relative", width: "100%", height: m ? 200 : 300 }}>
                     <img
                       key={spotlightOrg}
                       src={spotlightDisplayImg}
