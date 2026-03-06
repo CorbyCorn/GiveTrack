@@ -441,6 +441,7 @@ const DEMO_DATA = {
   "courtney@isara.io": [
     { orgName: "Save the Children", paidTo: "https://support.savethechildren.org/site/Ecommerce", allocatedAmount: 950, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "Save the Children", paidTo: "https://support.savethechildren.org/site/Ecommerce", allocatedAmount: 950, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
+    { orgName: "Save the Children", paidTo: "https://support.savethechildren.org/site/Ecommerce", allocatedAmount: 950, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 100 },
   ],
   "edward@isara.io": [
     { orgName: "Give To IV", paidTo: "https://givetoiv.org/justinlee", allocatedAmount: 285, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 30 },
@@ -455,48 +456,68 @@ const DEMO_DATA = {
     { orgName: "The Washing Machine Project", paidTo: "https://www.thewashingmachineproject.org/our-impact", allocatedAmount: 95, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 10 },
     { orgName: "Radiance SF", paidTo: "https://www.radiancesf.org/", allocatedAmount: 142.50, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 15 },
     { orgName: "Reality SF", paidTo: "https://realitysf.com/", allocatedAmount: 142.50, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 15 },
+    { orgName: "Give To IV", paidTo: "https://givetoiv.org/justinlee", allocatedAmount: 285, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 30 },
+    { orgName: "Open Door Legal", paidTo: "https://opendoorlegal.org/", allocatedAmount: 190, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 20 },
+    { orgName: "Wholesome Wave", paidTo: "https://www.wholesomewave.org/", allocatedAmount: 95, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 10 },
+    { orgName: "The Washing Machine Project", paidTo: "https://www.thewashingmachineproject.org/our-impact", allocatedAmount: 95, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 10 },
+    { orgName: "Radiance SF", paidTo: "https://www.radiancesf.org/", allocatedAmount: 142.50, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 15 },
+    { orgName: "Reality SF", paidTo: "https://realitysf.com/", allocatedAmount: 142.50, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 15 },
   ],
   "amy@isara.io": [
     { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 125, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 125, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
+    { orgName: "Evidence Action", paidTo: "https://www.evidenceaction.org/donate", allocatedAmount: 125, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 100 },
   ],
   "ben@isara.io": [
     { orgName: "NCCHC Foundation", paidTo: "https://ncchcfoundation.org/", allocatedAmount: 435, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "NCCHC Foundation", paidTo: "https://ncchcfoundation.org/", allocatedAmount: 435, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
+    { orgName: "NCCHC Foundation", paidTo: "https://ncchcfoundation.org/", allocatedAmount: 435, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 100 },
   ],
   "bernie@isara.io": [
     { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 2367.50, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "Action Against Hunger", paidTo: "https://www.actionagainsthunger.org", allocatedAmount: 947, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
     { orgName: "Médecins Sans Frontières", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 947, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
     { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 473.50, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
+    { orgName: "Action Against Hunger", paidTo: "https://www.actionagainsthunger.org", allocatedAmount: 947, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 40 },
+    { orgName: "Médecins Sans Frontières", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 947, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 40 },
+    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 473.50, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 20 },
   ],
   "ed@isara.io": [
     { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 94, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 94, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
+    { orgName: "GiveWell", paidTo: "https://www.givewell.org/charities/malaria-consortium", allocatedAmount: 94, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 100 },
   ],
   "peter@isara.io": [
     { orgName: "SFHS", paidTo: "https://www.sfhs.com/make-a-gift", allocatedAmount: 10666.67, month: "Jan 2026", currency: "$", paidDate: "", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "SFHS", paidTo: "https://www.sfhs.com/make-a-gift", allocatedAmount: 10666.67, month: "Feb 2026", currency: "$", paidDate: "", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
+    { orgName: "SFHS", paidTo: "https://www.sfhs.com/make-a-gift", allocatedAmount: 10666.67, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 100 },
   ],
   "jerry@isara.io": [
     { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 3208.33, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 3208.33, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
+    { orgName: "School on Wheels", paidTo: "https://schoolonwheels.org/", allocatedAmount: 3208.33, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 100 },
   ],
   "rowan@isara.io": [
     { orgName: "Asylum Access", paidTo: "https://www.asylumaccess.org/", allocatedAmount: 1924.83, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "Clean Ocean Action", paidTo: "https://www.cleanoceanaction.org", allocatedAmount: 577.45, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
     { orgName: "Middle East Children's Alliance", paidTo: "https://www.mecaforpeace.org", allocatedAmount: 769.93, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
     { orgName: "Room to Read", paidTo: "https://www.roomtoread.org", allocatedAmount: 577.45, month: "Feb 2026", currency: "$", paidDate: "24-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 30 },
+    { orgName: "Clean Ocean Action", paidTo: "https://www.cleanoceanaction.org", allocatedAmount: 577.45, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 30 },
+    { orgName: "Middle East Children's Alliance", paidTo: "https://www.mecaforpeace.org", allocatedAmount: 769.93, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 40 },
+    { orgName: "Room to Read", paidTo: "https://www.roomtoread.org", allocatedAmount: 577.45, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 30 },
   ],
   "sam@isara.io": [
     { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 1400, month: "Jan 2026", currency: "$", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 100 },
     { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 1400, month: "Feb 2026", currency: "$", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 100 },
+    { orgName: "Doctors Without Borders", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 1400, month: "Mar 2026", currency: "$", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 100 },
   ],
   "artur@isara.io": [
     { orgName: "Malaria Consortium", paidTo: "https://www.malariaconsortium.org", allocatedAmount: 1039.59, month: "Jan 2026", currency: "£", paidDate: "10-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
     { orgName: "En Ptahy Vidchui", paidTo: "https://en.ptahy.vidchui.org/", allocatedAmount: 1039.58, month: "Jan 2026", currency: "£", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
     { orgName: "Malaria Consortium", paidTo: "https://www.malariaconsortium.org", allocatedAmount: 1039.59, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 50 },
     { orgName: "En Ptahy Vidchui", paidTo: "https://en.ptahy.vidchui.org/", allocatedAmount: 1039.58, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 50 },
+    { orgName: "Malaria Consortium", paidTo: "https://www.malariaconsortium.org", allocatedAmount: 1039.59, month: "Mar 2026", currency: "£", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 50 },
+    { orgName: "En Ptahy Vidchui", paidTo: "https://en.ptahy.vidchui.org/", allocatedAmount: 1039.58, month: "Mar 2026", currency: "£", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 50 },
   ],
   "lily@isara.io": [
     { orgName: "Oceana", paidTo: "https://oceana.org", allocatedAmount: 689.59, month: "Jan 2026", currency: "£", paidDate: "12-Feb-26", cycle: "Jan-31 Payroll Cycle", percentage: 50 },
@@ -504,6 +525,9 @@ const DEMO_DATA = {
     { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 551.67, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
     { orgName: "Médecins sans Frontières", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 551.67, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 40 },
     { orgName: "Action Against Hunger", paidTo: "https://www.actionagainsthunger.org", allocatedAmount: 275.83, month: "Feb 2026", currency: "£", paidDate: "25-Feb-26", cycle: "Feb-15 Payroll Cycle", percentage: 20 },
+    { orgName: "Sea Shepherd", paidTo: "https://seashepherd.org", allocatedAmount: 551.67, month: "Mar 2026", currency: "£", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 40 },
+    { orgName: "Médecins sans Frontières", paidTo: "https://www.doctorswithoutborders.org", allocatedAmount: 551.67, month: "Mar 2026", currency: "£", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 40 },
+    { orgName: "Action Against Hunger", paidTo: "https://www.actionagainsthunger.org", allocatedAmount: 275.83, month: "Mar 2026", currency: "£", paidDate: "", cycle: "Feb-28 Payroll Cycle", percentage: 20 },
   ],
 };
 
@@ -1539,7 +1563,7 @@ function CumulativeUnpaid() {
         const tData = cycleTracker[email]?.[alloc.orgName] || {};
         if (!tData.paid) {
           const amt = (alloc.percentage / 100) * budget.cycleAmount;
-          unpaidRows.push({ email, name: budget.name, orgName: alloc.orgName, paidTo: alloc.paidTo || ORG_WEBSITES[alloc.orgName] || "", amount: Math.round(amt * 100) / 100, currency: budget.currency, cycleLabel: cycle.label });
+          unpaidRows.push({ email, name: budget.name, orgName: alloc.orgName, paidTo: alloc.paidTo || ORG_WEBSITES[alloc.orgName] || "", amount: Math.round(amt * 100) / 100, currency: budget.currency, cycleId, cycleLabel: cycle.label });
         }
       });
     });
@@ -1548,20 +1572,21 @@ function CumulativeUnpaid() {
       Object.entries(orgs).forEach(([orgName, tData]) => {
         if (!seen.has(`${email}:${orgName}`) && !tData.paid) {
           const budget = budgets[email] || { name: email, currency: "$" };
-          unpaidRows.push({ email, name: budget.name, orgName, paidTo: ORG_WEBSITES[orgName] || "", amount: tData.amount || 0, currency: budget.currency, cycleLabel: cycle.label });
+          unpaidRows.push({ email, name: budget.name, orgName, paidTo: ORG_WEBSITES[orgName] || "", amount: tData.amount || 0, currency: budget.currency, cycleId, cycleLabel: cycle.label });
         }
       });
     });
   });
 
-  unpaidRows.sort((a, b) => a.name.localeCompare(b.name) || a.cycleLabel.localeCompare(b.cycleLabel) || a.orgName.localeCompare(b.orgName));
+  // Sort by cycle chronologically (cycleId is date-sortable), then employee, then org
+  unpaidRows.sort((a, b) => a.cycleId.localeCompare(b.cycleId) || a.name.localeCompare(b.name) || a.orgName.localeCompare(b.orgName));
 
-  // Group by employee
+  // Group by pay cycle
   const groups = [];
   let currentGroup = null;
   unpaidRows.forEach(row => {
-    if (!currentGroup || currentGroup.email !== row.email) {
-      currentGroup = { email: row.email, name: row.name, rows: [] };
+    if (!currentGroup || currentGroup.cycleId !== row.cycleId) {
+      currentGroup = { cycleId: row.cycleId, cycleLabel: row.cycleLabel, rows: [] };
       groups.push(currentGroup);
     }
     currentGroup.rows.push(row);
@@ -1588,33 +1613,30 @@ function CumulativeUnpaid() {
         </div>
       ) : (
         <div style={{ ...glass, overflow: "hidden", overflowX: m ? "auto" : "hidden" }}>
-          {/* Header */}
-          <div style={{ display: "grid", gridTemplateColumns: "140px 1fr 120px 100px", padding: "12px 20px", borderBottom: `1px solid ${C.divider}`, background: "rgba(139,119,90,0.03)" }}>
-            {["Employee", "Organization", "Cycle", "Amount"].map(h => (
-              <div key={h} style={{ fontSize: 11, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600 }}>{h}</div>
-            ))}
-          </div>
           {groups.map((group, gi) => {
             const groupTotal = group.rows.reduce((s, r) => s + r.amount, 0);
             return (
-              <div key={group.email}>
+              <div key={group.cycleId}>
+                {/* Cycle header dark bar */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 100px", padding: "10px 20px", background: C.text, alignItems: "center" }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", letterSpacing: ".04em" }}>{group.cycleLabel}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: C.accent }}>{fmt(groupTotal)}</div>
+                </div>
+                {/* Column headers */}
+                <div style={{ display: "grid", gridTemplateColumns: "140px 1fr 100px", padding: "10px 20px", borderBottom: `1px solid ${C.divider}`, background: "rgba(139,119,90,0.03)" }}>
+                  {["Employee", "Organization", "Amount"].map(h => (
+                    <div key={h} style={{ fontSize: 11, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600 }}>{h}</div>
+                  ))}
+                </div>
                 {group.rows.map((row, ri) => (
-                  <div key={`${row.cycleLabel}-${row.orgName}`} style={{ display: "grid", gridTemplateColumns: "140px 1fr 120px 100px", padding: "12px 20px", borderBottom: ri === group.rows.length - 1 ? "none" : `1px solid ${C.divider}`, alignItems: "center" }}>
-                    <div style={{ fontSize: 14, fontWeight: ri === 0 ? 600 : 400, color: ri === 0 ? C.text : "transparent" }}>{row.name}</div>
+                  <div key={`${row.email}-${row.orgName}`} style={{ display: "grid", gridTemplateColumns: "140px 1fr 100px", padding: "12px 20px", borderBottom: ri === group.rows.length - 1 ? "none" : `1px solid ${C.divider}`, alignItems: "center" }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{row.name}</div>
                     <div style={{ fontSize: 14, color: C.textSoft }}>
                       {row.paidTo ? <a href={row.paidTo} target="_blank" rel="noopener noreferrer" style={{ color: C.navy, textDecoration: "underline", fontWeight: 500 }}>{row.orgName}</a> : row.orgName}
                     </div>
-                    <div style={{ fontSize: 13, color: C.textMuted }}>{row.cycleLabel.replace(" Payroll Cycle", "")}</div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: C.warm }}>{fmt(row.amount, row.currency)}</div>
                   </div>
                 ))}
-                {/* Employee subtotal + dark separator */}
-                <div style={{ display: "grid", gridTemplateColumns: "140px 1fr 120px 100px", padding: "8px 20px", background: C.text, alignItems: "center" }}>
-                  <div />
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,253,248,0.6)", textAlign: "right", paddingRight: 12 }}>Subtotal — {group.rows.length} unpaid</div>
-                  <div />
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{fmt(groupTotal, group.rows[0]?.currency)}</div>
-                </div>
               </div>
             );
           })}
